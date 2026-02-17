@@ -1,1 +1,1102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FNF' - Mobile</title>
 
+  <style>
+    @font-face {
+      font-family: "MiFuente";
+      src: url("assets/fonts/funkin.ttf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "MiFuente", system-ui, -apple-system, sans-serif;
+    }
+
+    :root {
+      --text: #e0e0e0;
+      --card-bg: rgba(0, 0, 0, 0.55);
+      --neon-blue: #00eaff;
+      --neon-pink: #ff00c8;
+      --neon-purple: #b400ff;
+      --neon-green: #00ff41;
+      --neon-yellow: #ffea00;
+      --neon-red: #ff003c;
+      --neon-gold: #ffd700;
+      --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
+    }
+
+    body.light {
+      --text: #1a1a1a;
+      --card-bg: rgba(255,255,255,0.7);
+      --bg: linear-gradient(45deg, #e6f7ff, #ffffff, #f0f0f0);
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(45deg, #0f0f0f, #000638, #1a1a1a);
+      background-size: 600% 600%;
+      animation: moveBg 12s ease infinite;
+    }
+    @keyframes moveBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.295), transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(255, 0, 200, 0.288), transparent 60%),
+                  radial-gradient(circle at 50% 50%, rgba(179, 0, 255, 0.267), transparent 70%);
+      filter: blur(80px);
+      animation: nebulaMove 10s ease-in-out infinite alternate;
+    }
+
+    /* --- NUEVO DISEÑO POPUP NOVEDADES --- */
+.update-card-modern {
+  background: #151515 !important;
+  border: 1px solid var(--neon-blue);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
+  max-width: 420px !important;
+  overflow: visible !important; /* Permitir que el icono salga */
+  animation: floatUp 0.4s ease-out;
+}
+
+.update-header-art {
+  height: 90px;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  margin-bottom: 40px; /* Espacio para el icono */
+}
+
+.update-icon-circle {
+  width: 70px;
+  height: 70px;
+  background: #151515;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  border: 3px solid var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
+  z-index: 10;
+}
+
+.update-body {
+  padding: 0 25px 25px 25px;
+  text-align: center;
+}
+
+.update-list-modern {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.update-list-modern li {
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border-left: 3px solid var(--neon-purple);
+  font-size: 14px;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-update-action {
+  background: transparent;
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 12px;
+  width: 100%;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  text-transform: uppercase;
+}
+
+.btn-update-action:hover {
+  background: var(--neon-blue);
+  color: black;
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
+    .container {
+      max-width:1100px;
+      margin:40px auto;
+      background:var(--card-bg);
+      padding:24px;
+      border-radius:14px;
+      backdrop-filter:blur(12px);
+      box-shadow:0 0 25px rgba(0,0,0,.6);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    @keyframes nebulaMove {
+      0% { transform: translate(-40px, -40px) scale(1.1); opacity: 0.7; }
+      50% { transform: translate(40px, 20px) scale(1.3); opacity: 1; }
+      100% { transform: translate(-20px, 40px) scale(1.2); opacity: 0.8; }
+    }
+
+    .glow {
+      color: white;
+      text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple), 0 0 80px var(--neon-purple);
+    }
+
+    .admin-name {
+      color: #00eaff !important;
+      font-weight: bold;
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+    }
+
+    .admin-name::after {
+      content: "✦";
+      color: #fff;
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      font-size: 10px;
+      text-shadow: 0 0 4px #00eaff;
+      animation: tinyStar 1.5s infinite alternate;
+    }
+
+    .admin-name::before {
+      content: "✨";
+      position: absolute;
+      bottom: -2px;
+      left: -12px;
+      font-size: 9px;
+      animation: tinyStar 2s infinite alternate-reverse;
+    }
+
+    @keyframes tinyStar {
+      0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+      100% { opacity: 1; transform: scale(1.3) rotate(45deg); }
+    }
+    /* ------------------------------------------ */
+
+    .theme-btn {
+      font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
+      position: fixed; top: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.3); width: 50px; height: 50px;
+      display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--neon-blue);
+    }
+
+    @keyframes spinGlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .menu-btn { width:32px; height:26px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; }
+    .menu-btn div { height:4px; background: white; border-radius:4px; box-shadow:0 0 6px var(--neon-blue); }
+
+    #menuPopup { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); z-index: 9999; opacity: 0; pointer-events: none; transition: .3s ease; }
+    #menuPopup.show { opacity: 1; pointer-events: auto; }
+    #menuContent { width: 80%; max-width: 360px; background: rgba(15,15,15,0.95); padding: 25px; border-radius: 14px; text-align: center; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); }
+    .menu-option { display:block; margin:18px 0; padding:12px; font-size:20px; font-weight:600; color:white; border-radius:10px; text-shadow:0 0 10px var(--neon-blue); border:1px solid var(--neon-blue); cursor:pointer; background: rgba(0,0,0,0.45); }
+    #closeMenuPopup { margin-top:18px; font-size:22px; cursor:pointer; color:var(--neon-pink); text-shadow:0 0 10px var(--neon-pink); }
+
+    .apks-grid, .mods-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; margin-top:20px; }
+    .apk-card, .mod-card { 
+      background: rgba(0,0,0,0.45); padding:18px; border-radius:12px; 
+      border:1px solid var(--neon-blue); box-shadow:0 0 15px var(--neon-blue); 
+      text-align:center; position: relative; transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .apk-card:hover, .mod-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px var(--neon-pink); border-color: var(--neon-pink); }
+    .apk-card img, .mod-card img { width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:14px; box-shadow:0 0 12px var(--neon-blue); }
+
+    .like-container { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; border: 1px solid var(--neon-pink); cursor: pointer; z-index: 5; transition: 0.3s; }
+    .like-icon { color: #555; transition: 0.3s; }
+    .like-container.active { border-color: var(--neon-pink); background: rgba(255, 0, 200, 0.2); }
+    .like-container.active .like-icon { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+    .like-count { font-size: 14px; color: white; }
+
+    .dl-counter {
+      position: absolute; top: 10px; left: 80px;
+      background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px;
+      display: flex; align-items: center; gap: 5px; border: 1px solid var(--neon-blue);
+      font-size: 12px; color: #ccc; pointer-events: none;
+    }
+
+    .gama-badge {
+      position: absolute; top: 10px; right: 10px;
+      padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;
+      color: black; text-transform: uppercase; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+    .gama-low { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+    .gama-mid { background: var(--neon-yellow); box-shadow: 0 0 8px var(--neon-yellow); }
+    .gama-high { background: var(--neon-red); color: white; box-shadow: 0 0 8px var(--neon-red); }
+
+    .coming-soon-card { background: rgba(40, 0, 40, 0.4); border: 1px dashed var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); opacity: 0.8; position: relative; overflow: hidden; }
+    .coming-soon-card img { filter: blur(8px) grayscale(1); }
+    .coming-soon-badge { position: absolute; top: 10px; right: -30px; background: var(--neon-pink); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 12px; font-weight: bold; box-shadow: 0 0 10px var(--neon-pink); }
+
+    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; }
+
+    .popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    .popup.show { opacity: 1; pointer-events: auto; }
+    .popup-content { width: 85%; max-width: 450px; background: rgba(10,10,10,0.95); border-radius: 15px; position: relative; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); color: white; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+    .popup-scroll-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .popup-scroll-body::-webkit-scrollbar { width: 6px; }
+    .popup-scroll-body::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+    .popup-scroll-body::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
+
+    @media screen and (min-width: 768px) { .popup-content { max-width: 800px; } }
+    .popup-close { position: absolute; top: 8px; right: 10px; font-size: 26px; cursor: pointer; color: var(--neon-blue); z-index: 100; background: rgba(0,0,0,0.5); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+    .popup-content img { width: 100%; border-radius: 10px; margin-bottom: 10px; object-fit: contain; max-height: 350px; }
+
+    .social-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
+    .social-item { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); transition: all 0.3s ease; width: 140px; }
+    .social-item:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 0 25px var(--neon-pink); border-color: var(--neon-pink); }
+    .social-item img { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px var(--neon-blue); }
+
+    .section { display:none; }
+    .active{ display:block; }
+    .visitor-counter { margin-top: 15px; font-size: 14px; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); border: 1px solid var(--neon-blue); display: inline-block; padding: 5px 15px; border-radius: 20px; background: rgba(0,0,0,0.3); }
+
+    .yt-comment-container { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-align: left; }
+    
+    .yt-comment-container.pinned { border: 1px solid var(--neon-gold); background: rgba(255, 215, 0, 0.05); border-radius: 12px; padding: 10px; }
+    .pinned-badge { display: inline-block; background: var(--neon-gold); color: black; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
+
+    .verified-icon { color: #00eaff; margin-left: 4px; font-size: 14px; text-shadow: 0 0 5px #00eaff; }
+
+    .yt-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; flex-shrink: 0; }
+    .yt-content { flex: 1; }
+    .yt-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 13px; flex-wrap: wrap;}
+    .yt-name { color: white; font-weight: bold; }
+    .yt-name-link { text-decoration: none; color: inherit; }
+    .yt-name-link:hover { text-decoration: underline; color: var(--neon-blue); }
+    .yt-date { color: #aaa; font-size: 11px; }
+    .yt-text { font-size: 14px; color: #eee; line-height: 1.4; margin-bottom: 8px; font-family: sans-serif; }
+    .yt-actions { display: flex; align-items: center; gap: 15px; font-size: 12px; color: #aaa; }
+    .yt-action-btn { cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
+    .yt-action-btn.active { color: var(--neon-pink); font-weight: bold; }
+    .yt-action-btn:hover { color: var(--neon-blue); }
+
+    .reg-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 12px; color: white; margin-bottom: 15px; box-sizing: border-box; }
+
+    #commentList { max-height: 500px; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+    #commentList::-webkit-scrollbar { width: 6px; }
+    #commentList::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    #commentList::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
+    
+    .search-wrapper { margin-bottom: 10px; position: relative; }
+    .search-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--neon-blue); background: rgba(0,0,0,0.3); color: white; font-size: 16px; outline: none; transition: 0.3s; box-shadow: 0 0 10px rgba(0, 234, 255, 0.1); }
+    .search-input:focus { border-color: var(--neon-pink); box-shadow: 0 0 20px rgba(255, 0, 200, 0.3); }
+
+    .server-status { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid #333; font-size: 12px; color: #aaa; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #555; transition: 0.3s; }
+    .status-dot.online { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--neon-blue); background: rgba(0,0,0,0.4); color: white; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+    .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
+    .filter-btn:hover { border-color: var(--neon-pink); }
+  </style>
+</head>
+
+<body>
+
+  <div class="theme-btn" onclick="toggleTheme()">☼</div>
+
+  <div id="ban-popup" class="popup">
+    <div class="popup-content" style="padding: 20px;">
+      <h2 class="glow" style="text-align: center;">🔨 Control de Baneo</h2>
+      <p id="ban-target-info" style="font-size: 14px; margin-bottom: 15px; color: var(--neon-pink);"></p>
+      <input type="text" id="banReason" class="reg-input" placeholder="Motivo del baneo">
+      <input type="number" id="banDuration" class="reg-input" placeholder="Horas (ej: 24)" value="24">
+      <button class="btn" id="confirmBanBtn" style="width: 100%; background: red;">Banear Usuario</button>
+      <button class="btn" onclick="document.getElementById('ban-popup').classList.remove('show')" style="width: 100%; background: #444; margin-top: 10px;">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="admin-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 20px;">
+      <h2 class="glow">Acceso Superusuario</h2>
+      <p>Introduce el código de seguridad:</p>
+      <input type="password" id="adminCode" class="reg-input" placeholder="Código">
+      <button class="btn" onclick="verifyAdmin()" style="width: 100%">Entrar</button>
+      <p onclick="document.getElementById('admin-popup').classList.remove('show')" style="cursor:pointer; color:gray; font-size:12px; margin-top:10px;">Cancelar</p>
+    </div>
+  </div>
+
+  <div id="update-popup" class="popup">
+  <div class="popup-content update-card-modern" style="padding: 0; border: none;">
+    
+    <div class="update-header-art">
+      <div class="update-icon-circle">🚀</div>
+      <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
+    </div>
+
+    <div class="update-body">
+      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v2.4.3!</h2>
+      <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
+
+      <ul class="update-list-modern">
+        <li>
+          <span>🔥</span> 
+          <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span>
+        </li>
+         <li>
+          <span>🔥</span> 
+          <span><b>Nueva Base:</b> P-Slice Engine.</span>
+        </li>
+        <li>
+          <span>🔧</span> 
+          <span>Corrección de errores y optimización.</span>
+        </li>
+        <li style="border-left-color: var(--neon-green);">
+          <span>🆕</span> 
+          <span>Nuevo Cuadro de Novedades Mejorado.</span>
+        </li>
+      </ul>
+
+      <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
+    </div>
+
+  </div>
+</div>
+
+  <div id="register-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 20px;">
+      <h2 class="glow">Registro de Usuario</h2>
+      <p style="font-size: 13px; margin-bottom: 20px;">Regístrate para poder continuar.</p>
+      <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo (ej: LaloCF)">
+      <input type="url" id="regLink" class="reg-input" placeholder="Link de tu Canal o Perfil (Opcional)">
+      <button class="btn" onclick="saveRegistration()" style="width: 100%">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="menuPopup">
+    <div id="menuContent">
+      <h2 class="glow">Menú</h2>
+      <div class="menu-option" onclick="selectSection('apks')">Bases</div>
+      <div class="menu-option" onclick="selectSection('mods')">MODs</div>
+      <div class="menu-option" onclick="selectSection('comments-area')">Comunidad (Beta)</div>
+      <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
+      <div id="closeMenuPopup" onclick="toggleMenu()">✖</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <div class="menu-btn" onclick="toggleMenu()"><div></div><div></div><div></div></div>
+      <div style="text-align:center">
+        <h1 class="glow" id="fnf-title" style="user-select:none; cursor:pointer; margin:0; font-size: 24px;">Friday Night Funkin'</h1>
+        <div class="server-status"><div id="statusDot" class="status-dot"></div> <span id="statusText">Conectando...</span></div>
+      </div>
+    </header>
+
+    <section id="welcome">
+      <h1>Bienvenido a FNF' - Mobile</h1>
+      <p>Tu rincón de mods para Friday Night Funkin' Mobile. ¡Explora y descarga!</p>
+    </section>
+    
+    <div id="searchContainer" class="search-wrapper">
+      <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar Mods o Bases..." onkeyup="filterContent()">
+    </div>
+    
+    <div id="filterContainer" class="filter-bar" style="display:none;">
+      <div class="filter-btn active" onclick="setFilter('all', this)">Todos</div>
+      <div class="filter-btn" onclick="setFilter('low', this)">🟢 Gama Baja</div>
+      <div class="filter-btn" onclick="setFilter('mid', this)">🟡 Gama Media</div>
+      <div class="filter-btn" onclick="setFilter('high', this)">🔴 Gama Alta</div>
+    </div>
+
+    <section id="apks" class="section active">
+      <h2 class="glow">Descargas</h2>
+      <div class="apks-grid" id="apksContainer">
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
+          <img src="assets/images/webp/logopsych.webp">
+          <h3>Psych Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk1')">Más información</button>
+        </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
+          <img src="assets/images/webp/logoonline.webp">
+          <h3>Psych Online</h3>
+          <button class="btn" onclick="openApkInfo('apk2')">Más información</button>
+        </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
+          <img src="assets/images/webp/logocode.webp">
+          <h3>CodeName Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk3')">Más información</button>
+        </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
+          <img src="assets/images/webp/logopsych.webp">
+          <h3>Plus Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk4')">Más información</button>
+        </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
+          <img src="assets/images/webp/logop.webp">
+          <h3>P-Slice Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk5')">Más información</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="mods" class="section">
+      <h2 class="glow">MODs Disponibles</h2>
+      <div class="mods-grid" id="modsContainer">
+
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_2">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
+          <h3>Child's Play Pico Mix (NEW)</h3>
+          <button class="btn" onclick="openModInfo('mod99_2')">Más información</button>
+        </div>
+
+         <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Media-Baja</span>
+          <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
+          <h3>TaintedFate</h3>
+          <button class="btn" onclick="openModInfo('mod99_3')">Más información</button>
+        </div>
+        
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_4">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_4">0</span></div>
+          <h3>VS Jeffy V3</h3>
+          <button class="btn" onclick="openModInfo('mod99_4')">Más información</button>
+        </div>
+
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_6">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_6">0</span></div>
+          <h3>Cocoa Noimix</h3>
+          <button class="btn" onclick="openModInfo('mod99_6')">Más información</button>
+        </div>
+
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_7">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_7">0</span></div>
+          <h3>Vs Metal Pipe V2</h3>
+          <button class="btn" onclick="openModInfo('mod99_7')">Más información</button>
+        </div>
+
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_8">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_8">0</span></div>
+          <h3>Rolling Girl</h3>
+          <button class="btn" onclick="openModInfo('mod99_8')">Más información</button>
+        </div>
+
+        <div class="mod-card" data-gama="mid">
+          <span class="gama-badge gama-mid">Media</span>
+          <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_9">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_9">0</span></div>
+          <h3>Herobrine Tales</h3>
+          <button class="btn" onclick="openModInfo('mod99_9')">Más información</button>
+        </div>
+
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod100">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod100">0</span></div>
+          <h3>Vs. TheOdd1sOut</h3>
+          <button class="btn" onclick="openModInfo('mod100')">Más información</button>
+        </div>
+      </div>
+      
+      <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
+      <div class="mods-grid">
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
+      </div>
+    </section>
+
+    <section id="comments-area" class="section">
+      <h2 class="glow">Comunidad (Beta)</h2>
+      <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--neon-blue);">
+        <div style="display:flex; gap:12px;">
+          <div id="myAvatar" class="yt-avatar" style="background:#555">?</div>
+          <div style="flex:1">
+            <div id="displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;">Usuario: Cargando...</div>
+            <textarea id="commentText" placeholder="Añade un comentario..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+            <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span id="charCounter">0</span> / 100</div>
+            <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
+              <button class="btn" style="background:#444" onclick="document.getElementById('commentText').value=''">Cancelar</button>
+              <button class="btn" onclick="addComment()">Comentar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="commentList"></div>
+    </section>
+
+    <section id="contact" class="section">
+      <h2 class="glow">Redes Sociales</h2>
+      <div class="social-grid">
+        <a class="social-item" href="https://youtube.com/@lalocf_1" target="_blank"><img src="assets/icons/youtube.jpeg"><span class="btn">YouTube</span></a>
+        <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img src="assets/icons/telegram.jpeg"><span class="btn">Telegram</span></a>
+        <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img src="assets/icons/instagram.jpeg"><span class="btn">Instagram</span></a>
+        <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img src="assets/icons/tiktok.jpeg"><span class="btn">TikTok</span></a>
+      </div>
+    </section>
+
+    <footer style="margin-top:40px; text-align:center; color:white;">
+      © <span id="year"></span> LaloCF | V2.4.3 <br>
+      <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
+    </footer>
+  </div>
+
+  <div id="apk-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeApkInfo()">✖</span><div class="popup-scroll-body"><img id="apk-img"><h2 id="apk-title"></h2><p id="apk-desc"></p><h3 id="apk-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="apk-downloads"></div></div></div></div>
+  <div id="mod-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeModInfo()">✖</span><div class="popup-scroll-body"><img id="popup-img"><h2 id="popup-title"></h2><p id="popup-desc"></p><h3 id="popup-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="popup-downloads"></div></div></div></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update, runTransaction, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
+      authDomain: "fnf-mobile-lalocf.firebaseapp.com",
+      databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
+      projectId: "fnf-mobile-lalocf",
+      storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
+      messagingSenderId: "407243542354",
+      appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const APP_VERSION = "v2.4.3";
+    let isSuperUser = localStorage.getItem('superUser') === 'true';
+
+    let verifiedUsers = {};
+    let downloadCounts = {};
+
+    onValue(ref(db, 'downloads'), (snap) => {
+      downloadCounts = snap.val() || {};
+      Object.keys(downloadCounts).forEach(id => {
+        const el = document.getElementById('dl-' + id);
+        if(el) el.innerText = downloadCounts[id];
+      });
+    });
+
+    onValue(ref(db, 'verified_users'), (snap) => {
+      verifiedUsers = snap.val() || {};
+    });
+
+    window.trackDownload = (id) => {
+      runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
+    };
+
+    onValue(ref(db, 'comments'), (snapshot) => {
+      const list = document.getElementById('commentList');
+      list.innerHTML = '';
+      const data = snapshot.val();
+      const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+
+      if(data) {
+        let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        
+        commentsArray.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return b.id.localeCompare(a.id);
+        });
+
+        commentsArray.forEach(c => {
+          const isLalo = c.user.toLowerCase() === 'lalocf';
+          const isVerified = verifiedUsers[c.ownerKey] || isLalo;
+          const myLikedComments = JSON.parse(localStorage.getItem('my_liked_comments') || '{}');
+          const activeClass = myLikedComments[c.id] ? 'active' : '';
+          
+          const pinClass = c.isPinned ? 'pinned' : '';
+          const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
+          const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
+
+          let adminBtns = '';
+          if (isSuperUser) {
+             adminBtns = `
+               <span style="color:gold; cursor:pointer" onclick="togglePin('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
+               <span style="color:#00eaff; cursor:pointer" onclick="toggleVerify('${c.ownerKey}')">Verificar</span> • 
+               <span style="color:red; cursor:pointer" onclick="deleteComment('${c.id}')">Eliminar</span>
+             `;
+          } else if (myProfile && c.ownerKey === myProfile.key) {
+             adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteComment('${c.id}')">Eliminar</span>`;
+          }
+
+          const div = document.createElement('div');
+          div.className = `yt-comment-container ${pinClass}`;
+          div.innerHTML = `
+            <div class="yt-avatar" style="background:${stringToColor(c.user)}">${c.user.charAt(0).toUpperCase()}</div>
+            <div class="yt-content">
+              ${pinBadge}
+              <div class="yt-header">
+                <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${c.user}')">
+                  <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${c.user}</a>${verifyBadge}
+                </span>
+                <span class="yt-date">${c.date}</span>
+              </div>
+              <div class="yt-text">${c.text}</div>
+              <div class="yt-actions">
+                <span class="yt-action-btn ${activeClass}" id="btn-like-${c.id}" onclick="likeComment('${c.id}')">👍 <span id="l-count-${c.id}">${c.likes || 0}</span></span> 
+                <span class="yt-action-btn" onclick="replyComment('${c.user}')">Responder</span>
+                ${adminBtns}
+              </div>
+            </div>`;
+          list.appendChild(div);
+        });
+      }
+    });
+
+    window.togglePin = (commentId, currentState) => { update(ref(db, `comments/${commentId}`), { isPinned: !currentState }); };
+    window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
+
+    onValue(ref(db, ".info/connected"), (snap) => {
+      if (snap.val() === true) {
+        document.getElementById("statusDot").classList.add("online");
+        document.getElementById("statusText").innerText = "Servidor: Online";
+        document.getElementById("statusText").style.color = "#00ff41";
+      } else {
+        document.getElementById("statusDot").classList.remove("online");
+        document.getElementById("statusText").innerText = "Desconectado";
+        document.getElementById("statusText").style.color = "#aaa";
+      }
+    });
+
+    window.toggleTheme = () => document.body.classList.toggle("light");
+    window.toggleMenu = () => document.getElementById("menuPopup").classList.toggle("show");
+    
+    window.selectSection = (id) => { 
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); 
+      document.getElementById(id).classList.add("active"); 
+      
+      const searchUI = document.getElementById("searchContainer");
+      const filterUI = document.getElementById("filterContainer");
+
+      if (id === 'apks') {
+          searchUI.style.display = 'block';
+          filterUI.style.display = 'none';
+      } else if (id === 'mods') {
+          searchUI.style.display = 'block';
+          filterUI.style.display = 'flex';
+      } else {
+          searchUI.style.display = 'none';
+          filterUI.style.display = 'none';
+      }
+
+      toggleMenu(); 
+    };
+
+    let currentFilter = 'all';
+    window.setFilter = (filter, btn) => {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterContent();
+    };
+
+    window.filterContent = () => {
+      const search = document.getElementById('globalSearch').value.toLowerCase();
+      const items = document.querySelectorAll('.mod-card');
+      const apks = document.querySelectorAll('.apk-card');
+      
+      items.forEach(item => {
+        if(item.classList.contains('coming-soon-card')) return;
+        const title = item.querySelector('h3').innerText.toLowerCase();
+        const itemGama = item.getAttribute('data-gama') || 'mid';
+        const matchesSearch = title.includes(search);
+        const matchesFilter = currentFilter === 'all' || itemGama === currentFilter;
+        item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
+      });
+
+      apks.forEach(apk => {
+        const title = apk.querySelector('h3').innerText.toLowerCase();
+        apk.style.display = title.includes(search) ? "block" : "none";
+      });
+    };
+
+    async function checkBanStatus() {
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if (!profile) return false;
+      const snap = await get(ref(db, `banned_users/${profile.key}`));
+      if (snap.exists()) {
+        const banData = snap.val();
+        if (Date.now() < banData.expiresAt) {
+          const timeLeft = Math.ceil((banData.expiresAt - Date.now()) / 3600000);
+          alert(`⛔ ACCESO DENEGADO\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
+          return true;
+        } else {
+          await set(ref(db, `banned_users/${profile.key}`), null);
+          return false;
+        }
+      }
+      return false;
+    }
+
+    window.openBanPanel = (userKey, userName) => {
+      if (!isSuperUser) return;
+      document.getElementById('ban-target-info').innerText = `Gestionando a: ${userName}`;
+      document.getElementById('ban-popup').classList.add('show');
+      document.getElementById('confirmBanBtn').onclick = async () => {
+        const reason = document.getElementById('banReason').value || "Normas";
+        const hours = parseInt(document.getElementById('banDuration').value) || 24;
+        await set(ref(db, `banned_users/${userKey}`), { userName, reason, expiresAt: Date.now() + (hours * 3600000) });
+        alert("Usuario baneado.");
+        document.getElementById('ban-popup').classList.remove('show');
+      };
+    };
+
+    function checkUserStatus() {
+      const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if(!user) { document.getElementById('register-popup').classList.add('show'); } 
+      else { updateCommentInterface(user); syncLikeButtons(); }
+    }
+
+    function updateCommentInterface(user) {
+      const display = document.getElementById('displayMyName');
+      display.innerText = "Comentando como: " + user.name;
+      if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
+      const avatar = document.getElementById('myAvatar');
+      avatar.innerText = user.name.charAt(0).toUpperCase();
+      avatar.style.background = stringToColor(user.name);
+    }
+
+    window.saveRegistration = () => {
+      const name = document.getElementById('regName').value.trim();
+      const link = document.getElementById('regLink').value.trim() || "#";
+      if(name.length < 3) return alert("Nombre muy corto.");
+      const profile = { name, link, key: 'user_' + Math.random().toString(36).substr(2, 9) };
+      localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+      document.getElementById('register-popup').classList.remove('show');
+      location.reload();
+    };
+
+    let holdTimer;
+    const fnfTitle = document.getElementById('fnf-title');
+    const _0xd1a4 = "bGFsb2NmbW9kczE=";
+
+    fnfTitle.addEventListener('mousedown', startHold);
+    fnfTitle.addEventListener('mouseup', endHold);
+    fnfTitle.addEventListener('touchstart', startHold);
+    fnfTitle.addEventListener('touchend', endHold);
+
+    function startHold() { holdTimer = setTimeout(() => { document.getElementById('admin-popup').classList.add('show'); }, 5000); }
+    function endHold() { clearTimeout(holdTimer); }
+
+    window.verifyAdmin = () => {
+      const input = document.getElementById('adminCode').value;
+      if(btoa(input) === _0xd1a4) {
+        localStorage.setItem('superUser', 'true');
+        alert("Modo Superusuario Activado.");
+        location.reload();
+      } else { alert("Código incorrecto."); }
+    };
+
+    function stringToColor(str) {
+      let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+      return `hsl(${hash % 360}, 65%, 50%)`;
+    }
+
+    window.addComment = async () => {
+      if (await checkBanStatus()) return;
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      const text = document.getElementById('commentText').value.trim();
+      if(!profile) return checkUserStatus();
+      if(!text) return alert("Escribe algo...");
+      push(ref(db, 'comments'), { ownerKey: profile.key, user: profile.name, link: profile.link, text, date: new Date().toLocaleString(), likes: 0, isPinned: false });
+      document.getElementById('commentText').value = '';
+    };
+
+    window.likeComment = async (commentId) => {
+      if (await checkBanStatus()) return;
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if(!profile) return checkUserStatus();
+      const userKey = profile.key;
+      const myLikedComments = JSON.parse(localStorage.getItem('my_liked_comments') || '{}');
+      const likeRef = ref(db, `comments/${commentId}/userLikes/${userKey}`);
+      const snap = await get(likeRef);
+      if (snap.exists()) {
+        await set(likeRef, null); runTransaction(ref(db, `comments/${commentId}/likes`), (c) => (c || 1) - 1);
+        delete myLikedComments[commentId];
+      } else {
+        await set(likeRef, true); runTransaction(ref(db, `comments/${commentId}/likes`), (c) => (c || 0) + 1);
+        myLikedComments[commentId] = true;
+      }
+      localStorage.setItem('my_liked_comments', JSON.stringify(myLikedComments));
+    };
+
+    window.handleLike = async (id, el) => {
+      if (await checkBanStatus()) return;
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if(!profile) return checkUserStatus();
+      const userKey = profile.key;
+      const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
+      const itemLikeRef = ref(db, `likes_registry/${id}/${userKey}`);
+      const snap = await get(itemLikeRef);
+      if (snap.exists()) {
+        await set(itemLikeRef, null); runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
+        delete myLikedItems[id]; el.classList.remove('active');
+      } else {
+        await set(itemLikeRef, true); runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
+        myLikedItems[id] = true; el.classList.add('active');
+      }
+      localStorage.setItem('my_liked_items', JSON.stringify(myLikedItems));
+    };
+
+    function syncLikeButtons() {
+      const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
+      Object.keys(myLikedItems).forEach(id => {
+        const btn = document.getElementById('like-' + id);
+        if(btn) btn.classList.add('active');
+      });
+    }
+
+    window.replyComment = (name) => { const txt = document.getElementById('commentText'); txt.value = `@${name} `; txt.focus(); };
+    window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
+
+    const MOD_DATA = {
+  mod99_2: {
+    img: "assets/images/mods/play.webp",
+    title: "Child's Play Pico Mix",
+    desc: "Friday Night Funkin' FNF' Child's Play Pico Mix & Wip Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (Drive) Mejorado y Opt por LaloCF", link: "https://drive.google.com/file/d/1qyMKXjaGwH4PG3DPVqphTrMskvU-sX_4/view?usp=drivesdk" },
+      { name: "Descarga (Tik Tok) Wip", link: "https://vt.tiktok.com/ZSawhN2LN/" },
+      { name: "Descarga Original", link: "https://gamebanana.com/mods/546317" }
+    ]
+  },
+  mod99_3: {
+    img: "assets/images/mods/fate.webp",
+    title: "TaintedFate",
+    desc: "Friday Night Funkin' FNF' TaintedFate Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (Drive)", link: "https://drive.usercontent.google.com/download?id=12kYlM1XbLGa_3o9uIjYtFfUMGE7PLe4E&export=download&authuser=0" },
+      { name: "Descarga Original", link: "https://gamebanana.com/mods/504445" }
+    ]
+  },
+  mod99_4: {
+    img: "assets/images/mods/logojeffy.jpeg",
+    title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
+    desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
+    version: "Psych v1.0.4",
+    downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
+  },
+  mod99_5: {
+    img: "assets/images/mods/logonusky.jpeg",
+    title: "VS Nusky",
+    desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
+    ]
+  },
+  mod99_6: {
+    img: "assets/images/mods/chritmas.jpeg",
+    title: "Cocoa Noimix",
+    desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
+      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
+      { name: "Descarga Directa iOS (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=11AUlGXUvPrxszI5xnjssMS5OvZDFp64_&export=download" },
+      { name: "Descarga Directa Opt (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1EO-TOh4KByE0gSf24DXx2pG10WR8wdhU&export=download" }
+    ]
+  },
+  mod99_7: {
+    img: "assets/images/mods/metal.png",
+    title: "Vs Metal Pipe V2",
+    desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
+      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download"}
+    ]
+  },
+  mod99_8: {
+    img: "assets/images/mods/Girl.png",
+    title: "Rolling Girl",
+    desc: "Friday Night Funkin' FNF' Rolling Girl Port Psych Engine Optimizado Para (Pc/Android/iOS).",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/42313?lang=es" },
+      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1n_e-lmvGFeIybTIDkdHXnduEIeXziD8I&export=download" }
+    ]
+  },
+  mod99_9: {
+    img: "assets/images/mods/tales.webp",
+    title: "Herobrine Reborn Tales",
+    desc: "Friday Night Funkin' FNF' Herobrine Reborn Tales Port Psych Engine Para (Pc/Android/iOS).",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1bPmKg62b6r5xiEOI5ZVFNHZqU0Mp0PLY/view" }
+    ]
+  },
+  mod100: {
+    img: "assets/images/mods/odd.webp",
+    title: "Vs. TheOdd1sOut ONESHOT",
+    desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga Directa ES (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1rBL-hdK-_jeq-bByvK2xUfDu23D4QVEY&export=download" },
+      { name: "Descarga Directa EU (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=12gPg9wTnUa_JUSVj1IgUE7ETJieHNPIl&export=download" },
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/498584" }
+    ]
+  }
+};
+
+    const APK_DATA = {
+  apk1: {
+    img: "assets/images/webp/logopsychengine.webp",
+    title: "Psych Engine",
+    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
+    version: "v1.0.4",
+    downloads: [
+      { name: "Descarga Directa Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
+      { name: "Descarga Directa Windows32 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Android No Optimizado (Drive)", link: "https://drive.google.com/file/d/1OLfDEtB_-ItFS0WqRut9xfsnfXSWlBgq/view" },
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
+    ]
+  },
+  apk2: {
+    img: "assets/images/webp/logopsychonline.webp",
+    title: "Psych Online",
+    desc: "Mod de Psych Engine con funciones en línea.",
+    version: "v0.13.2 Bugfix",
+    downloads: [
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/macBuild.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
+    ]
+  },
+  apk3: {
+    img: "assets/images/webp/logocodename.webp",
+    title: "CodeName Engine",
+    desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
+    version: "v1.0.1",
+    downloads: [
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" }
+    ]
+  },  
+  apk4: {
+    img: "assets/images/webp/logoplusengine.webp",
+    title: "Plus Engine",
+    desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
+    version: "v1.2",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Windows.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Linux.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Mac.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
+    ]
+  },
+  apk5: {
+    img: "assets/images/webp/logop-slice.webp",
+    title: "P-Slice Engine",
+    desc: "El motor P-Slice es un cruce entre Psych Engine y la versión más reciente de Friday Night Funkin.\n\nSu objetivo es incorporar nuevos elementos visuales y características de las versiones más nuevas de FNF y realizar cambios en las existentes para que se sientan más cercanas a las de V-Slice.",
+    version: "v3.4.2",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Slice/P-Slice/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+    ]
+  }
+};
+
+    window.openModInfo = (id) => { 
+      const d = MOD_DATA[id]; 
+      document.getElementById("popup-img").src = d.img; 
+      document.getElementById("popup-title").innerText = d.title; 
+      document.getElementById("popup-desc").innerText = d.desc; 
+      document.getElementById("popup-version").innerText = d.version; 
+      let h = ""; 
+      d.downloads.forEach(dl => { 
+        h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`; 
+      }); 
+      document.getElementById("popup-downloads").innerHTML = h; 
+      document.getElementById("mod-popup").classList.add("show"); 
+    };
+    window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
+
+    window.openApkInfo = (id) => { 
+      const d = APK_DATA[id]; 
+      document.getElementById("apk-img").src = d.img; 
+      document.getElementById("apk-title").innerText = d.title; 
+      document.getElementById("apk-desc").innerText = d.desc; 
+      document.getElementById("apk-version").innerText = d.version; 
+      let h = ""; 
+      d.downloads.forEach(dl => { 
+        h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`; 
+      }); 
+      document.getElementById("apk-downloads").innerHTML = h; 
+      document.getElementById("apk-popup").classList.add("show"); 
+    };
+    window.closeApkInfo = () => document.getElementById("apk-popup").classList.remove("show");
+
+    onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
+    
+    window.onload = () => {
+      document.getElementById("year").textContent = new Date().getFullYear();
+      if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
+      else checkUserStatus();
+      
+      if(document.getElementById('apks').classList.contains('active')) {
+          document.getElementById('searchContainer').style.display = 'block';
+      }
+    };
+    window.closeUpdatePopup = () => { document.getElementById('update-popup').classList.remove('show'); localStorage.setItem('lastVersionSeen', APP_VERSION); checkUserStatus(); };
+    document.getElementById('commentText').addEventListener('input', function() { document.getElementById('charCounter').innerText = this.value.length; });
+  </script>
+</body>
+</html>

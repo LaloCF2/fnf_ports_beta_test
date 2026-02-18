@@ -62,85 +62,85 @@
     }
 
     /* --- NUEVO DISEÑO POPUP NOVEDADES --- */
-.update-card-modern {
-  background: #151515 !important;
-  border: 1px solid var(--neon-blue);
-  border-radius: 20px;
-  box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
-  max-width: 420px !important;
-  overflow: visible !important; /* Permitir que el icono salga */
-  animation: floatUp 0.4s ease-out;
-}
+    .update-card-modern {
+      background: #151515 !important;
+      border: 1px solid var(--neon-blue);
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
+      max-width: 420px !important;
+      overflow: visible !important;
+      animation: floatUp 0.4s ease-out;
+    }
 
-.update-header-art {
-  height: 90px;
-  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-  border-radius: 20px 20px 0 0;
-  position: relative;
-  margin-bottom: 40px; /* Espacio para el icono */
-}
+    .update-header-art {
+      height: 90px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      border-radius: 20px 20px 0 0;
+      position: relative;
+      margin-bottom: 40px;
+    }
 
-.update-icon-circle {
-  width: 70px;
-  height: 70px;
-  background: #151515;
-  border-radius: 50%;
-  position: absolute;
-  bottom: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 35px;
-  border: 3px solid var(--neon-blue);
-  box-shadow: 0 0 20px var(--neon-blue);
-  z-index: 10;
-}
+    .update-icon-circle {
+      width: 70px;
+      height: 70px;
+      background: #151515;
+      border-radius: 50%;
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      border: 3px solid var(--neon-blue);
+      box-shadow: 0 0 20px var(--neon-blue);
+      z-index: 10;
+    }
 
-.update-body {
-  padding: 0 25px 25px 25px;
-  text-align: center;
-}
+    .update-body {
+      padding: 0 25px 25px 25px;
+      text-align: center;
+    }
 
-.update-list-modern {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-  text-align: left;
-}
+    .update-list-modern {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+      text-align: left;
+    }
 
-.update-list-modern li {
-  background: rgba(255, 255, 255, 0.05);
-  margin-bottom: 10px;
-  padding: 12px 15px;
-  border-radius: 12px;
-  border-left: 3px solid var(--neon-purple);
-  font-size: 14px;
-  color: #ddd;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    .update-list-modern li {
+      background: rgba(255, 255, 255, 0.05);
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      border-left: 3px solid var(--neon-purple);
+      font-size: 14px;
+      color: #ddd;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.btn-update-action {
-  background: transparent;
-  border: 2px solid var(--neon-blue);
-  color: var(--neon-blue);
-  padding: 12px;
-  width: 100%;
-  border-radius: 50px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-  text-transform: uppercase;
-}
+    .btn-update-action {
+      background: transparent;
+      border: 2px solid var(--neon-blue);
+      color: var(--neon-blue);
+      padding: 12px;
+      width: 100%;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      text-transform: uppercase;
+    }
 
-.btn-update-action:hover {
-  background: var(--neon-blue);
-  color: black;
-  box-shadow: 0 0 15px var(--neon-blue);
-}
+    .btn-update-action:hover {
+      background: var(--neon-blue);
+      color: black;
+      box-shadow: 0 0 15px var(--neon-blue);
+    }
 
     .container {
       max-width:1100px;
@@ -197,7 +197,6 @@
       0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
       100% { opacity: 1; transform: scale(1.3) rotate(45deg); }
     }
-    /* ------------------------------------------ */
 
     .theme-btn {
       font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
@@ -314,11 +313,198 @@
     .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--neon-blue); background: rgba(0,0,0,0.4); color: white; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
     .filter-btn:hover { border-color: var(--neon-pink); }
+
+    /* =========================================
+       🍏 TEMA EXCLUSIVO iOS (LIQUID GLASS / CRISTAL NEÓN) 🍏
+       ========================================= */
+    body.ios-theme {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      background: radial-gradient(circle at top right, #110022, #000000, #001122) !important;
+      animation: none !important;
+    }
+
+    body.ios-theme::before {
+      display: block !important;
+      opacity: 0.25 !important;
+      filter: blur(60px) !important;
+      animation: none !important;
+    }
+
+    body.ios-theme .container {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 15px !important;
+      margin-top: 20px !important;
+    }
+
+    body.ios-theme .glow {
+      text-shadow: 0 0 15px rgba(255,255,255,0.2) !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.3px !important;
+    }
+
+    body.ios-theme .apk-card, 
+    body.ios-theme .mod-card,
+    body.ios-theme .social-item {
+      background: rgba(0, 234, 255, 0.05) !important; 
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(0, 234, 255, 0.2) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 8px 32px rgba(0, 234, 255, 0.1) !important;
+      padding: 16px !important;
+      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+    }
+
+    body.ios-theme .apk-card:hover, 
+    body.ios-theme .mod-card:hover,
+    body.ios-theme .social-item:hover {
+      transform: scale(0.97) !important; 
+      border: 1px solid rgba(0, 234, 255, 0.4) !important;
+    }
+
+    body.ios-theme .apk-card img, 
+    body.ios-theme .mod-card img,
+    body.ios-theme .social-item img {
+      border-radius: 14px !important;
+      box-shadow: none !important;
+    }
+
+    body.ios-theme .btn {
+      background: rgba(255, 0, 200, 0.15) !important; 
+      backdrop-filter: blur(15px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+      border: 1px solid rgba(255, 0, 200, 0.4) !important;
+      color: #fff !important;
+      border-radius: 20px !important; 
+      box-shadow: 0 4px 15px rgba(255, 0, 200, 0.15) !important;
+      font-weight: 600 !important;
+      font-size: 15px !important;
+      padding: 10px 20px !important;
+      transition: opacity 0.2s, transform 0.2s !important;
+    }
+    body.ios-theme .btn:active {
+      opacity: 0.6 !important;
+      transform: scale(0.95) !important;
+    }
+
+    body.ios-theme .search-input,
+    body.ios-theme .reg-input {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 12px !important;
+      color: #fff !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+      padding: 12px 15px !important;
+      font-size: 17px !important;
+    }
+    body.ios-theme .search-input:focus,
+    body.ios-theme .reg-input:focus {
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    body.ios-theme .popup-content {
+      background: rgba(10, 10, 15, 0.6) !important;
+      backdrop-filter: blur(25px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 28px !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+    }
+
+    body.ios-theme .update-card-modern {
+      background: rgba(15, 15, 20, 0.65) !important;
+      backdrop-filter: blur(30px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+    }
+    body.ios-theme .update-header-art {
+      background: transparent !important; 
+    }
+    body.ios-theme .update-icon-circle {
+      background: rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border: 1px solid rgba(0, 234, 255, 0.3) !important;
+      box-shadow: 0 5px 20px rgba(0, 234, 255, 0.2) !important;
+    }
+    body.ios-theme .btn-update-action {
+      background: rgba(0, 234, 255, 0.15) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      color: white !important;
+      border: 1px solid rgba(0, 234, 255, 0.4) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 4px 15px rgba(0, 234, 255, 0.15) !important;
+    }
+
+    body.ios-theme .filter-btn {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #fff !important;
+    }
+    body.ios-theme .filter-btn.active {
+      background: rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1) !important;
+    }
+
+    body.ios-theme #menuContent {
+      background: rgba(10, 10, 15, 0.65) !important;
+      backdrop-filter: blur(25px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+    body.ios-theme .menu-option {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+      border-radius: 0 !important;
+      text-shadow: none !important;
+      text-align: left !important;
+      padding: 15px 5px !important;
+    }
+    body.ios-theme .menu-option:last-child {
+      border-bottom: none !important;
+    }
+    
+    body.ios-theme .like-container,
+    body.ios-theme .dl-counter,
+    body.ios-theme .server-status {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+    }
+    body.ios-theme .like-container.active {
+      background: rgba(255, 0, 200, 0.15) !important;
+      border: 1px solid rgba(255, 0, 200, 0.4) !important;
+    }
   </style>
 </head>
 
 <body>
 
+  <script>
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.userAgent.includes("Mac") && "ontouchend" in document) || 
+                /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+    
+    if (isIOS) {
+      document.body.classList.add('ios-theme');
+    }
+  </script>
   <div class="theme-btn" onclick="toggleTheme()">☼</div>
 
   <div id="ban-popup" class="popup">

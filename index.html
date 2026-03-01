@@ -1,9 +1,18 @@
 <!doctype html>
 <html lang="es">
 <head>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FNF' - Mobile</title>
+
+  <link rel="apple-touch-icon" href="assets/icons/logo192.png">
+  <link rel="icon" type="image/png" href="assets/icons/logo192.png">
+  <link rel="shortcut icon" href="assets/icons/logo192.png">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00eaff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
     @font-face {
@@ -17,6 +26,10 @@
       font-family: "MiFuente", system-ui, -apple-system, sans-serif;
     }
 
+    body.ios-theme .theme-btn {
+      display: none !important;
+    }
+
     :root {
       --text: #e0e0e0;
       --card-bg: rgba(0, 0, 0, 0.55);
@@ -27,6 +40,11 @@
       --neon-yellow: #ffea00;
       --neon-red: #ff003c;
       --neon-gold: #ffd700;
+      --neon-orange: #ff8800;
+      --neon-grey: #585858;
+      --neon-violet: #eb46fa;
+      --neon-brown: #755128;
+      --neon-bluef: #1900ff;
       --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
     }
 
@@ -61,7 +79,6 @@
       animation: nebulaMove 10s ease-in-out infinite alternate;
     }
 
-    /* --- NUEVO DISEÑO POPUP NOVEDADES --- */
     .update-card-modern {
       background: #151515 !important;
       border: 1px solid var(--neon-blue);
@@ -251,7 +268,11 @@
     .coming-soon-card img { filter: blur(8px) grayscale(1); }
     .coming-soon-badge { position: absolute; top: 10px; right: -30px; background: var(--neon-pink); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 12px; font-weight: bold; box-shadow: 0 0 10px var(--neon-pink); }
 
-    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; }
+    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; text-align: center; }
+    
+    .card-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+    .card-buttons .btn { flex: 1; margin-top: 0; padding: 10px 5px; font-size: 13px; }
+    .btn-chat { background: var(--neon-purple) !important; box-shadow: 0 0 12px var(--neon-purple) !important; }
 
     .popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
     .popup.show { opacity: 1; pointer-events: auto; }
@@ -275,10 +296,8 @@
     .visitor-counter { margin-top: 15px; font-size: 14px; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); border: 1px solid var(--neon-blue); display: inline-block; padding: 5px 15px; border-radius: 20px; background: rgba(0,0,0,0.3); }
 
     .yt-comment-container { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-align: left; }
-    
     .yt-comment-container.pinned { border: 1px solid var(--neon-gold); background: rgba(255, 215, 0, 0.05); border-radius: 12px; padding: 10px; }
     .pinned-badge { display: inline-block; background: var(--neon-gold); color: black; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
-
     .verified-icon { color: #00eaff; margin-left: 4px; font-size: 14px; text-shadow: 0 0 5px #00eaff; }
 
     .yt-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; flex-shrink: 0; }
@@ -296,10 +315,10 @@
 
     .reg-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 12px; color: white; margin-bottom: 15px; box-sizing: border-box; }
 
-    #commentList { max-height: 500px; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
-    #commentList::-webkit-scrollbar { width: 6px; }
-    #commentList::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-    #commentList::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
+    #commentList, #mc-commentList { max-height: 500px; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+    #commentList::-webkit-scrollbar, #mc-commentList::-webkit-scrollbar { width: 6px; }
+    #commentList::-webkit-scrollbar-track, #mc-commentList::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    #commentList::-webkit-scrollbar-thumb, #mc-commentList::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
     
     .search-wrapper { margin-bottom: 10px; position: relative; }
     .search-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--neon-blue); background: rgba(0,0,0,0.3); color: white; font-size: 16px; outline: none; transition: 0.3s; box-shadow: 0 0 10px rgba(0, 234, 255, 0.1); }
@@ -315,196 +334,71 @@
     .filter-btn:hover { border-color: var(--neon-pink); }
 
     /* =========================================
-       🍏 TEMA EXCLUSIVO iOS (LIQUID GLASS / CRISTAL NEÓN) 🍏
+       NUEVAS FUNCIONES: SUPERUSUARIO & NOTIFICACIONES
        ========================================= */
-    body.ios-theme {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-      background: radial-gradient(circle at top right, #110022, #000000, #001122) !important;
-      animation: none !important;
-    }
 
-    body.ios-theme::before {
-      display: block !important;
-      opacity: 0.25 !important;
-      filter: blur(60px) !important;
-      animation: none !important;
-    }
-
-    body.ios-theme .container {
-      background: transparent !important;
-      box-shadow: none !important;
-      border: none !important;
-      padding: 15px !important;
-      margin-top: 20px !important;
-    }
-
-    body.ios-theme .glow {
-      text-shadow: 0 0 15px rgba(255,255,255,0.2) !important;
-      color: #FFFFFF !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.3px !important;
-    }
-
-    body.ios-theme .apk-card, 
-    body.ios-theme .mod-card,
-    body.ios-theme .social-item {
-      background: rgba(0, 234, 255, 0.05) !important; 
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(0, 234, 255, 0.2) !important;
-      border-radius: 24px !important;
-      box-shadow: 0 8px 32px rgba(0, 234, 255, 0.1) !important;
-      padding: 16px !important;
-      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
-    }
-
-    body.ios-theme .apk-card:hover, 
-    body.ios-theme .mod-card:hover,
-    body.ios-theme .social-item:hover {
-      transform: scale(0.97) !important; 
-      border: 1px solid rgba(0, 234, 255, 0.4) !important;
-    }
-
-    body.ios-theme .apk-card img, 
-    body.ios-theme .mod-card img,
-    body.ios-theme .social-item img {
-      border-radius: 14px !important;
-      box-shadow: none !important;
-    }
-
-    body.ios-theme .btn {
-      background: rgba(255, 0, 200, 0.15) !important; 
-      backdrop-filter: blur(15px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
-      border: 1px solid rgba(255, 0, 200, 0.4) !important;
-      color: #fff !important;
-      border-radius: 20px !important; 
-      box-shadow: 0 4px 15px rgba(255, 0, 200, 0.15) !important;
-      font-weight: 600 !important;
-      font-size: 15px !important;
-      padding: 10px 20px !important;
-      transition: opacity 0.2s, transform 0.2s !important;
-    }
-    body.ios-theme .btn:active {
-      opacity: 0.6 !important;
-      transform: scale(0.95) !important;
-    }
-
-    body.ios-theme .search-input,
-    body.ios-theme .reg-input {
-      background: rgba(255, 255, 255, 0.08) !important;
-      backdrop-filter: blur(15px) !important;
-      -webkit-backdrop-filter: blur(15px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-radius: 12px !important;
-      color: #fff !important;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-      padding: 12px 15px !important;
-      font-size: 17px !important;
-    }
-    body.ios-theme .search-input:focus,
-    body.ios-theme .reg-input:focus {
-      background: rgba(255, 255, 255, 0.12) !important;
-      border-color: rgba(255, 255, 255, 0.3) !important;
-    }
-
-    body.ios-theme .popup-content {
-      background: rgba(10, 10, 15, 0.6) !important;
-      backdrop-filter: blur(25px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-radius: 28px !important;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
-    }
-
-    body.ios-theme .update-card-modern {
-      background: rgba(15, 15, 20, 0.65) !important;
-      backdrop-filter: blur(30px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-    }
-    body.ios-theme .update-header-art {
-      background: transparent !important; 
-    }
-    body.ios-theme .update-icon-circle {
-      background: rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(15px) !important;
-      -webkit-backdrop-filter: blur(15px) !important;
-      border: 1px solid rgba(0, 234, 255, 0.3) !important;
-      box-shadow: 0 5px 20px rgba(0, 234, 255, 0.2) !important;
-    }
-    body.ios-theme .btn-update-action {
-      background: rgba(0, 234, 255, 0.15) !important;
-      backdrop-filter: blur(15px) !important;
-      -webkit-backdrop-filter: blur(15px) !important;
-      color: white !important;
-      border: 1px solid rgba(0, 234, 255, 0.4) !important;
-      border-radius: 14px !important;
-      box-shadow: 0 4px 15px rgba(0, 234, 255, 0.15) !important;
-    }
-
-    body.ios-theme .filter-btn {
-      background: rgba(255, 255, 255, 0.08) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #fff !important;
-    }
-    body.ios-theme .filter-btn.active {
-      background: rgba(255, 255, 255, 0.2) !important;
-      border: 1px solid rgba(255, 255, 255, 0.5) !important;
-      color: #ffffff !important;
-      font-weight: 600 !important;
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1) !important;
-    }
-
-    body.ios-theme #menuContent {
-      background: rgba(10, 10, 15, 0.65) !important;
-      backdrop-filter: blur(25px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    }
-    body.ios-theme .menu-option {
-      background: transparent !important;
-      border: none !important;
-      border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-      border-radius: 0 !important;
-      text-shadow: none !important;
-      text-align: left !important;
-      padding: 15px 5px !important;
-    }
-    body.ios-theme .menu-option:last-child {
-      border-bottom: none !important;
-    }
+    .admin-pin-btn { position: absolute; top: 40px; right: 10px; z-index: 10; background: var(--neon-gold); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-gold); display: none; }
     
-    body.ios-theme .like-container,
-    body.ios-theme .dl-counter,
-    body.ios-theme .server-status {
-      background: rgba(255, 255, 255, 0.08) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
-    }
-    body.ios-theme .like-container.active {
-      background: rgba(255, 0, 200, 0.15) !important;
-      border: 1px solid rgba(255, 0, 200, 0.4) !important;
-    }
+    .admin-led-btn { position: absolute; top: 40px; left: 10px; z-index: 10; background: var(--neon-green); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-green); display: none; }
+    .mod-card .admin-led-btn { top: 75px; left: auto; right: 10px; }
+    
+    body.is-admin .admin-pin-btn, body.is-admin .admin-led-btn { display: block; }
+    
+    .pinned-mod { border-color: var(--neon-gold) !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4) !important; order: -1; }
+    .pinned-mod::before { content: '📌 DESTACADO'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--neon-gold); color: black; padding: 4px 12px; font-size: 11px; font-weight: bold; border-radius: 10px; z-index: 10; box-shadow: 0 0 10px var(--neon-gold); }
+
+    .admin-float-btn { position: fixed; bottom: 20px; right: 20px; background: var(--neon-purple); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 0 15px var(--neon-purple); border: 2px solid white; transition: 0.3s; }
+    body.is-admin .admin-float-btn { display: flex; }
+    .admin-float-btn:hover { transform: scale(1.1); box-shadow: 0 0 25px var(--neon-purple); }
+
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
+    .toast { background: rgba(10, 10, 15, 0.85); border: 1px solid var(--neon-blue); box-shadow: 0 5px 20px rgba(0, 234, 255, 0.4); color: white; padding: 15px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: bold; animation: slideDownToast 0.5s ease forwards; backdrop-filter: blur(15px); pointer-events: auto; }
+    .toast.hide { animation: slideUpToast 0.5s ease forwards; }
+    @keyframes slideDownToast { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideUpToast { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
+
+    /* =========================================
+       NUEVO: INDICADORES LED
+       ========================================= */
+    .led-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 10px currentColor; }
+    .led-green { background: #00ff41; color: #00ff41; }
+    .led-yellow { background: #ffea00; color: #ffea00; animation: pulseYellow 2s infinite; }
+    @keyframes pulseYellow { 0% { box-shadow: 0 0 5px #ffea00; } 50% { box-shadow: 0 0 15px #ffea00; } 100% { box-shadow: 0 0 5px #ffea00; } }
+
+    /* =========================================
+       🍏 TEMA EXCLUSIVO iOS 🍏
+       ========================================= */
+    body.ios-theme { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important; background: radial-gradient(circle at top right, #110022, #000000, #001122) !important; animation: none !important; }
+    body.ios-theme::before { display: block !important; opacity: 0.25 !important; filter: blur(60px) !important; animation: none !important; }
+    body.ios-theme .container { background: transparent !important; box-shadow: none !important; border: none !important; padding: 15px !important; margin-top: 20px !important; }
+    body.ios-theme .glow { text-shadow: 0 0 15px rgba(255,255,255,0.2) !important; color: #FFFFFF !important; font-weight: 700 !important; letter-spacing: 0.3px !important; }
+    body.ios-theme .apk-card, body.ios-theme .mod-card, body.ios-theme .social-item { background: rgba(0, 234, 255, 0.05) !important; backdrop-filter: blur(20px) saturate(180%) !important; -webkit-backdrop-filter: blur(20px) saturate(180%) !important; border: 1px solid rgba(0, 234, 255, 0.2) !important; border-radius: 24px !important; box-shadow: 0 8px 32px rgba(0, 234, 255, 0.1) !important; padding: 16px !important; transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important; }
+    body.ios-theme .apk-card:hover, body.ios-theme .mod-card:hover, body.ios-theme .social-item:hover { transform: scale(0.97) !important; border: 1px solid rgba(0, 234, 255, 0.4) !important; }
+    body.ios-theme .apk-card img, body.ios-theme .mod-card img, body.ios-theme .social-item img { border-radius: 14px !important; box-shadow: none !important; }
+    body.ios-theme .btn { background: rgba(255, 0, 200, 0.15) !important; backdrop-filter: blur(15px) saturate(180%) !important; -webkit-backdrop-filter: blur(15px) saturate(180%) !important; border: 1px solid rgba(255, 0, 200, 0.4) !important; color: #fff !important; border-radius: 20px !important; box-shadow: 0 4px 15px rgba(255, 0, 200, 0.15) !important; font-weight: 600 !important; font-size: 15px !important; padding: 10px 20px !important; transition: opacity 0.2s, transform 0.2s !important; }
+    body.ios-theme .btn-chat { background: rgba(180, 0, 255, 0.15) !important; border: 1px solid rgba(180, 0, 255, 0.4) !important; box-shadow: 0 4px 15px rgba(180, 0, 255, 0.15) !important; }
+    body.ios-theme .btn:active { opacity: 0.6 !important; transform: scale(0.95) !important; }
+    body.ios-theme .search-input, body.ios-theme .reg-input { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; color: #fff !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; padding: 12px 15px !important; font-size: 17px !important; }
+    body.ios-theme .search-input:focus, body.ios-theme .reg-input:focus { background: rgba(255, 255, 255, 0.12) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
+    body.ios-theme .popup-content { background: rgba(10, 10, 15, 0.6) !important; backdrop-filter: blur(25px) saturate(200%) !important; -webkit-backdrop-filter: blur(25px) saturate(200%) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 28px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
+    body.ios-theme .update-card-modern { background: rgba(15, 15, 20, 0.65) !important; backdrop-filter: blur(30px) saturate(200%) !important; -webkit-backdrop-filter: blur(30px) saturate(200%) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important; }
+    body.ios-theme .update-header-art { background: transparent !important; }
+    body.ios-theme .update-icon-circle { background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(0, 234, 255, 0.3) !important; box-shadow: 0 5px 20px rgba(0, 234, 255, 0.2) !important; }
+    body.ios-theme .btn-update-action { background: rgba(0, 234, 255, 0.15) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; color: white !important; border: 1px solid rgba(0, 234, 255, 0.4) !important; border-radius: 14px !important; box-shadow: 0 4px 15px rgba(0, 234, 255, 0.15) !important; }
+    body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #fff !important; }
+    body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1) !important; }
+    body.ios-theme #menuContent { background: rgba(10, 10, 15, 0.65) !important; backdrop-filter: blur(25px) saturate(180%) !important; -webkit-backdrop-filter: blur(25px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; }
+    body.ios-theme .menu-option { background: transparent !important; border: none !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; border-radius: 0 !important; text-shadow: none !important; text-align: left !important; padding: 15px 5px !important; }
+    body.ios-theme .menu-option:last-child { border-bottom: none !important; }
+    body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .server-status { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; }
+    body.ios-theme .like-container.active { background: rgba(255, 0, 200, 0.15) !important; border: 1px solid rgba(255, 0, 200, 0.4) !important; }
   </style>
 </head>
 
 <body>
 
-  <script>
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                (navigator.userAgent.includes("Mac") && "ontouchend" in document) || 
-                /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
-    
-    if (isIOS) {
-      document.body.classList.add('ios-theme');
-    }
-  </script>
+  <div id="toast-container" class="toast-container"></div>
+  <div class="admin-float-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')">🛠️</div>
   <div class="theme-btn" onclick="toggleTheme()">☼</div>
 
   <div id="ban-popup" class="popup">
@@ -528,42 +422,70 @@
     </div>
   </div>
 
+  <div id="admin-tools-popup" class="popup">
+    <div class="popup-content" style="padding: 20px; text-align: center;">
+      <span class="popup-close" onclick="document.getElementById('admin-tools-popup').classList.remove('show')">✖</span>
+      <h2 class="glow">Panel de Control Global</h2>
+      <p style="font-size: 13px; margin-bottom: 15px; color: #aaa;">Envía una notificación a todos los usuarios que abran la app.</p>
+      <textarea id="globalNotifText" class="reg-input" placeholder="Ej: ¡Nuevo Mod de Pico ya disponible para Android!" rows="3" style="resize:none;"></textarea>
+      <button class="btn" onclick="sendGlobalNotification()" style="width: 100%;">🔔 Enviar Notificación</button>
+    </div>
+  </div>
+
   <div id="update-popup" class="popup">
   <div class="popup-content update-card-modern" style="padding: 0; border: none;">
-    
     <div class="update-header-art">
       <div class="update-icon-circle">🚀</div>
       <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
     </div>
-
     <div class="update-body">
-      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v2.4.3!</h2>
+      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.1.0!</h2>
       <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
-
       <ul class="update-list-modern">
-        <li>
+        <li style="border-left-color: var(--neon-red);">
           <span>🔥</span> 
-          <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span>
+          <span><b>Se ha hecho una actualizacion:</b> <n></n></span>
         </li>
-         <li>
-          <span>🔥</span> 
-          <span><b>Nueva Base:</b> P-Slice Engine.</span>
+        <li style="border-left-color: var(--neon-pink);">
+          <span>🆕</span> 
+          <span><b>Nuevo Diseño Especial Mejorado:</b> <n>(Solo funciona si usas sistema iOS, Estado: BETA)</n></span>
         </li>
-        <li>
-          <span>🔧</span> 
-          <span>Corrección de errores y optimización.</span>
+         <li style="border-left-color: var(--neon-purple);">
+          <span>🆕</span> 
+          <span><b>Nuevos enlaces al motor Plus Engine:</b> <n>Actualizacion de la base Plus Engine.</n></span>
+        </li>
+        <li style="border-left-color: var(--neon-orange);">
+          <span>🆕</span> 
+          <span><b>Nuevo Port Añadido:</b> <n>Vs Matt V3.</n></span>
+        </li>
+        <li style="border-left-color: var(--neon-gold);">
+          <span>🆕</span> 
+          <span><b>Nuevo apartado de chat en los Mods e Indicadores:</b> <n>Verde: Hay Nueva actualizacion, Amarillo: Hay nuevos comentarios.</n></span>
         </li>
         <li style="border-left-color: var(--neon-green);">
-          <span>🆕</span> 
-          <span>Nuevo Cuadro de Novedades Mejorado.</span>
+          <span>🔧</span> 
+          <span>Corrección de errores menores y mejoras en el diseño de la interfaz.</span>
+        </li>
+        <li style="border-left-color: var(--neon-grey);">
+          <span></span> 
+          <span><b>Si tienen mas sugerencias agamenlo saber. ¡Animo!</b><n></n></span>
         </li>
       </ul>
-
       <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
     </div>
-
   </div>
-</div>
+  </div>
+
+  <div id="install-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 25px; max-width: 350px;">
+      <h2 class="glow" style="margin-top:0; font-size:22px;">📱 Instalar App</h2>
+      <p style="font-size: 14px; margin-bottom: 25px;">¿Te gustaría instalar esta web como una aplicación en tu dispositivo para un acceso más rápido y pantalla completa?</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()">Que sea luego</button>
+        <button class="btn" style="flex: 1;" onclick="installApp()">Sí, instalar</button>
+      </div>
+    </div>
+  </div>
 
   <div id="register-popup" class="popup">
     <div class="popup-content" style="text-align: center; padding: 20px;">
@@ -580,7 +502,6 @@
       <h2 class="glow">Menú</h2>
       <div class="menu-option" onclick="selectSection('apks')">Bases</div>
       <div class="menu-option" onclick="selectSection('mods')">MODs</div>
-      <div class="menu-option" onclick="selectSection('comments-area')">Comunidad (Beta)</div>
       <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
       <div id="closeMenuPopup" onclick="toggleMenu()">✖</div>
     </div>
@@ -616,43 +537,75 @@
       <div class="apks-grid" id="apksContainer">
 
         <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3>Psych Engine</h3>
-          <button class="btn" onclick="openApkInfo('apk1')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk1')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')">💬 Chat</button>
+          </div>
         </div>
 
         <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk2" onclick="toggleGreenLed('apk2', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
           <img src="assets/images/webp/logoonline.webp">
-          <h3>Psych Online</h3>
-          <button class="btn" onclick="openApkInfo('apk2')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk2')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')">💬 Chat</button>
+          </div>
         </div>
 
         <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk3" onclick="toggleGreenLed('apk3', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
           <img src="assets/images/webp/logocode.webp">
-          <h3>CodeName Engine</h3>
-          <button class="btn" onclick="openApkInfo('apk3')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk3')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')">💬 Chat</button>
+          </div>
         </div>
 
         <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk4" onclick="toggleGreenLed('apk4', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3>Plus Engine</h3>
-          <button class="btn" onclick="openApkInfo('apk4')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk4')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')">💬 Chat</button>
+          </div>
         </div>
 
         <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk5" onclick="toggleGreenLed('apk5', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
           <img src="assets/images/webp/logop.webp">
-          <h3>P-Slice Engine</h3>
-          <button class="btn" onclick="openApkInfo('apk5')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk5')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk6">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk6">0</span></div>
+          <img src="assets/images/webp/logof.webp">
+          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk6" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk6')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')">💬 Chat</button>
+          </div>
         </div>
       </div>
     </section>
@@ -661,74 +614,128 @@
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
 
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="mid" id="card-mod99_1">
+          <span class="gama-badge gama-mid">Media</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_1">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_1">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_1" style="display:none;" title="Nuevos comentarios"></span>Vs Matt V3</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_1')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs Matt V3')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="mod-card" data-gama="low" id="card-mod99_2">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
-          <h3>Child's Play Pico Mix (NEW)</h3>
-          <button class="btn" onclick="openModInfo('mod99_2')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_2')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Child\'s Play Pico Mix')">💬 Chat</button>
+          </div>
         </div>
 
-         <div class="mod-card" data-gama="low">
+         <div class="mod-card" data-gama="low" id="card-mod99_3">
           <span class="gama-badge gama-low">Media-Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_3', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
-          <h3>TaintedFate</h3>
-          <button class="btn" onclick="openModInfo('mod99_3')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_3')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')">💬 Chat</button>
+          </div>
         </div>
         
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="low" id="card-mod99_4">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_4', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_4">0</span></div>
-          <h3>VS Jeffy V3</h3>
-          <button class="btn" onclick="openModInfo('mod99_4')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_4')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy V3')">💬 Chat</button>
+          </div>
         </div>
 
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="low" id="card-mod99_6">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_6', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_6">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_6">0</span></div>
-          <h3>Cocoa Noimix</h3>
-          <button class="btn" onclick="openModInfo('mod99_6')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_6')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')">💬 Chat</button>
+          </div>
         </div>
 
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="low" id="card-mod99_7">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_7', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_7">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_7">0</span></div>
-          <h3>Vs Metal Pipe V2</h3>
-          <button class="btn" onclick="openModInfo('mod99_7')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_7')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Vs Metal Pipe V2')">💬 Chat</button>
+          </div>
         </div>
 
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="low" id="card-mod99_8">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_8', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_8">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_8">0</span></div>
-          <h3>Rolling Girl</h3>
-          <button class="btn" onclick="openModInfo('mod99_8')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_8')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')">💬 Chat</button>
+          </div>
         </div>
 
-        <div class="mod-card" data-gama="mid">
+        <div class="mod-card" data-gama="mid" id="card-mod99_9">
           <span class="gama-badge gama-mid">Media</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_9', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_9">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_9">0</span></div>
-          <h3>Herobrine Tales</h3>
-          <button class="btn" onclick="openModInfo('mod99_9')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_9')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine Tales')">💬 Chat</button>
+          </div>
         </div>
 
-        <div class="mod-card" data-gama="low">
+        <div class="mod-card" data-gama="low" id="card-mod100">
           <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod100', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod100">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod100">0</span></div>
-          <h3>Vs. TheOdd1sOut</h3>
-          <button class="btn" onclick="openModInfo('mod100')">Más información</button>
+          <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod100')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod100', 'Vs. TheOdd1sOut')">💬 Chat</button>
+          </div>
         </div>
       </div>
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>Vs BotFriend</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 50% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: Se detuvo</p></div>
       </div>
     </section>
 
@@ -762,13 +769,37 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.4.3 <br>
+      © <span id="year"></span> LaloCF | V3.1.0 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
 
   <div id="apk-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeApkInfo()">✖</span><div class="popup-scroll-body"><img id="apk-img"><h2 id="apk-title"></h2><p id="apk-desc"></p><h3 id="apk-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="apk-downloads"></div></div></div></div>
   <div id="mod-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeModInfo()">✖</span><div class="popup-scroll-body"><img id="popup-img"><h2 id="popup-title"></h2><p id="popup-desc"></p><h3 id="popup-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="popup-downloads"></div></div></div></div>
+
+  <div id="mod-comments-popup" class="popup">
+    <div class="popup-content" style="max-width: 600px;">
+      <span class="popup-close" onclick="closeModComments()">✖</span>
+      <div class="popup-scroll-body">
+        <h2 id="mc-title" class="glow" style="font-size: 20px; text-align: center; margin-top: 0;">Comentarios</h2>
+        <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--neon-blue);">
+          <div style="display:flex; gap:12px;">
+            <div id="mc-myAvatar" class="yt-avatar" style="background:#555">?</div>
+            <div style="flex:1">
+              <div id="mc-displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;">Usuario: Cargando...</div>
+              <textarea id="mc-commentText" placeholder="Escribe tu opinión sobre este port..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+              <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span id="mc-charCounter">0</span> / 100</div>
+              <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
+                <button class="btn" style="background:#444" onclick="document.getElementById('mc-commentText').value=''">Cancelar</button>
+                <button class="btn" onclick="addModComment()">Comentar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="mc-commentList"></div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -786,8 +817,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.4.3";
+    const APP_VERSION = "v3.1.0";
+    
     let isSuperUser = localStorage.getItem('superUser') === 'true';
+    if(isSuperUser) { document.body.classList.add('is-admin'); }
 
     let verifiedUsers = {};
     let downloadCounts = {};
@@ -807,6 +840,128 @@
     window.trackDownload = (id) => {
       runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
     };
+
+    // --- SISTEMA DE LEDS VERDES (ADMIN) ---
+    window.toggleGreenLed = async (id, event) => {
+      event.stopPropagation();
+      if (!isSuperUser) return;
+      const ledRef = ref(db, `updates_led/${id}`);
+      const snap = await get(ledRef);
+      if (snap.exists()) {
+        await set(ledRef, null);
+      } else {
+        await set(ledRef, true);
+      }
+    };
+
+    onValue(ref(db, 'updates_led'), (snap) => {
+      const leds = snap.val() || {};
+      document.querySelectorAll('.led-green').forEach(el => el.style.display = 'none');
+      Object.keys(leds).forEach(id => {
+        const el = document.getElementById(`led-green-${id}`);
+        if (el) el.style.display = 'inline-block';
+        const btn = document.getElementById(`btn-led-${id}`);
+        if (btn) btn.innerText = '⭕ Quitar LED';
+      });
+      document.querySelectorAll('.admin-led-btn').forEach(btn => {
+        const id = btn.id.replace('btn-led-', '');
+        if(!leds[id]) btn.innerText = '🟢 Act. LED';
+      });
+    });
+
+    // --- SISTEMA DE LEDS AMARILLOS (COMENTARIOS NUEVOS) ---
+    onValue(ref(db, 'last_comment_time'), (snap) => {
+      const times = snap.val() || {};
+      document.querySelectorAll('.led-yellow').forEach(el => el.style.display = 'none');
+      Object.keys(times).forEach(id => {
+        const lastComment = times[id];
+        const lastSeen = localStorage.getItem(`seen_comments_${id}`) || 0;
+        if (lastComment > lastSeen) {
+          const el = document.getElementById(`led-yellow-${id}`);
+          if (el) el.style.display = 'inline-block';
+        }
+      });
+    });
+
+    window.toggleModPin = async (modId, event) => {
+      event.stopPropagation();
+      if (!isSuperUser) return;
+      const pinRef = ref(db, `pinned_mods/${modId}`);
+      const snap = await get(pinRef);
+      if (snap.exists()) {
+        await set(pinRef, null);
+      } else {
+        await set(pinRef, true);
+      }
+    };
+
+    onValue(ref(db, 'pinned_mods'), (snap) => {
+      const pinned = snap.val() || {};
+      const container = document.getElementById('modsContainer');
+      const cards = Array.from(container.querySelectorAll('.mod-card:not(.coming-soon-card)'));
+
+      cards.forEach(card => {
+        const modId = card.id.replace('card-', '');
+        const btn = card.querySelector('.admin-pin-btn');
+        if (pinned[modId]) {
+          card.classList.add('pinned-mod');
+          if (btn) btn.innerText = '❌ Desfijar';
+        } else {
+          card.classList.remove('pinned-mod');
+          if (btn) btn.innerText = '📌 Fijar';
+        }
+      });
+
+      cards.sort((a, b) => {
+        const aId = a.id.replace('card-', '');
+        const bId = b.id.replace('card-', '');
+        const aPinned = pinned[aId] ? 1 : 0;
+        const bPinned = pinned[bId] ? 1 : 0;
+        return bPinned - aPinned;
+      });
+
+      cards.forEach(card => container.appendChild(card));
+    });
+
+    window.sendGlobalNotification = async () => {
+      const text = document.getElementById('globalNotifText').value.trim();
+      if (!text) return alert("Escribe un mensaje primero.");
+      
+      await set(ref(db, 'notifications/latest'), {
+        message: text,
+        timestamp: Date.now(),
+        id: Math.random().toString(36).substr(2, 9)
+      });
+      
+      document.getElementById('globalNotifText').value = '';
+      document.getElementById('admin-tools-popup').classList.remove('show');
+    };
+
+    window.showToast = (msg) => {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span style="font-size:20px;">🔔</span> <span>${msg}</span>`;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 500);
+      }, 6000);
+    };
+
+    onValue(ref(db, 'notifications/latest'), (snap) => {
+      const data = snap.val();
+      if (!data) return;
+      
+      const lastSeen = localStorage.getItem('last_notif_id');
+      const isRecent = (Date.now() - data.timestamp) < (24 * 60 * 60 * 1000); 
+      
+      if (lastSeen !== data.id && isRecent) {
+        window.showToast(data.message);
+        localStorage.setItem('last_notif_id', data.id);
+      }
+    });
 
     onValue(ref(db, 'comments'), (snapshot) => {
       const list = document.getElementById('commentList');
@@ -867,6 +1022,158 @@
         });
       }
     });
+
+    let currentModCommentsId = null;
+    let modCommentsListener = null;
+
+    window.openModComments = (id, title) => {
+      currentModCommentsId = id;
+      document.getElementById("mc-title").innerText = "Comentarios: " + title;
+      
+      // Apagamos el foco amarillo si es que estaba prendido
+      localStorage.setItem(`seen_comments_${id}`, Date.now());
+      const yellowLed = document.getElementById(`led-yellow-${id}`);
+      if(yellowLed) yellowLed.style.display = 'none';
+
+      const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if(!user) {
+        document.getElementById('register-popup').classList.add('show');
+        return;
+      }
+      
+      const display = document.getElementById('mc-displayMyName');
+      display.innerText = "Comentando como: " + user.name;
+      if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
+      const avatar = document.getElementById('mc-myAvatar');
+      avatar.innerText = user.name.charAt(0).toUpperCase();
+      avatar.style.background = stringToColor(user.name);
+
+      document.getElementById("mod-comments-popup").classList.add("show");
+
+      if(modCommentsListener) modCommentsListener(); 
+
+      const commentsRef = ref(db, `mod_comments/${id}`);
+      modCommentsListener = onValue(commentsRef, (snapshot) => {
+        const list = document.getElementById('mc-commentList');
+        list.innerHTML = '';
+        const data = snapshot.val();
+        const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+
+        if(data) {
+          let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+          
+          commentsArray.sort((a, b) => {
+              if (a.isPinned && !b.isPinned) return -1;
+              if (!a.isPinned && b.isPinned) return 1;
+              return b.id.localeCompare(a.id);
+          });
+
+          commentsArray.forEach(c => {
+            const isLalo = c.user.toLowerCase() === 'lalocf';
+            const isVerified = verifiedUsers[c.ownerKey] || isLalo;
+            const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
+            const activeClass = myLikedComments[c.id] ? 'active' : '';
+            
+            const pinClass = c.isPinned ? 'pinned' : '';
+            const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
+            const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
+
+            let adminBtns = '';
+            if (isSuperUser) {
+               adminBtns = `
+                 <span style="color:gold; cursor:pointer" onclick="togglePinModComment('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
+                 <span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>
+               `;
+            } else if (myProfile && c.ownerKey === myProfile.key) {
+               adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>`;
+            }
+
+            const div = document.createElement('div');
+            div.className = `yt-comment-container ${pinClass}`;
+            div.innerHTML = `
+              <div class="yt-avatar" style="background:${stringToColor(c.user)}">${c.user.charAt(0).toUpperCase()}</div>
+              <div class="yt-content">
+                ${pinBadge}
+                <div class="yt-header">
+                  <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${c.user}')">
+                    <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${c.user}</a>${verifyBadge}
+                  </span>
+                  <span class="yt-date">${c.date}</span>
+                </div>
+                <div class="yt-text">${c.text}</div>
+                <div class="yt-actions">
+                  <span class="yt-action-btn ${activeClass}" id="btn-mclike-${c.id}" onclick="likeModComment('${c.id}')">👍 <span id="mcl-count-${c.id}">${c.likes || 0}</span></span> 
+                  <span class="yt-action-btn" onclick="replyModComment('${c.user}')">Responder</span>
+                  ${adminBtns}
+                </div>
+              </div>`;
+            list.appendChild(div);
+          });
+        } else {
+            list.innerHTML = '<p style="text-align:center; color:#aaa; font-size:13px;">Sé el primero en comentar sobre este port.</p>';
+        }
+      });
+    };
+
+    window.closeModComments = () => {
+      document.getElementById("mod-comments-popup").classList.remove("show");
+      if(modCommentsListener) {
+        modCommentsListener();
+        modCommentsListener = null;
+      }
+    };
+
+    window.addModComment = async () => {
+      if (await checkBanStatus()) return;
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      const text = document.getElementById('mc-commentText').value.trim();
+      if(!profile) return checkUserStatus();
+      if(!text) return alert("Escribe algo...");
+      
+      push(ref(db, `mod_comments/${currentModCommentsId}`), { 
+        ownerKey: profile.key, 
+        user: profile.name, 
+        link: profile.link, 
+        text, 
+        date: new Date().toLocaleString(), 
+        likes: 0, 
+        isPinned: false 
+      });
+      
+      // Actualizamos el reloj global para encender el LED amarillo a los demás
+      set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
+
+      document.getElementById('mc-commentText').value = '';
+    };
+
+    window.likeModComment = async (commentId) => {
+      if (await checkBanStatus()) return;
+      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      if(!profile) return checkUserStatus();
+      const userKey = profile.key;
+      const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
+      
+      const likeRef = ref(db, `mod_comments/${currentModCommentsId}/${commentId}/userLikes/${userKey}`);
+      const snap = await get(likeRef);
+      if (snap.exists()) {
+        await set(likeRef, null); 
+        runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 1) - 1);
+        delete myLikedComments[commentId];
+      } else {
+        await set(likeRef, true); 
+        runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 0) + 1);
+        myLikedComments[commentId] = true;
+      }
+      localStorage.setItem('my_liked_mod_comments', JSON.stringify(myLikedComments));
+    };
+
+    window.deleteModComment = (id) => confirm("¿Borrar comentario?") && remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
+    window.togglePinModComment = (cId, currentState) => update(ref(db, `mod_comments/${currentModCommentsId}/${cId}`), { isPinned: !currentState });
+    window.replyModComment = (name) => { const txt = document.getElementById('mc-commentText'); txt.value = `@${name} `; txt.focus(); };
+    
+    document.getElementById('mc-commentText').addEventListener('input', function() { document.getElementById('mc-charCounter').innerText = this.value.length; });
+
+    // --------------------------------------------------------------------------
 
     window.togglePin = (commentId, currentState) => { update(ref(db, `comments/${commentId}`), { isPinned: !currentState }); };
     window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
@@ -1075,6 +1382,18 @@
     window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
 
     const MOD_DATA = {
+  mod99_1: {
+    img: "assets/images/mods/wii.webp",
+    title: "VS Matt V3",
+    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga ZIP (Drive)", link: "" },
+      { name: "Descarga 7z (Drive)", link: "" },
+      { name: "Descarga ZIP (MediaFire)", link: "" },
+      { name: "Descarga 7z (MediaFire)", link: "" }
+    ]
+  },
   mod99_2: {
     img: "assets/images/mods/play.webp",
     title: "Child's Play Pico Mix",
@@ -1213,14 +1532,17 @@
     img: "assets/images/webp/logoplusengine.webp",
     title: "Plus Engine",
     desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2",
+    version: "v1.2.6 HOTFIX",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Mac.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
+      { name: "Descarga Directa Windows 32 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
+      { name: "Descarga Directa Windows 64 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x64.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
+      { name: "Descarga Directa Mac ARM (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
+      { name: "Descarga Directa Mac Intel (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Android-x64-v7a.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
     ]
   },
   apk5: {
@@ -1236,6 +1558,21 @@
       { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
       { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+    ]
+  },
+  apk6: {
+    img: "assets/images/webp/logonova.webp",
+    title: "NovaFleare Engine",
+    desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
+    version: "v1.1.8 HOTFIX",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/windows.zip" },
+      { name: "Descarga Directa Mac14 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS14.zip" },
+      { name: "Descarga Directa Mac15 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS15.tar"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/android.apk"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/iOS.zip" }
     ]
   }
 };
@@ -1272,6 +1609,41 @@
 
     onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
     
+    // --- LÓGICA DE INSTALACIÓN (PWA) ---
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    window.closeUpdatePopup = () => { 
+      document.getElementById('update-popup').classList.remove('show'); 
+      localStorage.setItem('lastVersionSeen', APP_VERSION); 
+      
+      // Si el navegador permite la instalación, mostramos el popup de instalación
+      if (deferredPrompt) {
+        document.getElementById('install-popup').classList.add('show');
+      } else {
+        // Si no se puede instalar (ya está instalada o es iOS Safari), pasamos al registro
+        checkUserStatus(); 
+      }
+    };
+
+    window.installApp = async () => {
+      document.getElementById('install-popup').classList.remove('show');
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      }
+      checkUserStatus();
+    };
+
+    window.dismissInstall = () => {
+      document.getElementById('install-popup').classList.remove('show');
+      checkUserStatus();
+    };
+    
     window.onload = () => {
       document.getElementById("year").textContent = new Date().getFullYear();
       if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
@@ -1281,8 +1653,31 @@
           document.getElementById('searchContainer').style.display = 'block';
       }
     };
-    window.closeUpdatePopup = () => { document.getElementById('update-popup').classList.remove('show'); localStorage.setItem('lastVersionSeen', APP_VERSION); checkUserStatus(); };
+
     document.getElementById('commentText').addEventListener('input', function() { document.getElementById('charCounter').innerText = this.value.length; });
+
   </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        document.body.classList.add('ios-theme');
+        console.log("🍏 iOS Detectado: Activando diseño Apple.");
+      } else {
+        console.log("🤖 Android/PC Detectado: Manteniendo diseño.");
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('App lista para instalar'))
+          .catch(err => console.log('Error al registrar SW', err));
+      });
+    }
+  </script>
+
 </body>
 </html>

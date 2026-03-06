@@ -3,7 +3,7 @@
 <head>
 
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>FNF' - Mobile</title>
 
   <link rel="apple-touch-icon" href="assets/icons/logo192.png">
@@ -40,11 +40,6 @@
       --neon-yellow: #ffea00;
       --neon-red: #ff003c;
       --neon-gold: #ffd700;
-      --neon-orange: #ff8800;
-      --neon-grey: #585858;
-      --neon-violet: #eb46fa;
-      --neon-brown: #755128;
-      --neon-bluef: #1900ff;
       --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
     }
 
@@ -60,6 +55,7 @@
       background: linear-gradient(45deg, #0f0f0f, #000638, #1a1a1a);
       background-size: 600% 600%;
       animation: moveBg 12s ease infinite;
+      padding-bottom: 120px; /* Más espacio para la píldora flotante */
     }
     @keyframes moveBg {
       0% { background-position: 0% 50%; }
@@ -79,89 +75,9 @@
       animation: nebulaMove 10s ease-in-out infinite alternate;
     }
 
-    .update-card-modern {
-      background: #151515 !important;
-      border: 1px solid var(--neon-blue);
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
-      max-width: 420px !important;
-      overflow: visible !important;
-      animation: floatUp 0.4s ease-out;
-    }
-
-    .update-header-art {
-      height: 90px;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      border-radius: 20px 20px 0 0;
-      position: relative;
-      margin-bottom: 40px;
-    }
-
-    .update-icon-circle {
-      width: 70px;
-      height: 70px;
-      background: #151515;
-      border-radius: 50%;
-      position: absolute;
-      bottom: -35px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      border: 3px solid var(--neon-blue);
-      box-shadow: 0 0 20px var(--neon-blue);
-      z-index: 10;
-    }
-
-    .update-body {
-      padding: 0 25px 25px 25px;
-      text-align: center;
-    }
-
-    .update-list-modern {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0;
-      text-align: left;
-    }
-
-    .update-list-modern li {
-      background: rgba(255, 255, 255, 0.05);
-      margin-bottom: 10px;
-      padding: 12px 15px;
-      border-radius: 12px;
-      border-left: 3px solid var(--neon-purple);
-      font-size: 14px;
-      color: #ddd;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .btn-update-action {
-      background: transparent;
-      border: 2px solid var(--neon-blue);
-      color: var(--neon-blue);
-      padding: 12px;
-      width: 100%;
-      border-radius: 50px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      text-transform: uppercase;
-    }
-
-    .btn-update-action:hover {
-      background: var(--neon-blue);
-      color: black;
-      box-shadow: 0 0 15px var(--neon-blue);
-    }
-
     .container {
       max-width:1100px;
-      margin:40px auto;
+      margin:20px auto;
       background:var(--card-bg);
       padding:24px;
       border-radius:14px;
@@ -181,6 +97,100 @@
       text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple), 0 0 80px var(--neon-purple);
     }
 
+    /* BARRA DE NAVEGACIÓN INFERIOR (ESTILO PÍLDORA) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 25px; /* Separado del borde */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 420px;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(0, 234, 255, 0.3);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 10px;
+      border-radius: 40px; /* Forma de píldora */
+      z-index: 9990;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.7), 0 0 15px rgba(0, 234, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #777;
+      cursor: pointer;
+      transition: 0.3s ease;
+      flex: 1;
+      user-select: none;
+    }
+
+    .nav-item.active {
+      color: var(--neon-blue);
+      text-shadow: 0 0 10px var(--neon-blue);
+      transform: translateY(-4px);
+    }
+
+    .nav-icon { font-size: 24px; margin-bottom: 4px; transition: transform 0.3s; }
+    .nav-item.active .nav-icon { transform: scale(1.2); }
+    .nav-text { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* SECCIÓN INICIO (HERO BANNER) */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(0, 234, 255, 0.1), rgba(180, 0, 255, 0.1));
+      border: 1px solid var(--neon-blue);
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 234, 255, 0.15);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      animation: rotateLight 10s linear infinite;
+      z-index: 0; pointer-events: none;
+    }
+    @keyframes rotateLight { 100% { transform: rotate(360deg); } }
+
+    /* TARJETA DE BENEFICIOS / INFO */
+    .info-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--neon-blue);
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 25px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.1);
+      position: relative;
+    }
+
+    .info-list {
+      text-align: left;
+      color: #ddd;
+      font-size: 14.5px;
+      line-height: 2;
+      margin: 0 auto;
+      max-width: 320px;
+      list-style: none;
+      padding: 0;
+    }
+
+    .info-list li {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .admin-name {
       color: #00eaff !important;
       font-weight: bold;
@@ -189,48 +199,16 @@
       cursor: pointer;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
     }
-
-    .admin-name::after {
-      content: "✦";
-      color: #fff;
-      position: absolute;
-      top: -6px;
-      right: -10px;
-      font-size: 10px;
-      text-shadow: 0 0 4px #00eaff;
-      animation: tinyStar 1.5s infinite alternate;
-    }
-
-    .admin-name::before {
-      content: "✨";
-      position: absolute;
-      bottom: -2px;
-      left: -12px;
-      font-size: 9px;
-      animation: tinyStar 2s infinite alternate-reverse;
-    }
-
-    @keyframes tinyStar {
-      0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
-      100% { opacity: 1; transform: scale(1.3) rotate(45deg); }
-    }
+    .admin-name::after { content: "✦"; color: #fff; position: absolute; top: -6px; right: -10px; font-size: 10px; text-shadow: 0 0 4px #00eaff; animation: tinyStar 1.5s infinite alternate; }
+    .admin-name::before { content: "✨"; position: absolute; bottom: -2px; left: -12px; font-size: 9px; animation: tinyStar 2s infinite alternate-reverse; }
+    @keyframes tinyStar { 0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); } 100% { opacity: 1; transform: scale(1.3) rotate(45deg); } }
 
     .theme-btn {
       font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
       position: fixed; top: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.3); width: 50px; height: 50px;
       display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--neon-blue);
     }
-
     @keyframes spinGlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .menu-btn { width:32px; height:26px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; }
-    .menu-btn div { height:4px; background: white; border-radius:4px; box-shadow:0 0 6px var(--neon-blue); }
-
-    #menuPopup { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); z-index: 9999; opacity: 0; pointer-events: none; transition: .3s ease; }
-    #menuPopup.show { opacity: 1; pointer-events: auto; }
-    #menuContent { width: 80%; max-width: 360px; background: rgba(15,15,15,0.95); padding: 25px; border-radius: 14px; text-align: center; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); }
-    .menu-option { display:block; margin:18px 0; padding:12px; font-size:20px; font-weight:600; color:white; border-radius:10px; text-shadow:0 0 10px var(--neon-blue); border:1px solid var(--neon-blue); cursor:pointer; background: rgba(0,0,0,0.45); }
-    #closeMenuPopup { margin-top:18px; font-size:22px; cursor:pointer; color:var(--neon-pink); text-shadow:0 0 10px var(--neon-pink); }
 
     .apks-grid, .mods-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; margin-top:20px; }
     .apk-card, .mod-card { 
@@ -268,13 +246,13 @@
     .coming-soon-card img { filter: blur(8px) grayscale(1); }
     .coming-soon-badge { position: absolute; top: 10px; right: -30px; background: var(--neon-pink); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 12px; font-weight: bold; box-shadow: 0 0 10px var(--neon-pink); }
 
-    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; text-align: center; }
+    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; text-align: center; position: relative; z-index: 10;}
     
     .card-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
     .card-buttons .btn { flex: 1; margin-top: 0; padding: 10px 5px; font-size: 13px; }
     .btn-chat { background: var(--neon-purple) !important; box-shadow: 0 0 12px var(--neon-purple) !important; }
 
-    .popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    .popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
     .popup.show { opacity: 1; pointer-events: auto; }
     .popup-content { width: 85%; max-width: 450px; background: rgba(10,10,10,0.95); border-radius: 15px; position: relative; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); color: white; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
     .popup-scroll-body { padding: 20px; overflow-y: auto; flex: 1; }
@@ -286,13 +264,64 @@
     .popup-close { position: absolute; top: 8px; right: 10px; font-size: 26px; cursor: pointer; color: var(--neon-blue); z-index: 100; background: rgba(0,0,0,0.5); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
     .popup-content img { width: 100%; border-radius: 10px; margin-bottom: 10px; object-fit: contain; max-height: 350px; }
 
+    /* NOVEDADES POPUP (MEJORADO) */
+    .update-card-modern {
+      background: linear-gradient(145deg, #151515, #0a0a0a) !important;
+      border: 2px solid var(--neon-blue);
+      border-radius: 25px !important;
+      box-shadow: 0 0 40px rgba(0, 234, 255, 0.2) !important;
+      max-width: 420px !important;
+      overflow: visible !important;
+    }
+    .update-header-art {
+      height: 90px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      border-radius: 23px 23px 0 0;
+      position: relative;
+      margin-bottom: 45px;
+    }
+    .update-icon-circle {
+      width: 75px; height: 75px;
+      background: #111;
+      border-radius: 50%;
+      position: absolute; bottom: -37px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; justify-content: center; font-size: 35px;
+      border: 4px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); z-index: 10;
+    }
+    .update-body { padding: 0 25px 30px 25px; text-align: center; }
+    .update-list-modern { list-style: none; padding: 0; margin: 25px 0; text-align: left; }
+    .update-list-modern li {
+      background: rgba(255, 255, 255, 0.03); margin-bottom: 12px; padding: 14px 15px;
+      border-radius: 12px; border-left: 4px solid var(--neon-purple); font-size: 14px; color: #ddd; display: flex; align-items: center; gap: 10px;
+    }
+    /* BOTÓN DE NOVEDADES REDISEÑADO */
+    .btn-update-action {
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+      border: none;
+      color: white;
+      padding: 15px;
+      width: 100%;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 15px rgba(0, 234, 255, 0.3), inset 0 -3px 0 rgba(0,0,0,0.2);
+    }
+    .btn-update-action:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 234, 255, 0.5); }
+    .btn-update-action:active { transform: translateY(2px); box-shadow: 0 3px 10px rgba(0, 234, 255, 0.3), inset 0 -1px 0 rgba(0,0,0,0.2); }
+
     .social-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
     .social-item { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); transition: all 0.3s ease; width: 140px; }
     .social-item:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 0 25px var(--neon-pink); border-color: var(--neon-pink); }
     .social-item img { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px var(--neon-blue); }
 
-    .section { display:none; }
+    .section { display:none; animation: fadeIn 0.4s ease; }
     .active{ display:block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
     .visitor-counter { margin-top: 15px; font-size: 14px; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); border: 1px solid var(--neon-blue); display: inline-block; padding: 5px 15px; border-radius: 20px; background: rgba(0,0,0,0.3); }
 
     .yt-comment-container { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-align: left; }
@@ -333,21 +362,15 @@
     .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
     .filter-btn:hover { border-color: var(--neon-pink); }
 
-    /* =========================================
-       NUEVAS FUNCIONES: SUPERUSUARIO & NOTIFICACIONES
-       ========================================= */
-
     .admin-pin-btn { position: absolute; top: 40px; right: 10px; z-index: 10; background: var(--neon-gold); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-gold); display: none; }
-    
     .admin-led-btn { position: absolute; top: 40px; left: 10px; z-index: 10; background: var(--neon-green); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-green); display: none; }
     .mod-card .admin-led-btn { top: 75px; left: auto; right: 10px; }
-    
     body.is-admin .admin-pin-btn, body.is-admin .admin-led-btn { display: block; }
     
     .pinned-mod { border-color: var(--neon-gold) !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4) !important; order: -1; }
     .pinned-mod::before { content: '📌 DESTACADO'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--neon-gold); color: black; padding: 4px 12px; font-size: 11px; font-weight: bold; border-radius: 10px; z-index: 10; box-shadow: 0 0 10px var(--neon-gold); }
 
-    .admin-float-btn { position: fixed; bottom: 20px; right: 20px; background: var(--neon-purple); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 0 15px var(--neon-purple); border: 2px solid white; transition: 0.3s; }
+    .admin-float-btn { position: fixed; bottom: 100px; right: 20px; background: var(--neon-purple); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 0 15px var(--neon-purple); border: 2px solid white; transition: 0.3s; }
     body.is-admin .admin-float-btn { display: flex; }
     .admin-float-btn:hover { transform: scale(1.1); box-shadow: 0 0 25px var(--neon-purple); }
 
@@ -357,45 +380,93 @@
     @keyframes slideDownToast { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes slideUpToast { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
 
-    /* =========================================
-       NUEVO: INDICADORES LED
-       ========================================= */
     .led-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 10px currentColor; }
     .led-green { background: #00ff41; color: #00ff41; }
     .led-yellow { background: #ffea00; color: #ffea00; animation: pulseYellow 2s infinite; }
     @keyframes pulseYellow { 0% { box-shadow: 0 0 5px #ffea00; } 50% { box-shadow: 0 0 15px #ffea00; } 100% { box-shadow: 0 0 5px #ffea00; } }
 
     /* =========================================
-       🍏 TEMA EXCLUSIVO iOS 🍏
+       🍏 TEMA EXCLUSIVO iOS (LIQUID GLASS PRO) 🍏
        ========================================= */
     body.ios-theme { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important; background: radial-gradient(circle at top right, #110022, #000000, #001122) !important; animation: none !important; }
     body.ios-theme::before { display: block !important; opacity: 0.25 !important; filter: blur(60px) !important; animation: none !important; }
-    body.ios-theme .container { background: transparent !important; box-shadow: none !important; border: none !important; padding: 15px !important; margin-top: 20px !important; }
+    body.ios-theme .container { background: transparent !important; box-shadow: none !important; border: none !important; padding: 15px !important; margin-top: 10px !important; }
     body.ios-theme .glow { text-shadow: 0 0 15px rgba(255,255,255,0.2) !important; color: #FFFFFF !important; font-weight: 700 !important; letter-spacing: 0.3px !important; }
-    body.ios-theme .apk-card, body.ios-theme .mod-card, body.ios-theme .social-item { background: rgba(0, 234, 255, 0.05) !important; backdrop-filter: blur(20px) saturate(180%) !important; -webkit-backdrop-filter: blur(20px) saturate(180%) !important; border: 1px solid rgba(0, 234, 255, 0.2) !important; border-radius: 24px !important; box-shadow: 0 8px 32px rgba(0, 234, 255, 0.1) !important; padding: 16px !important; transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important; }
-    body.ios-theme .apk-card:hover, body.ios-theme .mod-card:hover, body.ios-theme .social-item:hover { transform: scale(0.97) !important; border: 1px solid rgba(0, 234, 255, 0.4) !important; }
+    
+    /* LIQUID GLASS PARA TARJETAS, BANNERS Y POPUPS */
+    body.ios-theme .apk-card, body.ios-theme .mod-card, body.ios-theme .social-item, body.ios-theme .hero-banner, body.ios-theme .info-card { 
+      background: rgba(255, 255, 255, 0.03) !important; 
+      backdrop-filter: blur(30px) saturate(200%) !important; 
+      -webkit-backdrop-filter: blur(30px) saturate(200%) !important; 
+      border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+      border-radius: 24px !important; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.05) !important; 
+      padding: 16px !important; 
+      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important; 
+    }
+    body.ios-theme .apk-card:hover, body.ios-theme .mod-card:hover, body.ios-theme .social-item:hover { transform: scale(0.97) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; }
     body.ios-theme .apk-card img, body.ios-theme .mod-card img, body.ios-theme .social-item img { border-radius: 14px !important; box-shadow: none !important; }
-    body.ios-theme .btn { background: rgba(255, 0, 200, 0.15) !important; backdrop-filter: blur(15px) saturate(180%) !important; -webkit-backdrop-filter: blur(15px) saturate(180%) !important; border: 1px solid rgba(255, 0, 200, 0.4) !important; color: #fff !important; border-radius: 20px !important; box-shadow: 0 4px 15px rgba(255, 0, 200, 0.15) !important; font-weight: 600 !important; font-size: 15px !important; padding: 10px 20px !important; transition: opacity 0.2s, transform 0.2s !important; }
-    body.ios-theme .btn-chat { background: rgba(180, 0, 255, 0.15) !important; border: 1px solid rgba(180, 0, 255, 0.4) !important; box-shadow: 0 4px 15px rgba(180, 0, 255, 0.15) !important; }
-    body.ios-theme .btn:active { opacity: 0.6 !important; transform: scale(0.95) !important; }
-    body.ios-theme .search-input, body.ios-theme .reg-input { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; color: #fff !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; padding: 12px 15px !important; font-size: 17px !important; }
+    
+    /* BOTONES LIQUID GLASS */
+    body.ios-theme .btn { 
+      background: rgba(255, 255, 255, 0.1) !important; 
+      backdrop-filter: blur(25px) saturate(200%) !important; 
+      -webkit-backdrop-filter: blur(25px) saturate(200%) !important; 
+      border: 1px solid rgba(255, 255, 255, 0.4) !important; 
+      color: #fff !important; 
+      border-radius: 20px !important; 
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.2), 0 8px 20px rgba(0, 0, 0, 0.3) !important; 
+      font-weight: 600 !important; font-size: 15px !important; padding: 10px 20px !important; transition: all 0.3s ease !important; 
+    }
+    body.ios-theme .btn:hover, body.ios-theme .btn:active { 
+      background: rgba(255, 255, 255, 0.2) !important; box-shadow: inset 0 0 15px rgba(255,255,255,0.3), 0 10px 25px rgba(0, 0, 0, 0.4) !important; transform: scale(0.95) !important; 
+    }
+    body.ios-theme .btn-chat { 
+      background: rgba(180, 0, 255, 0.2) !important; border: 1px solid rgba(180, 0, 255, 0.5) !important; box-shadow: inset 0 0 15px rgba(180, 0, 255, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3) !important; 
+    }
+    
+    /* PÍLDORA LIQUID GLASS */
+    body.ios-theme .bottom-nav {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    body.ios-theme .search-input, body.ios-theme .reg-input { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; color: #fff !important; box-shadow: inset 0 0 10px rgba(255,255,255,0.05), 0 4px 15px rgba(0, 0, 0, 0.2) !important; padding: 12px 15px !important; font-size: 17px !important; }
     body.ios-theme .search-input:focus, body.ios-theme .reg-input:focus { background: rgba(255, 255, 255, 0.12) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
-    body.ios-theme .popup-content { background: rgba(10, 10, 15, 0.6) !important; backdrop-filter: blur(25px) saturate(200%) !important; -webkit-backdrop-filter: blur(25px) saturate(200%) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 28px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
-    body.ios-theme .update-card-modern { background: rgba(15, 15, 20, 0.65) !important; backdrop-filter: blur(30px) saturate(200%) !important; -webkit-backdrop-filter: blur(30px) saturate(200%) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important; }
-    body.ios-theme .update-header-art { background: transparent !important; }
-    body.ios-theme .update-icon-circle { background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(0, 234, 255, 0.3) !important; box-shadow: 0 5px 20px rgba(0, 234, 255, 0.2) !important; }
-    body.ios-theme .btn-update-action { background: rgba(0, 234, 255, 0.15) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; color: white !important; border: 1px solid rgba(0, 234, 255, 0.4) !important; border-radius: 14px !important; box-shadow: 0 4px 15px rgba(0, 234, 255, 0.15) !important; }
-    body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #fff !important; }
-    body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1) !important; }
-    body.ios-theme #menuContent { background: rgba(10, 10, 15, 0.65) !important; backdrop-filter: blur(25px) saturate(180%) !important; -webkit-backdrop-filter: blur(25px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; }
-    body.ios-theme .menu-option { background: transparent !important; border: none !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; border-radius: 0 !important; text-shadow: none !important; text-align: left !important; padding: 15px 5px !important; }
-    body.ios-theme .menu-option:last-child { border-bottom: none !important; }
+    
+    /* POPUPS LIQUID GLASS */
+    body.ios-theme .popup-content, body.ios-theme .update-card-modern { 
+      background: rgba(15, 15, 20, 0.65) !important; backdrop-filter: blur(35px) saturate(200%) !important; -webkit-backdrop-filter: blur(35px) saturate(200%) !important; 
+      border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 28px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.1) !important; 
+    }
+    
+    body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #fff !important; }
+    body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important; }
     body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .server-status { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; }
-    body.ios-theme .like-container.active { background: rgba(255, 0, 200, 0.15) !important; border: 1px solid rgba(255, 0, 200, 0.4) !important; }
   </style>
 </head>
 
 <body>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="selectSection('home', this)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-text">Inicio</span>
+    </div>
+    <div class="nav-item" onclick="selectSection('apks', this)">
+      <span class="nav-icon">📦</span>
+      <span class="nav-text">Bases</span>
+    </div>
+    <div class="nav-item" onclick="selectSection('mods', this)">
+      <span class="nav-icon">🎮</span>
+      <span class="nav-text">MODs</span>
+    </div>
+    <div class="nav-item" onclick="selectSection('contact', this)">
+      <span class="nav-icon">📞</span>
+      <span class="nav-text">Redes</span>
+    </div>
+  </nav>
 
   <div id="toast-container" class="toast-container"></div>
   <div class="admin-float-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')">🛠️</div>
@@ -433,47 +504,23 @@
   </div>
 
   <div id="update-popup" class="popup">
-  <div class="popup-content update-card-modern" style="padding: 0; border: none;">
-    <div class="update-header-art">
-      <div class="update-icon-circle">🚀</div>
-      <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
+    <div class="popup-content update-card-modern" style="padding: 0; border: none;">
+      <div class="update-header-art">
+        <div class="update-icon-circle">🚀</div>
+        <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
+      </div>
+      <div class="update-body">
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;">¡Novedades v2.4.3!</h2>
+        <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Lo nuevo en esta versión</p>
+        <ul class="update-list-modern">
+          <li><span>🔥</span> <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span></li>
+          <li><span>🔥</span> <span><b>Nueva Base:</b> P-Slice Engine.</span></li>
+          <li><span>🔧</span> <span>Corrección de errores y optimización.</span></li>
+          <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Nuevo Diseño de Menú Píldora.</span></li>
+        </ul>
+        <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido! 👍</button>
+      </div>
     </div>
-    <div class="update-body">
-      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.1.0!</h2>
-      <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
-      <ul class="update-list-modern">
-        <li style="border-left-color: var(--neon-red);">
-          <span>🔥</span> 
-          <span><b>Se ha hecho una actualizacion:</b> <n></n></span>
-        </li>
-        <li style="border-left-color: var(--neon-pink);">
-          <span>🆕</span> 
-          <span><b>Nuevo Diseño Especial Mejorado:</b> <n>(Solo funciona si usas sistema iOS, Estado: BETA)</n></span>
-        </li>
-         <li style="border-left-color: var(--neon-purple);">
-          <span>🆕</span> 
-          <span><b>Nuevos enlaces al motor Plus Engine:</b> <n>Actualizacion de la base Plus Engine.</n></span>
-        </li>
-        <li style="border-left-color: var(--neon-orange);">
-          <span>🆕</span> 
-          <span><b>Nuevo Port Añadido:</b> <n>Vs Matt V3.</n></span>
-        </li>
-        <li style="border-left-color: var(--neon-gold);">
-          <span>🆕</span> 
-          <span><b>Nuevo apartado de chat en los Mods e Indicadores:</b> <n>Verde: Hay Nueva actualizacion, Amarillo: Hay nuevos comentarios.</n></span>
-        </li>
-        <li style="border-left-color: var(--neon-green);">
-          <span>🔧</span> 
-          <span>Corrección de errores menores y mejoras en el diseño de la interfaz.</span>
-        </li>
-        <li style="border-left-color: var(--neon-grey);">
-          <span></span> 
-          <span><b>Si tienen mas sugerencias agamenlo saber. ¡Animo!</b><n></n></span>
-        </li>
-      </ul>
-      <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
-    </div>
-  </div>
   </div>
 
   <div id="install-popup" class="popup">
@@ -497,31 +544,15 @@
     </div>
   </div>
 
-  <div id="menuPopup">
-    <div id="menuContent">
-      <h2 class="glow">Menú</h2>
-      <div class="menu-option" onclick="selectSection('apks')">Bases</div>
-      <div class="menu-option" onclick="selectSection('mods')">MODs</div>
-      <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
-      <div id="closeMenuPopup" onclick="toggleMenu()">✖</div>
-    </div>
-  </div>
-
   <div class="container">
-    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <div class="menu-btn" onclick="toggleMenu()"><div></div><div></div><div></div></div>
+    <header style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; position:relative;">
       <div style="text-align:center">
-        <h1 class="glow" id="fnf-title" style="user-select:none; cursor:pointer; margin:0; font-size: 24px;">Friday Night Funkin'</h1>
-        <div class="server-status"><div id="statusDot" class="status-dot"></div> <span id="statusText">Conectando...</span></div>
+        <h1 class="glow" id="fnf-title" style="user-select:none; cursor:pointer; margin:0; font-size: 26px;">Friday Night Funkin'</h1>
+        <div class="server-status" style="margin-top: 10px;"><div id="statusDot" class="status-dot"></div> <span id="statusText">Conectando...</span></div>
       </div>
     </header>
 
-    <section id="welcome">
-      <h1>Bienvenido a FNF' - Mobile</h1>
-      <p>Tu rincón de mods para Friday Night Funkin' Mobile. ¡Explora y descarga!</p>
-    </section>
-    
-    <div id="searchContainer" class="search-wrapper">
+    <div id="searchContainer" class="search-wrapper" style="display:none;">
       <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar Mods o Bases..." onkeyup="filterContent()">
     </div>
     
@@ -532,7 +563,28 @@
       <div class="filter-btn" onclick="setFilter('high', this)">🔴 Gama Alta</div>
     </div>
 
-    <section id="apks" class="section active">
+    <section id="home" class="section active">
+      <div class="hero-banner">
+        <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;">¡Bienvenido a FNF' Mobile!</h1>
+        <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;">El mejor lugar para descargar tus ports favoritos optimizados para dispositivos móviles.</p>
+        <button class="btn" style="font-size: 16px; padding: 12px 30px;" onclick="document.querySelectorAll('.nav-item')[2].click()">Explorar MODs 🚀</button>
+      </div>
+
+      <div class="info-card">
+        <h2 class="glow" style="font-size: 22px; margin-top: 0;">✨ ¿De qué trata esta página?</h2>
+        <p style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+          En esta página nos dedicamos a subir la mayoría de <b>MODs y Motores para móviles</b>. Nuestro objetivo es traerte las mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.
+        </p>
+        <ul class="info-list">
+          <li>🚀 <b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos.</li>
+          <li>📱 <b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas las gamas.</li>
+          <li>💬 <b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión en la tarjeta de cada MOD.</li>
+          <li>🔔 <b>Actualizaciones:</b> Te avisamos al instante con luces LED cuando hay algo nuevo.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="apks" class="section">
       <h2 class="glow">Descargas</h2>
       <div class="apks-grid" id="apksContainer">
 
@@ -543,7 +595,7 @@
           <img src="assets/images/webp/logopsych.webp">
           <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk1')">Más Info</button>
+            <button class="btn" onclick="openApkInfo('apk1')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')">💬 Chat</button>
           </div>
         </div>
@@ -555,7 +607,7 @@
           <img src="assets/images/webp/logoonline.webp">
           <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk2')">Más Info</button>
+            <button class="btn" onclick="openApkInfo('apk2')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')">💬 Chat</button>
           </div>
         </div>
@@ -567,7 +619,7 @@
           <img src="assets/images/webp/logocode.webp">
           <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk3')">Más Info</button>
+            <button class="btn" onclick="openApkInfo('apk3')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')">💬 Chat</button>
           </div>
         </div>
@@ -579,7 +631,7 @@
           <img src="assets/images/webp/logopsych.webp">
           <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk4')">Más Info</button>
+            <button class="btn" onclick="openApkInfo('apk4')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')">💬 Chat</button>
           </div>
         </div>
@@ -591,20 +643,8 @@
           <img src="assets/images/webp/logop.webp">
           <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk5')">Más Info</button>
+            <button class="btn" onclick="openApkInfo('apk5')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')">💬 Chat</button>
-          </div>
-        </div>
-
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)">🟢 Act. LED</button>
-          <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk6">0</span></div>
-          <div class="dl-counter">⬇️ <span id="dl-apk6">0</span></div>
-          <img src="assets/images/webp/logof.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk6" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk6')">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')">💬 Chat</button>
           </div>
         </div>
       </div>
@@ -614,19 +654,6 @@
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
 
-        <div class="mod-card" data-gama="mid" id="card-mod99_1">
-          <span class="gama-badge gama-mid">Media</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)">📌 Fijar</button>
-          <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)">🟢 Act. LED</button>
-          <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_1">0</span></div>
-          <div class="dl-counter">⬇️ <span id="dl-mod99_1">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_1" style="display:none;" title="Nuevos comentarios"></span>Vs Matt V3</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_1')">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs Matt V3')">💬 Chat</button>
-          </div>
-        </div>
-
         <div class="mod-card" data-gama="low" id="card-mod99_2">
           <span class="gama-badge gama-low">Baja</span>
           <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)">📌 Fijar</button>
@@ -635,7 +662,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_2')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_2')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Child\'s Play Pico Mix')">💬 Chat</button>
           </div>
         </div>
@@ -648,7 +675,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_3')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_3')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')">💬 Chat</button>
           </div>
         </div>
@@ -661,8 +688,22 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_4">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_4')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_4')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy V3')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="mod-card" data-gama="low" id="card-mod99_5">
+          <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_5', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_5" onclick="toggleGreenLed('mod99_5', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod99_5" onclick="handleLike('mod99_5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_5">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_5">0</span></div>
+          <img src="assets/images/mods/logonusky.jpeg" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:14px; box-shadow:0 0 12px var(--neon-blue);">
+          <h3><span class="led-dot led-green" id="led-green-mod99_5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_5" style="display:none;" title="Nuevos comentarios"></span>VS Nusky</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_5')">Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_5', 'VS Nusky')">💬 Chat</button>
           </div>
         </div>
 
@@ -674,7 +715,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_6">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_6')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_6')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')">💬 Chat</button>
           </div>
         </div>
@@ -687,7 +728,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_7">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_7')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_7')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Vs Metal Pipe V2')">💬 Chat</button>
           </div>
         </div>
@@ -700,7 +741,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_8">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_8')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_8')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')">💬 Chat</button>
           </div>
         </div>
@@ -713,7 +754,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod99_9">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_9')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod99_9')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine Tales')">💬 Chat</button>
           </div>
         </div>
@@ -726,7 +767,7 @@
           <div class="dl-counter">⬇️ <span id="dl-mod100">0</span></div>
           <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod100')">Más Info</button>
+            <button class="btn" onclick="openModInfo('mod100')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod100', 'Vs. TheOdd1sOut')">💬 Chat</button>
           </div>
         </div>
@@ -734,42 +775,24 @@
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>Vs BotFriend</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 50% Completado</p></div>
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: Se detuvo</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
       </div>
     </section>
 
-    <section id="comments-area" class="section">
-      <h2 class="glow">Comunidad (Beta)</h2>
-      <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--neon-blue);">
-        <div style="display:flex; gap:12px;">
-          <div id="myAvatar" class="yt-avatar" style="background:#555">?</div>
-          <div style="flex:1">
-            <div id="displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;">Usuario: Cargando...</div>
-            <textarea id="commentText" placeholder="Añade un comentario..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
-            <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span id="charCounter">0</span> / 100</div>
-            <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
-              <button class="btn" style="background:#444" onclick="document.getElementById('commentText').value=''">Cancelar</button>
-              <button class="btn" onclick="addComment()">Comentar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="commentList"></div>
-    </section>
+    <section id="comments-area" class="section" style="display: none;"></section>
 
     <section id="contact" class="section">
       <h2 class="glow">Redes Sociales</h2>
       <div class="social-grid">
-        <a class="social-item" href="https://youtube.com/@lalocf_1" target="_blank"><img src="assets/icons/youtube.jpeg"><span class="btn">YouTube</span></a>
-        <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img src="assets/icons/telegram.jpeg"><span class="btn">Telegram</span></a>
-        <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img src="assets/icons/instagram.jpeg"><span class="btn">Instagram</span></a>
-        <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img src="assets/icons/tiktok.jpeg"><span class="btn">TikTok</span></a>
+        <a class="social-item" href="https://youtube.com/@lalocf_1" target="_blank"><img src="assets/icons/youtube.jpeg"><span class="btn" style="width: 100%; box-sizing: border-box;">YouTube</span></a>
+        <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img src="assets/icons/telegram.jpeg"><span class="btn" style="width: 100%; box-sizing: border-box;">Telegram</span></a>
+        <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img src="assets/icons/instagram.jpeg"><span class="btn" style="width: 100%; box-sizing: border-box;">Instagram</span></a>
+        <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img src="assets/icons/tiktok.jpeg"><span class="btn" style="width: 100%; box-sizing: border-box;">TikTok</span></a>
       </div>
     </section>
 
-    <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V3.1.0 <br>
+    <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
+      © <span id="year"></span> LaloCF | V2.4.3 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -817,7 +840,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v3.1.0";
+    const APP_VERSION = "v2.4.4";
     
     let isSuperUser = localStorage.getItem('superUser') === 'true';
     if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -841,7 +864,6 @@
       runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
     };
 
-    // --- SISTEMA DE LEDS VERDES (ADMIN) ---
     window.toggleGreenLed = async (id, event) => {
       event.stopPropagation();
       if (!isSuperUser) return;
@@ -869,7 +891,6 @@
       });
     });
 
-    // --- SISTEMA DE LEDS AMARILLOS (COMENTARIOS NUEVOS) ---
     onValue(ref(db, 'last_comment_time'), (snap) => {
       const times = snap.val() || {};
       document.querySelectorAll('.led-yellow').forEach(el => el.style.display = 'none');
@@ -963,66 +984,6 @@
       }
     });
 
-    onValue(ref(db, 'comments'), (snapshot) => {
-      const list = document.getElementById('commentList');
-      list.innerHTML = '';
-      const data = snapshot.val();
-      const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-      if(data) {
-        let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        
-        commentsArray.sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            return b.id.localeCompare(a.id);
-        });
-
-        commentsArray.forEach(c => {
-          const isLalo = c.user.toLowerCase() === 'lalocf';
-          const isVerified = verifiedUsers[c.ownerKey] || isLalo;
-          const myLikedComments = JSON.parse(localStorage.getItem('my_liked_comments') || '{}');
-          const activeClass = myLikedComments[c.id] ? 'active' : '';
-          
-          const pinClass = c.isPinned ? 'pinned' : '';
-          const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
-          const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
-
-          let adminBtns = '';
-          if (isSuperUser) {
-             adminBtns = `
-               <span style="color:gold; cursor:pointer" onclick="togglePin('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
-               <span style="color:#00eaff; cursor:pointer" onclick="toggleVerify('${c.ownerKey}')">Verificar</span> • 
-               <span style="color:red; cursor:pointer" onclick="deleteComment('${c.id}')">Eliminar</span>
-             `;
-          } else if (myProfile && c.ownerKey === myProfile.key) {
-             adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteComment('${c.id}')">Eliminar</span>`;
-          }
-
-          const div = document.createElement('div');
-          div.className = `yt-comment-container ${pinClass}`;
-          div.innerHTML = `
-            <div class="yt-avatar" style="background:${stringToColor(c.user)}">${c.user.charAt(0).toUpperCase()}</div>
-            <div class="yt-content">
-              ${pinBadge}
-              <div class="yt-header">
-                <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${c.user}')">
-                  <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${c.user}</a>${verifyBadge}
-                </span>
-                <span class="yt-date">${c.date}</span>
-              </div>
-              <div class="yt-text">${c.text}</div>
-              <div class="yt-actions">
-                <span class="yt-action-btn ${activeClass}" id="btn-like-${c.id}" onclick="likeComment('${c.id}')">👍 <span id="l-count-${c.id}">${c.likes || 0}</span></span> 
-                <span class="yt-action-btn" onclick="replyComment('${c.user}')">Responder</span>
-                ${adminBtns}
-              </div>
-            </div>`;
-          list.appendChild(div);
-        });
-      }
-    });
-
     let currentModCommentsId = null;
     let modCommentsListener = null;
 
@@ -1030,7 +991,6 @@
       currentModCommentsId = id;
       document.getElementById("mc-title").innerText = "Comentarios: " + title;
       
-      // Apagamos el foco amarillo si es que estaba prendido
       localStorage.setItem(`seen_comments_${id}`, Date.now());
       const yellowLed = document.getElementById(`led-yellow-${id}`);
       if(yellowLed) yellowLed.style.display = 'none';
@@ -1140,9 +1100,7 @@
         isPinned: false 
       });
       
-      // Actualizamos el reloj global para encender el LED amarillo a los demás
       set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
-
       document.getElementById('mc-commentText').value = '';
     };
 
@@ -1173,9 +1131,6 @@
     
     document.getElementById('mc-commentText').addEventListener('input', function() { document.getElementById('mc-charCounter').innerText = this.value.length; });
 
-    // --------------------------------------------------------------------------
-
-    window.togglePin = (commentId, currentState) => { update(ref(db, `comments/${commentId}`), { isPinned: !currentState }); };
     window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
 
     onValue(ref(db, ".info/connected"), (snap) => {
@@ -1191,9 +1146,8 @@
     });
 
     window.toggleTheme = () => document.body.classList.toggle("light");
-    window.toggleMenu = () => document.getElementById("menuPopup").classList.toggle("show");
     
-    window.selectSection = (id) => { 
+    window.selectSection = (id, el) => { 
       document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); 
       document.getElementById(id).classList.add("active"); 
       
@@ -1211,7 +1165,12 @@
           filterUI.style.display = 'none';
       }
 
-      toggleMenu(); 
+      if(el) {
+          document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+          el.classList.add("active");
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     let currentFilter = 'all';
@@ -1281,11 +1240,13 @@
 
     function updateCommentInterface(user) {
       const display = document.getElementById('displayMyName');
-      display.innerText = "Comentando como: " + user.name;
-      if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-      const avatar = document.getElementById('myAvatar');
-      avatar.innerText = user.name.charAt(0).toUpperCase();
-      avatar.style.background = stringToColor(user.name);
+      if(display) {
+        display.innerText = "Comentando como: " + user.name;
+        if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
+        const avatar = document.getElementById('myAvatar');
+        avatar.innerText = user.name.charAt(0).toUpperCase();
+        avatar.style.background = stringToColor(user.name);
+      }
     }
 
     window.saveRegistration = () => {
@@ -1324,34 +1285,6 @@
       return `hsl(${hash % 360}, 65%, 50%)`;
     }
 
-    window.addComment = async () => {
-      if (await checkBanStatus()) return;
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      const text = document.getElementById('commentText').value.trim();
-      if(!profile) return checkUserStatus();
-      if(!text) return alert("Escribe algo...");
-      push(ref(db, 'comments'), { ownerKey: profile.key, user: profile.name, link: profile.link, text, date: new Date().toLocaleString(), likes: 0, isPinned: false });
-      document.getElementById('commentText').value = '';
-    };
-
-    window.likeComment = async (commentId) => {
-      if (await checkBanStatus()) return;
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if(!profile) return checkUserStatus();
-      const userKey = profile.key;
-      const myLikedComments = JSON.parse(localStorage.getItem('my_liked_comments') || '{}');
-      const likeRef = ref(db, `comments/${commentId}/userLikes/${userKey}`);
-      const snap = await get(likeRef);
-      if (snap.exists()) {
-        await set(likeRef, null); runTransaction(ref(db, `comments/${commentId}/likes`), (c) => (c || 1) - 1);
-        delete myLikedComments[commentId];
-      } else {
-        await set(likeRef, true); runTransaction(ref(db, `comments/${commentId}/likes`), (c) => (c || 0) + 1);
-        myLikedComments[commentId] = true;
-      }
-      localStorage.setItem('my_liked_comments', JSON.stringify(myLikedComments));
-    };
-
     window.handleLike = async (id, el) => {
       if (await checkBanStatus()) return;
       const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
@@ -1378,22 +1311,7 @@
       });
     }
 
-    window.replyComment = (name) => { const txt = document.getElementById('commentText'); txt.value = `@${name} `; txt.focus(); };
-    window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
-
     const MOD_DATA = {
-  mod99_1: {
-    img: "assets/images/mods/wii.webp",
-    title: "VS Matt V3",
-    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga ZIP (Drive)", link: "" },
-      { name: "Descarga 7z (Drive)", link: "" },
-      { name: "Descarga ZIP (MediaFire)", link: "" },
-      { name: "Descarga 7z (MediaFire)", link: "" }
-    ]
-  },
   mod99_2: {
     img: "assets/images/mods/play.webp",
     title: "Child's Play Pico Mix",
@@ -1532,17 +1450,14 @@
     img: "assets/images/webp/logoplusengine.webp",
     title: "Plus Engine",
     desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2.6 HOTFIX",
+    version: "v1.2",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
-      { name: "Descarga Directa Windows 32 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
-      { name: "Descarga Directa Windows 64 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x64.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
-      { name: "Descarga Directa Mac ARM (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
-      { name: "Descarga Directa Mac Intel (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Android-x64-v7a.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Windows.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Linux.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Mac.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
     ]
   },
   apk5: {
@@ -1558,21 +1473,6 @@
       { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
       { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
-    ]
-  },
-  apk6: {
-    img: "assets/images/webp/logonova.webp",
-    title: "NovaFleare Engine",
-    desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
-    version: "v1.1.8 HOTFIX",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/windows.zip" },
-      { name: "Descarga Directa Mac14 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS14.zip" },
-      { name: "Descarga Directa Mac15 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS15.tar"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/android.apk"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/iOS.zip" }
     ]
   }
 };
@@ -1620,11 +1520,9 @@
       document.getElementById('update-popup').classList.remove('show'); 
       localStorage.setItem('lastVersionSeen', APP_VERSION); 
       
-      // Si el navegador permite la instalación, mostramos el popup de instalación
       if (deferredPrompt) {
         document.getElementById('install-popup').classList.add('show');
       } else {
-        // Si no se puede instalar (ya está instalada o es iOS Safari), pasamos al registro
         checkUserStatus(); 
       }
     };
@@ -1648,13 +1546,7 @@
       document.getElementById("year").textContent = new Date().getFullYear();
       if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
       else checkUserStatus();
-      
-      if(document.getElementById('apks').classList.contains('active')) {
-          document.getElementById('searchContainer').style.display = 'block';
-      }
     };
-
-    document.getElementById('commentText').addEventListener('input', function() { document.getElementById('charCounter').innerText = this.value.length; });
 
   </script>
 
@@ -1664,9 +1556,9 @@
       
       if (isIOS) {
         document.body.classList.add('ios-theme');
-        console.log("🍏 iOS Detectado: Activando diseño Apple.");
+        console.log("🍏 iOS Detectado: Activando diseño Apple Premium.");
       } else {
-        console.log("🤖 Android/PC Detectado: Manteniendo diseño.");
+        console.log("🤖 Android/PC Detectado: Manteniendo diseño Neón.");
       }
     });
 

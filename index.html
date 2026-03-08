@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="es">
 <head>
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>FNF' - Mobile</title>
@@ -10,445 +9,14 @@
   <link rel="icon" type="image/png" href="assets/icons/logo192.png">
   <link rel="shortcut icon" href="assets/icons/logo192.png">
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00eaff">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#00eaff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <style>
-    @font-face {
-      font-family: "MiFuente";
-      src: url("assets/fonts/funkin.ttf") format("opentype");
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    body {
-      font-family: "MiFuente", system-ui, -apple-system, sans-serif;
-    }
-
-    body.ios-theme .theme-btn {
-      display: none !important;
-    }
-
-    :root {
-      --text: #e0e0e0;
-      --card-bg: rgba(0, 0, 0, 0.55);
-      --neon-blue: #00eaff;
-      --neon-pink: #ff00c8;
-      --neon-purple: #b400ff;
-      --neon-green: #00ff41;
-      --neon-yellow: #ffea00;
-      --neon-red: #ff003c;
-      --neon-gold: #ffd700;
-      --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
-    }
-
-    body.light {
-      --text: #1a1a1a;
-      --card-bg: rgba(255,255,255,0.7);
-      --bg: linear-gradient(45deg, #e6f7ff, #ffffff, #f0f0f0);
-    }
-
-    body {
-      margin: 0;
-      color: var(--text);
-      background: linear-gradient(45deg, #0f0f0f, #000638, #1a1a1a);
-      background-size: 600% 600%;
-      animation: moveBg 12s ease infinite;
-      padding-bottom: 120px; /* Más espacio para la píldora flotante */
-    }
-    @keyframes moveBg {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.295), transparent 60%),
-                  radial-gradient(circle at 80% 70%, rgba(255, 0, 200, 0.288), transparent 60%),
-                  radial-gradient(circle at 50% 50%, rgba(179, 0, 255, 0.267), transparent 70%);
-      filter: blur(80px);
-      animation: nebulaMove 10s ease-in-out infinite alternate;
-    }
-
-    .container {
-      max-width:1100px;
-      margin:20px auto;
-      background:var(--card-bg);
-      padding:24px;
-      border-radius:14px;
-      backdrop-filter:blur(12px);
-      box-shadow:0 0 25px rgba(0,0,0,.6);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    @keyframes nebulaMove {
-      0% { transform: translate(-40px, -40px) scale(1.1); opacity: 0.7; }
-      50% { transform: translate(40px, 20px) scale(1.3); opacity: 1; }
-      100% { transform: translate(-20px, 40px) scale(1.2); opacity: 0.8; }
-    }
-
-    .glow {
-      color: white;
-      text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple), 0 0 80px var(--neon-purple);
-    }
-
-    /* BARRA DE NAVEGACIÓN INFERIOR (ESTILO PÍLDORA) */
-    .bottom-nav {
-      position: fixed;
-      bottom: 25px; /* Separado del borde */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 420px;
-      background: rgba(10, 10, 15, 0.85);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(0, 234, 255, 0.3);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 10px;
-      border-radius: 40px; /* Forma de píldora */
-      z-index: 9990;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.7), 0 0 15px rgba(0, 234, 255, 0.15);
-      transition: all 0.3s ease;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #777;
-      cursor: pointer;
-      transition: 0.3s ease;
-      flex: 1;
-      user-select: none;
-    }
-
-    .nav-item.active {
-      color: var(--neon-blue);
-      text-shadow: 0 0 10px var(--neon-blue);
-      transform: translateY(-4px);
-    }
-
-    .nav-icon { font-size: 24px; margin-bottom: 4px; transition: transform 0.3s; }
-    .nav-item.active .nav-icon { transform: scale(1.2); }
-    .nav-text { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* SECCIÓN INICIO (HERO BANNER) */
-    .hero-banner {
-      background: linear-gradient(135deg, rgba(0, 234, 255, 0.1), rgba(180, 0, 255, 0.1));
-      border: 1px solid var(--neon-blue);
-      border-radius: 20px;
-      padding: 30px 20px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(0, 234, 255, 0.15);
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-banner::before {
-      content: '';
-      position: absolute;
-      top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-      animation: rotateLight 10s linear infinite;
-      z-index: 0; pointer-events: none;
-    }
-    @keyframes rotateLight { 100% { transform: rotate(360deg); } }
-
-    /* TARJETA DE BENEFICIOS / INFO */
-    .info-card {
-      background: rgba(0,0,0,0.4);
-      border: 1px solid var(--neon-blue);
-      border-radius: 20px;
-      padding: 25px;
-      margin-top: 25px;
-      text-align: center;
-      box-shadow: 0 0 15px rgba(0, 234, 255, 0.1);
-      position: relative;
-    }
-
-    .info-list {
-      text-align: left;
-      color: #ddd;
-      font-size: 14.5px;
-      line-height: 2;
-      margin: 0 auto;
-      max-width: 320px;
-      list-style: none;
-      padding: 0;
-    }
-
-    .info-list li {
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .admin-name {
-      color: #00eaff !important;
-      font-weight: bold;
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
-    }
-    .admin-name::after { content: "✦"; color: #fff; position: absolute; top: -6px; right: -10px; font-size: 10px; text-shadow: 0 0 4px #00eaff; animation: tinyStar 1.5s infinite alternate; }
-    .admin-name::before { content: "✨"; position: absolute; bottom: -2px; left: -12px; font-size: 9px; animation: tinyStar 2s infinite alternate-reverse; }
-    @keyframes tinyStar { 0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); } 100% { opacity: 1; transform: scale(1.3) rotate(45deg); } }
-
-    .theme-btn {
-      font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
-      position: fixed; top: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.3); width: 50px; height: 50px;
-      display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--neon-blue);
-    }
-    @keyframes spinGlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .apks-grid, .mods-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; margin-top:20px; }
-    .apk-card, .mod-card { 
-      background: rgba(0,0,0,0.45); padding:18px; border-radius:12px; 
-      border:1px solid var(--neon-blue); box-shadow:0 0 15px var(--neon-blue); 
-      text-align:center; position: relative; transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .apk-card:hover, .mod-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px var(--neon-pink); border-color: var(--neon-pink); }
-    .apk-card img, .mod-card img { width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:14px; box-shadow:0 0 12px var(--neon-blue); }
-
-    .like-container { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; border: 1px solid var(--neon-pink); cursor: pointer; z-index: 5; transition: 0.3s; }
-    .like-icon { color: #555; transition: 0.3s; }
-    .like-container.active { border-color: var(--neon-pink); background: rgba(255, 0, 200, 0.2); }
-    .like-container.active .like-icon { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
-    .like-count { font-size: 14px; color: white; }
-
-    .dl-counter {
-      position: absolute; top: 10px; left: 80px;
-      background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px;
-      display: flex; align-items: center; gap: 5px; border: 1px solid var(--neon-blue);
-      font-size: 12px; color: #ccc; pointer-events: none;
-    }
-
-    .gama-badge {
-      position: absolute; top: 10px; right: 10px;
-      padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;
-      color: black; text-transform: uppercase; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      z-index: 5;
-    }
-    .gama-low { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
-    .gama-mid { background: var(--neon-yellow); box-shadow: 0 0 8px var(--neon-yellow); }
-    .gama-high { background: var(--neon-red); color: white; box-shadow: 0 0 8px var(--neon-red); }
-
-    .coming-soon-card { background: rgba(40, 0, 40, 0.4); border: 1px dashed var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); opacity: 0.8; position: relative; overflow: hidden; }
-    .coming-soon-card img { filter: blur(8px) grayscale(1); }
-    .coming-soon-badge { position: absolute; top: 10px; right: -30px; background: var(--neon-pink); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 12px; font-weight: bold; box-shadow: 0 0 10px var(--neon-pink); }
-
-    .btn { display:inline-block; padding:10px 16px; margin-top:10px; border-radius:8px; background: var(--neon-pink); color:white; font-weight:600; text-decoration:none; box-shadow:0 0 12px var(--neon-pink); cursor: pointer; border:none; text-align: center; position: relative; z-index: 10;}
-    
-    .card-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
-    .card-buttons .btn { flex: 1; margin-top: 0; padding: 10px 5px; font-size: 13px; }
-    .btn-chat { background: var(--neon-purple) !important; box-shadow: 0 0 12px var(--neon-purple) !important; }
-
-    .popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
-    .popup.show { opacity: 1; pointer-events: auto; }
-    .popup-content { width: 85%; max-width: 450px; background: rgba(10,10,10,0.95); border-radius: 15px; position: relative; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); color: white; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-    .popup-scroll-body { padding: 20px; overflow-y: auto; flex: 1; }
-    .popup-scroll-body::-webkit-scrollbar { width: 6px; }
-    .popup-scroll-body::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-    .popup-scroll-body::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
-
-    @media screen and (min-width: 768px) { .popup-content { max-width: 800px; } }
-    .popup-close { position: absolute; top: 8px; right: 10px; font-size: 26px; cursor: pointer; color: var(--neon-blue); z-index: 100; background: rgba(0,0,0,0.5); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
-    .popup-content img { width: 100%; border-radius: 10px; margin-bottom: 10px; object-fit: contain; max-height: 350px; }
-
-    /* NOVEDADES POPUP (MEJORADO) */
-    .update-card-modern {
-      background: linear-gradient(145deg, #151515, #0a0a0a) !important;
-      border: 2px solid var(--neon-blue);
-      border-radius: 25px !important;
-      box-shadow: 0 0 40px rgba(0, 234, 255, 0.2) !important;
-      max-width: 420px !important;
-      overflow: visible !important;
-    }
-    .update-header-art {
-      height: 90px;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      border-radius: 23px 23px 0 0;
-      position: relative;
-      margin-bottom: 45px;
-    }
-    .update-icon-circle {
-      width: 75px; height: 75px;
-      background: #111;
-      border-radius: 50%;
-      position: absolute; bottom: -37px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; justify-content: center; font-size: 35px;
-      border: 4px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); z-index: 10;
-    }
-    .update-body { padding: 0 25px 30px 25px; text-align: center; }
-    .update-list-modern { list-style: none; padding: 0; margin: 25px 0; text-align: left; }
-    .update-list-modern li {
-      background: rgba(255, 255, 255, 0.03); margin-bottom: 12px; padding: 14px 15px;
-      border-radius: 12px; border-left: 4px solid var(--neon-purple); font-size: 14px; color: #ddd; display: flex; align-items: center; gap: 10px;
-    }
-    /* BOTÓN DE NOVEDADES REDISEÑADO */
-    .btn-update-action {
-      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-      border: none;
-      color: white;
-      padding: 15px;
-      width: 100%;
-      border-radius: 50px;
-      font-weight: 800;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 15px rgba(0, 234, 255, 0.3), inset 0 -3px 0 rgba(0,0,0,0.2);
-    }
-    .btn-update-action:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 234, 255, 0.5); }
-    .btn-update-action:active { transform: translateY(2px); box-shadow: 0 3px 10px rgba(0, 234, 255, 0.3), inset 0 -1px 0 rgba(0,0,0,0.2); }
-
-    .social-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
-    .social-item { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); transition: all 0.3s ease; width: 140px; }
-    .social-item:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 0 25px var(--neon-pink); border-color: var(--neon-pink); }
-    .social-item img { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px var(--neon-blue); }
-
-    .section { display:none; animation: fadeIn 0.4s ease; }
-    .active{ display:block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    .visitor-counter { margin-top: 15px; font-size: 14px; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); border: 1px solid var(--neon-blue); display: inline-block; padding: 5px 15px; border-radius: 20px; background: rgba(0,0,0,0.3); }
-
-    .yt-comment-container { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-align: left; }
-    .yt-comment-container.pinned { border: 1px solid var(--neon-gold); background: rgba(255, 215, 0, 0.05); border-radius: 12px; padding: 10px; }
-    .pinned-badge { display: inline-block; background: var(--neon-gold); color: black; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
-    .verified-icon { color: #00eaff; margin-left: 4px; font-size: 14px; text-shadow: 0 0 5px #00eaff; }
-
-    .yt-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; flex-shrink: 0; }
-    .yt-content { flex: 1; }
-    .yt-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 13px; flex-wrap: wrap;}
-    .yt-name { color: white; font-weight: bold; }
-    .yt-name-link { text-decoration: none; color: inherit; }
-    .yt-name-link:hover { text-decoration: underline; color: var(--neon-blue); }
-    .yt-date { color: #aaa; font-size: 11px; }
-    .yt-text { font-size: 14px; color: #eee; line-height: 1.4; margin-bottom: 8px; font-family: sans-serif; }
-    .yt-actions { display: flex; align-items: center; gap: 15px; font-size: 12px; color: #aaa; }
-    .yt-action-btn { cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
-    .yt-action-btn.active { color: var(--neon-pink); font-weight: bold; }
-    .yt-action-btn:hover { color: var(--neon-blue); }
-
-    .reg-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 12px; color: white; margin-bottom: 15px; box-sizing: border-box; }
-
-    #commentList, #mc-commentList { max-height: 500px; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
-    #commentList::-webkit-scrollbar, #mc-commentList::-webkit-scrollbar { width: 6px; }
-    #commentList::-webkit-scrollbar-track, #mc-commentList::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-    #commentList::-webkit-scrollbar-thumb, #mc-commentList::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; box-shadow: 0 0 10px var(--neon-blue); }
-    
-    .search-wrapper { margin-bottom: 10px; position: relative; }
-    .search-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--neon-blue); background: rgba(0,0,0,0.3); color: white; font-size: 16px; outline: none; transition: 0.3s; box-shadow: 0 0 10px rgba(0, 234, 255, 0.1); }
-    .search-input:focus { border-color: var(--neon-pink); box-shadow: 0 0 20px rgba(255, 0, 200, 0.3); }
-
-    .server-status { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid #333; font-size: 12px; color: #aaa; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #555; transition: 0.3s; }
-    .status-dot.online { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--neon-blue); background: rgba(0,0,0,0.4); color: white; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-    .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
-    .filter-btn:hover { border-color: var(--neon-pink); }
-
-    .admin-pin-btn { position: absolute; top: 40px; right: 10px; z-index: 10; background: var(--neon-gold); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-gold); display: none; }
-    .admin-led-btn { position: absolute; top: 40px; left: 10px; z-index: 10; background: var(--neon-green); color: black; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-green); display: none; }
-    .mod-card .admin-led-btn { top: 75px; left: auto; right: 10px; }
-    body.is-admin .admin-pin-btn, body.is-admin .admin-led-btn { display: block; }
-    
-    .pinned-mod { border-color: var(--neon-gold) !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4) !important; order: -1; }
-    .pinned-mod::before { content: '📌 DESTACADO'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--neon-gold); color: black; padding: 4px 12px; font-size: 11px; font-weight: bold; border-radius: 10px; z-index: 10; box-shadow: 0 0 10px var(--neon-gold); }
-
-    .admin-float-btn { position: fixed; bottom: 100px; right: 20px; background: var(--neon-purple); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 0 15px var(--neon-purple); border: 2px solid white; transition: 0.3s; }
-    body.is-admin .admin-float-btn { display: flex; }
-    .admin-float-btn:hover { transform: scale(1.1); box-shadow: 0 0 25px var(--neon-purple); }
-
-    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
-    .toast { background: rgba(10, 10, 15, 0.85); border: 1px solid var(--neon-blue); box-shadow: 0 5px 20px rgba(0, 234, 255, 0.4); color: white; padding: 15px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: bold; animation: slideDownToast 0.5s ease forwards; backdrop-filter: blur(15px); pointer-events: auto; }
-    .toast.hide { animation: slideUpToast 0.5s ease forwards; }
-    @keyframes slideDownToast { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideUpToast { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
-
-    .led-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 10px currentColor; }
-    .led-green { background: #00ff41; color: #00ff41; }
-    .led-yellow { background: #ffea00; color: #ffea00; animation: pulseYellow 2s infinite; }
-    @keyframes pulseYellow { 0% { box-shadow: 0 0 5px #ffea00; } 50% { box-shadow: 0 0 15px #ffea00; } 100% { box-shadow: 0 0 5px #ffea00; } }
-
-    /* =========================================
-       🍏 TEMA EXCLUSIVO iOS (LIQUID GLASS PRO) 🍏
-       ========================================= */
-    body.ios-theme { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important; background: radial-gradient(circle at top right, #110022, #000000, #001122) !important; animation: none !important; }
-    body.ios-theme::before { display: block !important; opacity: 0.25 !important; filter: blur(60px) !important; animation: none !important; }
-    body.ios-theme .container { background: transparent !important; box-shadow: none !important; border: none !important; padding: 15px !important; margin-top: 10px !important; }
-    body.ios-theme .glow { text-shadow: 0 0 15px rgba(255,255,255,0.2) !important; color: #FFFFFF !important; font-weight: 700 !important; letter-spacing: 0.3px !important; }
-    
-    /* LIQUID GLASS PARA TARJETAS, BANNERS Y POPUPS */
-    body.ios-theme .apk-card, body.ios-theme .mod-card, body.ios-theme .social-item, body.ios-theme .hero-banner, body.ios-theme .info-card { 
-      background: rgba(255, 255, 255, 0.03) !important; 
-      backdrop-filter: blur(30px) saturate(200%) !important; 
-      -webkit-backdrop-filter: blur(30px) saturate(200%) !important; 
-      border: 1px solid rgba(255, 255, 255, 0.15) !important; 
-      border-radius: 24px !important; 
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.05) !important; 
-      padding: 16px !important; 
-      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important; 
-    }
-    body.ios-theme .apk-card:hover, body.ios-theme .mod-card:hover, body.ios-theme .social-item:hover { transform: scale(0.97) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; }
-    body.ios-theme .apk-card img, body.ios-theme .mod-card img, body.ios-theme .social-item img { border-radius: 14px !important; box-shadow: none !important; }
-    
-    /* BOTONES LIQUID GLASS */
-    body.ios-theme .btn { 
-      background: rgba(255, 255, 255, 0.1) !important; 
-      backdrop-filter: blur(25px) saturate(200%) !important; 
-      -webkit-backdrop-filter: blur(25px) saturate(200%) !important; 
-      border: 1px solid rgba(255, 255, 255, 0.4) !important; 
-      color: #fff !important; 
-      border-radius: 20px !important; 
-      box-shadow: inset 0 0 10px rgba(255,255,255,0.2), 0 8px 20px rgba(0, 0, 0, 0.3) !important; 
-      font-weight: 600 !important; font-size: 15px !important; padding: 10px 20px !important; transition: all 0.3s ease !important; 
-    }
-    body.ios-theme .btn:hover, body.ios-theme .btn:active { 
-      background: rgba(255, 255, 255, 0.2) !important; box-shadow: inset 0 0 15px rgba(255,255,255,0.3), 0 10px 25px rgba(0, 0, 0, 0.4) !important; transform: scale(0.95) !important; 
-    }
-    body.ios-theme .btn-chat { 
-      background: rgba(180, 0, 255, 0.2) !important; border: 1px solid rgba(180, 0, 255, 0.5) !important; box-shadow: inset 0 0 15px rgba(180, 0, 255, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3) !important; 
-    }
-    
-    /* PÍLDORA LIQUID GLASS */
-    body.ios-theme .bottom-nav {
-      background: rgba(255, 255, 255, 0.1) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    body.ios-theme .search-input, body.ios-theme .reg-input { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; color: #fff !important; box-shadow: inset 0 0 10px rgba(255,255,255,0.05), 0 4px 15px rgba(0, 0, 0, 0.2) !important; padding: 12px 15px !important; font-size: 17px !important; }
-    body.ios-theme .search-input:focus, body.ios-theme .reg-input:focus { background: rgba(255, 255, 255, 0.12) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
-    
-    /* POPUPS LIQUID GLASS */
-    body.ios-theme .popup-content, body.ios-theme .update-card-modern { 
-      background: rgba(15, 15, 20, 0.65) !important; backdrop-filter: blur(35px) saturate(200%) !important; -webkit-backdrop-filter: blur(35px) saturate(200%) !important; 
-      border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 28px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.1) !important; 
-    }
-    
-    body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #fff !important; }
-    body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important; }
-    body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .server-status { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="selectSection('home', this)">
       <span class="nav-icon">🏠</span>
@@ -461,6 +29,10 @@
     <div class="nav-item" onclick="selectSection('mods', this)">
       <span class="nav-icon">🎮</span>
       <span class="nav-text">MODs</span>
+    </div>
+    <div class="nav-item" onclick="selectSection('scripts', this)">
+      <span class="nav-icon">💻</span>
+      <span class="nav-text">Scripts</span>
     </div>
     <div class="nav-item" onclick="selectSection('contact', this)">
       <span class="nav-icon">📞</span>
@@ -515,8 +87,8 @@
         <ul class="update-list-modern">
           <li><span>🔥</span> <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span></li>
           <li><span>🔥</span> <span><b>Nueva Base:</b> P-Slice Engine.</span></li>
-          <li><span>🔧</span> <span>Corrección de errores y optimización.</span></li>
-          <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Nuevo Diseño de Menú Píldora.</span></li>
+          <li><span>💻</span> <span><b>Nueva Sección:</b> ¡Scripts ahora disponibles!</span></li>
+          <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Menú mejorado e interfaz refinada.</span></li>
         </ul>
         <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido! 👍</button>
       </div>
@@ -539,7 +111,8 @@
       <h2 class="glow">Registro de Usuario</h2>
       <p style="font-size: 13px; margin-bottom: 20px;">Regístrate para poder continuar.</p>
       <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo (ej: LaloCF)">
-      <input type="url" id="regLink" class="reg-input" placeholder="Link de tu Canal o Perfil (Opcional)">
+      <input type="url" id="regLink" class="reg-input" placeholder="Link de tu Canal (Opcional)">
+      <input type="url" id="regAvatar" class="reg-input" placeholder="URL de tu Foto (Opcional)">
       <button class="btn" onclick="saveRegistration()" style="width: 100%">Aceptar</button>
     </div>
   </div>
@@ -573,13 +146,13 @@
       <div class="info-card">
         <h2 class="glow" style="font-size: 22px; margin-top: 0;">✨ ¿De qué trata esta página?</h2>
         <p style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
-          En esta página nos dedicamos a subir la mayoría de <b>MODs y Motores para móviles</b>. Nuestro objetivo es traerte las mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.
+          En esta página nos dedicamos a subir la mayoría de <b>MODs, Motores y Scripts para móviles</b>. Nuestro objetivo es traerte las mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.
         </p>
         <ul class="info-list">
           <li>🚀 <b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos.</li>
           <li>📱 <b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas las gamas.</li>
-          <li>💬 <b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión en la tarjeta de cada MOD.</li>
-          <li>🔔 <b>Actualizaciones:</b> Te avisamos al instante con luces LED cuando hay algo nuevo.</li>
+          <li>💻 <b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a tus propios juegos.</li>
+          <li>💬 <b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión.</li>
         </ul>
       </div>
     </section>
@@ -587,13 +160,12 @@
     <section id="apks" class="section">
       <h2 class="glow">Descargas</h2>
       <div class="apks-grid" id="apksContainer">
-
         <div class="apk-card">
           <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
+          <h3><span class="led-dot led-red" id="led-red-apk1" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk1')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')">💬 Chat</button>
@@ -605,7 +177,7 @@
           <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
           <img src="assets/images/webp/logoonline.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
+          <h3><span class="led-dot led-red" id="led-red-apk2" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk2')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')">💬 Chat</button>
@@ -617,7 +189,7 @@
           <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
           <img src="assets/images/webp/logocode.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
+          <h3><span class="led-dot led-red" id="led-red-apk3" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk3')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')">💬 Chat</button>
@@ -629,7 +201,7 @@
           <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
+          <h3><span class="led-dot led-red" id="led-red-apk4" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk4')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')">💬 Chat</button>
@@ -641,7 +213,7 @@
           <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
           <img src="assets/images/webp/logop.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
+          <h3><span class="led-dot led-red" id="led-red-apk5" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk5')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')">💬 Chat</button>
@@ -653,14 +225,13 @@
     <section id="mods" class="section">
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
-
         <div class="mod-card" data-gama="low" id="card-mod99_2">
           <span class="gama-badge gama-low">Baja</span>
           <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)">📌 Fijar</button>
           <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_2" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_2')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Child\'s Play Pico Mix')">💬 Chat</button>
@@ -673,7 +244,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_3" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_3')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')">💬 Chat</button>
@@ -686,7 +257,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_4">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_4" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_4')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy V3')">💬 Chat</button>
@@ -700,7 +271,7 @@
           <div class="like-container" id="like-mod99_5" onclick="handleLike('mod99_5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_5">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_5">0</span></div>
           <img src="assets/images/mods/logonusky.jpeg" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:14px; box-shadow:0 0 12px var(--neon-blue);">
-          <h3><span class="led-dot led-green" id="led-green-mod99_5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_5" style="display:none;" title="Nuevos comentarios"></span>VS Nusky</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_5" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_5" style="display:none;" title="Nuevos comentarios"></span>VS Nusky</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_5')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_5', 'VS Nusky')">💬 Chat</button>
@@ -713,7 +284,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_6">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_6">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_6" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_6')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')">💬 Chat</button>
@@ -726,7 +297,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_7">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_7">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_7" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_7')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Vs Metal Pipe V2')">💬 Chat</button>
@@ -739,7 +310,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_8">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_8">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_8" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_8')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')">💬 Chat</button>
@@ -752,7 +323,7 @@
           <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_9">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_9">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod99_9" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod99_9')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine Tales')">💬 Chat</button>
@@ -765,7 +336,7 @@
           <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod100">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod100">0</span></div>
-          <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
+          <h3><span class="led-dot led-red" id="led-red-mod100" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openModInfo('mod100')">Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod100', 'Vs. TheOdd1sOut')">💬 Chat</button>
@@ -779,7 +350,24 @@
       </div>
     </section>
 
-    <section id="comments-area" class="section" style="display: none;"></section>
+    <section id="scripts" class="section">
+      <h2 class="glow">Scripts y Utilidades</h2>
+      <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;">Agrega código personalizado a tus propios mods y motores.</p>
+      
+      <div class="mods-grid" id="scriptsContainer">
+        <div class="apk-card" id="card-script1">
+          <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-script1" onclick="handleLike('script1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-script1">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-script1">0</span></div>
+          <img src="assets/images/webp/logocode.webp" style="height: 120px;">
+          <h3><span class="led-dot led-red" id="led-red-script1" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-script1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-script1" style="display:none;" title="Nuevos comentarios"></span>Script HUD Personalizado</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script1')">Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script1', 'Script HUD')">💬 Chat</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section id="contact" class="section">
       <h2 class="glow">Redes Sociales</h2>
@@ -800,6 +388,23 @@
   <div id="apk-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeApkInfo()">✖</span><div class="popup-scroll-body"><img id="apk-img"><h2 id="apk-title"></h2><p id="apk-desc"></p><h3 id="apk-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="apk-downloads"></div></div></div></div>
   <div id="mod-popup" class="popup"><div class="popup-content"><span class="popup-close" onclick="closeModInfo()">✖</span><div class="popup-scroll-body"><img id="popup-img"><h2 id="popup-title"></h2><p id="popup-desc"></p><h3 id="popup-version" style="color:#00eaff; margin-bottom:10px;"></h3><div id="popup-downloads"></div></div></div></div>
 
+  <div id="script-popup" class="popup">
+    <div class="popup-content">
+      <span class="popup-close" onclick="closeScriptInfo()">✖</span>
+      <div class="popup-scroll-body">
+        <div class="carousel-container">
+          <button class="carousel-btn carousel-prev" onclick="prevScriptImage()">&#10094;</button>
+          <img id="script-img" class="carousel-image" src="">
+          <button class="carousel-btn carousel-next" onclick="nextScriptImage()">&#10095;</button>
+        </div>
+        <h2 id="script-title"></h2>
+        <p id="script-desc"></p>
+        <h3 id="script-version" style="color:#00eaff; margin-bottom:10px;"></h3>
+        <div id="script-downloads"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="mod-comments-popup" class="popup">
     <div class="popup-content" style="max-width: 600px;">
       <span class="popup-close" onclick="closeModComments()">✖</span>
@@ -810,7 +415,7 @@
             <div id="mc-myAvatar" class="yt-avatar" style="background:#555">?</div>
             <div style="flex:1">
               <div id="mc-displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;">Usuario: Cargando...</div>
-              <textarea id="mc-commentText" placeholder="Escribe tu opinión sobre este port..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+              <textarea id="mc-commentText" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
               <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span id="mc-charCounter">0</span> / 100</div>
               <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
                 <button class="btn" style="background:#444" onclick="document.getElementById('mc-commentText').value=''">Cancelar</button>
@@ -824,752 +429,8 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove, update, runTransaction, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
-      authDomain: "fnf-mobile-lalocf.firebaseapp.com",
-      databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
-      projectId: "fnf-mobile-lalocf",
-      storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
-      messagingSenderId: "407243542354",
-      appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const APP_VERSION = "v2.4.4";
-    
-    let isSuperUser = localStorage.getItem('superUser') === 'true';
-    if(isSuperUser) { document.body.classList.add('is-admin'); }
-
-    let verifiedUsers = {};
-    let downloadCounts = {};
-
-    onValue(ref(db, 'downloads'), (snap) => {
-      downloadCounts = snap.val() || {};
-      Object.keys(downloadCounts).forEach(id => {
-        const el = document.getElementById('dl-' + id);
-        if(el) el.innerText = downloadCounts[id];
-      });
-    });
-
-    onValue(ref(db, 'verified_users'), (snap) => {
-      verifiedUsers = snap.val() || {};
-    });
-
-    window.trackDownload = (id) => {
-      runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
-    };
-
-    window.toggleGreenLed = async (id, event) => {
-      event.stopPropagation();
-      if (!isSuperUser) return;
-      const ledRef = ref(db, `updates_led/${id}`);
-      const snap = await get(ledRef);
-      if (snap.exists()) {
-        await set(ledRef, null);
-      } else {
-        await set(ledRef, true);
-      }
-    };
-
-    onValue(ref(db, 'updates_led'), (snap) => {
-      const leds = snap.val() || {};
-      document.querySelectorAll('.led-green').forEach(el => el.style.display = 'none');
-      Object.keys(leds).forEach(id => {
-        const el = document.getElementById(`led-green-${id}`);
-        if (el) el.style.display = 'inline-block';
-        const btn = document.getElementById(`btn-led-${id}`);
-        if (btn) btn.innerText = '⭕ Quitar LED';
-      });
-      document.querySelectorAll('.admin-led-btn').forEach(btn => {
-        const id = btn.id.replace('btn-led-', '');
-        if(!leds[id]) btn.innerText = '🟢 Act. LED';
-      });
-    });
-
-    onValue(ref(db, 'last_comment_time'), (snap) => {
-      const times = snap.val() || {};
-      document.querySelectorAll('.led-yellow').forEach(el => el.style.display = 'none');
-      Object.keys(times).forEach(id => {
-        const lastComment = times[id];
-        const lastSeen = localStorage.getItem(`seen_comments_${id}`) || 0;
-        if (lastComment > lastSeen) {
-          const el = document.getElementById(`led-yellow-${id}`);
-          if (el) el.style.display = 'inline-block';
-        }
-      });
-    });
-
-    window.toggleModPin = async (modId, event) => {
-      event.stopPropagation();
-      if (!isSuperUser) return;
-      const pinRef = ref(db, `pinned_mods/${modId}`);
-      const snap = await get(pinRef);
-      if (snap.exists()) {
-        await set(pinRef, null);
-      } else {
-        await set(pinRef, true);
-      }
-    };
-
-    onValue(ref(db, 'pinned_mods'), (snap) => {
-      const pinned = snap.val() || {};
-      const container = document.getElementById('modsContainer');
-      const cards = Array.from(container.querySelectorAll('.mod-card:not(.coming-soon-card)'));
-
-      cards.forEach(card => {
-        const modId = card.id.replace('card-', '');
-        const btn = card.querySelector('.admin-pin-btn');
-        if (pinned[modId]) {
-          card.classList.add('pinned-mod');
-          if (btn) btn.innerText = '❌ Desfijar';
-        } else {
-          card.classList.remove('pinned-mod');
-          if (btn) btn.innerText = '📌 Fijar';
-        }
-      });
-
-      cards.sort((a, b) => {
-        const aId = a.id.replace('card-', '');
-        const bId = b.id.replace('card-', '');
-        const aPinned = pinned[aId] ? 1 : 0;
-        const bPinned = pinned[bId] ? 1 : 0;
-        return bPinned - aPinned;
-      });
-
-      cards.forEach(card => container.appendChild(card));
-    });
-
-    window.sendGlobalNotification = async () => {
-      const text = document.getElementById('globalNotifText').value.trim();
-      if (!text) return alert("Escribe un mensaje primero.");
-      
-      await set(ref(db, 'notifications/latest'), {
-        message: text,
-        timestamp: Date.now(),
-        id: Math.random().toString(36).substr(2, 9)
-      });
-      
-      document.getElementById('globalNotifText').value = '';
-      document.getElementById('admin-tools-popup').classList.remove('show');
-    };
-
-    window.showToast = (msg) => {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `<span style="font-size:20px;">🔔</span> <span>${msg}</span>`;
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 500);
-      }, 6000);
-    };
-
-    onValue(ref(db, 'notifications/latest'), (snap) => {
-      const data = snap.val();
-      if (!data) return;
-      
-      const lastSeen = localStorage.getItem('last_notif_id');
-      const isRecent = (Date.now() - data.timestamp) < (24 * 60 * 60 * 1000); 
-      
-      if (lastSeen !== data.id && isRecent) {
-        window.showToast(data.message);
-        localStorage.setItem('last_notif_id', data.id);
-      }
-    });
-
-    let currentModCommentsId = null;
-    let modCommentsListener = null;
-
-    window.openModComments = (id, title) => {
-      currentModCommentsId = id;
-      document.getElementById("mc-title").innerText = "Comentarios: " + title;
-      
-      localStorage.setItem(`seen_comments_${id}`, Date.now());
-      const yellowLed = document.getElementById(`led-yellow-${id}`);
-      if(yellowLed) yellowLed.style.display = 'none';
-
-      const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if(!user) {
-        document.getElementById('register-popup').classList.add('show');
-        return;
-      }
-      
-      const display = document.getElementById('mc-displayMyName');
-      display.innerText = "Comentando como: " + user.name;
-      if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-      const avatar = document.getElementById('mc-myAvatar');
-      avatar.innerText = user.name.charAt(0).toUpperCase();
-      avatar.style.background = stringToColor(user.name);
-
-      document.getElementById("mod-comments-popup").classList.add("show");
-
-      if(modCommentsListener) modCommentsListener(); 
-
-      const commentsRef = ref(db, `mod_comments/${id}`);
-      modCommentsListener = onValue(commentsRef, (snapshot) => {
-        const list = document.getElementById('mc-commentList');
-        list.innerHTML = '';
-        const data = snapshot.val();
-        const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-        if(data) {
-          let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-          
-          commentsArray.sort((a, b) => {
-              if (a.isPinned && !b.isPinned) return -1;
-              if (!a.isPinned && b.isPinned) return 1;
-              return b.id.localeCompare(a.id);
-          });
-
-          commentsArray.forEach(c => {
-            const isLalo = c.user.toLowerCase() === 'lalocf';
-            const isVerified = verifiedUsers[c.ownerKey] || isLalo;
-            const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-            const activeClass = myLikedComments[c.id] ? 'active' : '';
-            
-            const pinClass = c.isPinned ? 'pinned' : '';
-            const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
-            const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
-
-            let adminBtns = '';
-            if (isSuperUser) {
-               adminBtns = `
-                 <span style="color:gold; cursor:pointer" onclick="togglePinModComment('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
-                 <span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>
-               `;
-            } else if (myProfile && c.ownerKey === myProfile.key) {
-               adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>`;
-            }
-
-            const div = document.createElement('div');
-            div.className = `yt-comment-container ${pinClass}`;
-            div.innerHTML = `
-              <div class="yt-avatar" style="background:${stringToColor(c.user)}">${c.user.charAt(0).toUpperCase()}</div>
-              <div class="yt-content">
-                ${pinBadge}
-                <div class="yt-header">
-                  <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${c.user}')">
-                    <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${c.user}</a>${verifyBadge}
-                  </span>
-                  <span class="yt-date">${c.date}</span>
-                </div>
-                <div class="yt-text">${c.text}</div>
-                <div class="yt-actions">
-                  <span class="yt-action-btn ${activeClass}" id="btn-mclike-${c.id}" onclick="likeModComment('${c.id}')">👍 <span id="mcl-count-${c.id}">${c.likes || 0}</span></span> 
-                  <span class="yt-action-btn" onclick="replyModComment('${c.user}')">Responder</span>
-                  ${adminBtns}
-                </div>
-              </div>`;
-            list.appendChild(div);
-          });
-        } else {
-            list.innerHTML = '<p style="text-align:center; color:#aaa; font-size:13px;">Sé el primero en comentar sobre este port.</p>';
-        }
-      });
-    };
-
-    window.closeModComments = () => {
-      document.getElementById("mod-comments-popup").classList.remove("show");
-      if(modCommentsListener) {
-        modCommentsListener();
-        modCommentsListener = null;
-      }
-    };
-
-    window.addModComment = async () => {
-      if (await checkBanStatus()) return;
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      const text = document.getElementById('mc-commentText').value.trim();
-      if(!profile) return checkUserStatus();
-      if(!text) return alert("Escribe algo...");
-      
-      push(ref(db, `mod_comments/${currentModCommentsId}`), { 
-        ownerKey: profile.key, 
-        user: profile.name, 
-        link: profile.link, 
-        text, 
-        date: new Date().toLocaleString(), 
-        likes: 0, 
-        isPinned: false 
-      });
-      
-      set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
-      document.getElementById('mc-commentText').value = '';
-    };
-
-    window.likeModComment = async (commentId) => {
-      if (await checkBanStatus()) return;
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if(!profile) return checkUserStatus();
-      const userKey = profile.key;
-      const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-      
-      const likeRef = ref(db, `mod_comments/${currentModCommentsId}/${commentId}/userLikes/${userKey}`);
-      const snap = await get(likeRef);
-      if (snap.exists()) {
-        await set(likeRef, null); 
-        runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 1) - 1);
-        delete myLikedComments[commentId];
-      } else {
-        await set(likeRef, true); 
-        runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 0) + 1);
-        myLikedComments[commentId] = true;
-      }
-      localStorage.setItem('my_liked_mod_comments', JSON.stringify(myLikedComments));
-    };
-
-    window.deleteModComment = (id) => confirm("¿Borrar comentario?") && remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
-    window.togglePinModComment = (cId, currentState) => update(ref(db, `mod_comments/${currentModCommentsId}/${cId}`), { isPinned: !currentState });
-    window.replyModComment = (name) => { const txt = document.getElementById('mc-commentText'); txt.value = `@${name} `; txt.focus(); };
-    
-    document.getElementById('mc-commentText').addEventListener('input', function() { document.getElementById('mc-charCounter').innerText = this.value.length; });
-
-    window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
-
-    onValue(ref(db, ".info/connected"), (snap) => {
-      if (snap.val() === true) {
-        document.getElementById("statusDot").classList.add("online");
-        document.getElementById("statusText").innerText = "Servidor: Online";
-        document.getElementById("statusText").style.color = "#00ff41";
-      } else {
-        document.getElementById("statusDot").classList.remove("online");
-        document.getElementById("statusText").innerText = "Desconectado";
-        document.getElementById("statusText").style.color = "#aaa";
-      }
-    });
-
-    window.toggleTheme = () => document.body.classList.toggle("light");
-    
-    window.selectSection = (id, el) => { 
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); 
-      document.getElementById(id).classList.add("active"); 
-      
-      const searchUI = document.getElementById("searchContainer");
-      const filterUI = document.getElementById("filterContainer");
-
-      if (id === 'apks') {
-          searchUI.style.display = 'block';
-          filterUI.style.display = 'none';
-      } else if (id === 'mods') {
-          searchUI.style.display = 'block';
-          filterUI.style.display = 'flex';
-      } else {
-          searchUI.style.display = 'none';
-          filterUI.style.display = 'none';
-      }
-
-      if(el) {
-          document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-          el.classList.add("active");
-      }
-      
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    let currentFilter = 'all';
-    window.setFilter = (filter, btn) => {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      filterContent();
-    };
-
-    window.filterContent = () => {
-      const search = document.getElementById('globalSearch').value.toLowerCase();
-      const items = document.querySelectorAll('.mod-card');
-      const apks = document.querySelectorAll('.apk-card');
-      
-      items.forEach(item => {
-        if(item.classList.contains('coming-soon-card')) return;
-        const title = item.querySelector('h3').innerText.toLowerCase();
-        const itemGama = item.getAttribute('data-gama') || 'mid';
-        const matchesSearch = title.includes(search);
-        const matchesFilter = currentFilter === 'all' || itemGama === currentFilter;
-        item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
-      });
-
-      apks.forEach(apk => {
-        const title = apk.querySelector('h3').innerText.toLowerCase();
-        apk.style.display = title.includes(search) ? "block" : "none";
-      });
-    };
-
-    async function checkBanStatus() {
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if (!profile) return false;
-      const snap = await get(ref(db, `banned_users/${profile.key}`));
-      if (snap.exists()) {
-        const banData = snap.val();
-        if (Date.now() < banData.expiresAt) {
-          const timeLeft = Math.ceil((banData.expiresAt - Date.now()) / 3600000);
-          alert(`⛔ ACCESO DENEGADO\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
-          return true;
-        } else {
-          await set(ref(db, `banned_users/${profile.key}`), null);
-          return false;
-        }
-      }
-      return false;
-    }
-
-    window.openBanPanel = (userKey, userName) => {
-      if (!isSuperUser) return;
-      document.getElementById('ban-target-info').innerText = `Gestionando a: ${userName}`;
-      document.getElementById('ban-popup').classList.add('show');
-      document.getElementById('confirmBanBtn').onclick = async () => {
-        const reason = document.getElementById('banReason').value || "Normas";
-        const hours = parseInt(document.getElementById('banDuration').value) || 24;
-        await set(ref(db, `banned_users/${userKey}`), { userName, reason, expiresAt: Date.now() + (hours * 3600000) });
-        alert("Usuario baneado.");
-        document.getElementById('ban-popup').classList.remove('show');
-      };
-    };
-
-    function checkUserStatus() {
-      const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if(!user) { document.getElementById('register-popup').classList.add('show'); } 
-      else { updateCommentInterface(user); syncLikeButtons(); }
-    }
-
-    function updateCommentInterface(user) {
-      const display = document.getElementById('displayMyName');
-      if(display) {
-        display.innerText = "Comentando como: " + user.name;
-        if(user.name.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-        const avatar = document.getElementById('myAvatar');
-        avatar.innerText = user.name.charAt(0).toUpperCase();
-        avatar.style.background = stringToColor(user.name);
-      }
-    }
-
-    window.saveRegistration = () => {
-      const name = document.getElementById('regName').value.trim();
-      const link = document.getElementById('regLink').value.trim() || "#";
-      if(name.length < 3) return alert("Nombre muy corto.");
-      const profile = { name, link, key: 'user_' + Math.random().toString(36).substr(2, 9) };
-      localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-      document.getElementById('register-popup').classList.remove('show');
-      location.reload();
-    };
-
-    let holdTimer;
-    const fnfTitle = document.getElementById('fnf-title');
-    const _0xd1a4 = "bGFsb2NmbW9kczE=";
-
-    fnfTitle.addEventListener('mousedown', startHold);
-    fnfTitle.addEventListener('mouseup', endHold);
-    fnfTitle.addEventListener('touchstart', startHold);
-    fnfTitle.addEventListener('touchend', endHold);
-
-    function startHold() { holdTimer = setTimeout(() => { document.getElementById('admin-popup').classList.add('show'); }, 5000); }
-    function endHold() { clearTimeout(holdTimer); }
-
-    window.verifyAdmin = () => {
-      const input = document.getElementById('adminCode').value;
-      if(btoa(input) === _0xd1a4) {
-        localStorage.setItem('superUser', 'true');
-        alert("Modo Superusuario Activado.");
-        location.reload();
-      } else { alert("Código incorrecto."); }
-    };
-
-    function stringToColor(str) {
-      let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-      return `hsl(${hash % 360}, 65%, 50%)`;
-    }
-
-    window.handleLike = async (id, el) => {
-      if (await checkBanStatus()) return;
-      const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      if(!profile) return checkUserStatus();
-      const userKey = profile.key;
-      const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-      const itemLikeRef = ref(db, `likes_registry/${id}/${userKey}`);
-      const snap = await get(itemLikeRef);
-      if (snap.exists()) {
-        await set(itemLikeRef, null); runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
-        delete myLikedItems[id]; el.classList.remove('active');
-      } else {
-        await set(itemLikeRef, true); runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
-        myLikedItems[id] = true; el.classList.add('active');
-      }
-      localStorage.setItem('my_liked_items', JSON.stringify(myLikedItems));
-    };
-
-    function syncLikeButtons() {
-      const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-      Object.keys(myLikedItems).forEach(id => {
-        const btn = document.getElementById('like-' + id);
-        if(btn) btn.classList.add('active');
-      });
-    }
-
-    const MOD_DATA = {
-  mod99_2: {
-    img: "assets/images/mods/play.webp",
-    title: "Child's Play Pico Mix",
-    desc: "Friday Night Funkin' FNF' Child's Play Pico Mix & Wip Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive) Mejorado y Opt por LaloCF", link: "https://drive.google.com/file/d/1qyMKXjaGwH4PG3DPVqphTrMskvU-sX_4/view?usp=drivesdk" },
-      { name: "Descarga (Tik Tok) Wip", link: "https://vt.tiktok.com/ZSawhN2LN/" },
-      { name: "Descarga Original", link: "https://gamebanana.com/mods/546317" }
-    ]
-  },
-  mod99_3: {
-    img: "assets/images/mods/fate.webp",
-    title: "TaintedFate",
-    desc: "Friday Night Funkin' FNF' TaintedFate Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive)", link: "https://drive.usercontent.google.com/download?id=12kYlM1XbLGa_3o9uIjYtFfUMGE7PLe4E&export=download&authuser=0" },
-      { name: "Descarga Original", link: "https://gamebanana.com/mods/504445" }
-    ]
-  },
-  mod99_4: {
-    img: "assets/images/mods/logojeffy.jpeg",
-    title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
-    desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
-    version: "Psych v1.0.4",
-    downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
-  },
-  mod99_5: {
-    img: "assets/images/mods/logonusky.jpeg",
-    title: "VS Nusky",
-    desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
-    ]
-  },
-  mod99_6: {
-    img: "assets/images/mods/chritmas.jpeg",
-    title: "Cocoa Noimix",
-    desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
-      { name: "Descarga Directa iOS (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=11AUlGXUvPrxszI5xnjssMS5OvZDFp64_&export=download" },
-      { name: "Descarga Directa Opt (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1EO-TOh4KByE0gSf24DXx2pG10WR8wdhU&export=download" }
-    ]
-  },
-  mod99_7: {
-    img: "assets/images/mods/metal.png",
-    title: "Vs Metal Pipe V2",
-    desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download"}
-    ]
-  },
-  mod99_8: {
-    img: "assets/images/mods/Girl.png",
-    title: "Rolling Girl",
-    desc: "Friday Night Funkin' FNF' Rolling Girl Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/42313?lang=es" },
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1n_e-lmvGFeIybTIDkdHXnduEIeXziD8I&export=download" }
-    ]
-  },
-  mod99_9: {
-    img: "assets/images/mods/tales.webp",
-    title: "Herobrine Reborn Tales",
-    desc: "Friday Night Funkin' FNF' Herobrine Reborn Tales Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1bPmKg62b6r5xiEOI5ZVFNHZqU0Mp0PLY/view" }
-    ]
-  },
-  mod100: {
-    img: "assets/images/mods/odd.webp",
-    title: "Vs. TheOdd1sOut ONESHOT",
-    desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga Directa ES (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1rBL-hdK-_jeq-bByvK2xUfDu23D4QVEY&export=download" },
-      { name: "Descarga Directa EU (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=12gPg9wTnUa_JUSVj1IgUE7ETJieHNPIl&export=download" },
-      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/498584" }
-    ]
-  }
-};
-
-    const APK_DATA = {
-  apk1: {
-    img: "assets/images/webp/logopsychengine.webp",
-    title: "Psych Engine",
-    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
-    version: "v1.0.4",
-    downloads: [
-      { name: "Descarga Directa Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
-      { name: "Descarga Directa Windows32 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
-      { name: "Descarga Android No Optimizado (Drive)", link: "https://drive.google.com/file/d/1OLfDEtB_-ItFS0WqRut9xfsnfXSWlBgq/view" },
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
-    ]
-  },
-  apk2: {
-    img: "assets/images/webp/logopsychonline.webp",
-    title: "Psych Online",
-    desc: "Mod de Psych Engine con funciones en línea.",
-    version: "v0.13.2 Bugfix",
-    downloads: [
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/macBuild.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
-    ]
-  },
-  apk3: {
-    img: "assets/images/webp/logocodename.webp",
-    title: "CodeName Engine",
-    desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
-    version: "v1.0.1",
-    downloads: [
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" }
-    ]
-  },  
-  apk4: {
-    img: "assets/images/webp/logoplusengine.webp",
-    title: "Plus Engine",
-    desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Mac.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
-    ]
-  },
-  apk5: {
-    img: "assets/images/webp/logop-slice.webp",
-    title: "P-Slice Engine",
-    desc: "El motor P-Slice es un cruce entre Psych Engine y la versión más reciente de Friday Night Funkin.\n\nSu objetivo es incorporar nuevos elementos visuales y características de las versiones más nuevas de FNF y realizar cambios en las existentes para que se sientan más cercanas a las de V-Slice.",
-    version: "v3.4.2",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Slice/P-Slice/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
-    ]
-  }
-};
-
-    window.openModInfo = (id) => { 
-      const d = MOD_DATA[id]; 
-      document.getElementById("popup-img").src = d.img; 
-      document.getElementById("popup-title").innerText = d.title; 
-      document.getElementById("popup-desc").innerText = d.desc; 
-      document.getElementById("popup-version").innerText = d.version; 
-      let h = ""; 
-      d.downloads.forEach(dl => { 
-        h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`; 
-      }); 
-      document.getElementById("popup-downloads").innerHTML = h; 
-      document.getElementById("mod-popup").classList.add("show"); 
-    };
-    window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
-
-    window.openApkInfo = (id) => { 
-      const d = APK_DATA[id]; 
-      document.getElementById("apk-img").src = d.img; 
-      document.getElementById("apk-title").innerText = d.title; 
-      document.getElementById("apk-desc").innerText = d.desc; 
-      document.getElementById("apk-version").innerText = d.version; 
-      let h = ""; 
-      d.downloads.forEach(dl => { 
-        h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`; 
-      }); 
-      document.getElementById("apk-downloads").innerHTML = h; 
-      document.getElementById("apk-popup").classList.add("show"); 
-    };
-    window.closeApkInfo = () => document.getElementById("apk-popup").classList.remove("show");
-
-    onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
-    
-    // --- LÓGICA DE INSTALACIÓN (PWA) ---
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-    });
-
-    window.closeUpdatePopup = () => { 
-      document.getElementById('update-popup').classList.remove('show'); 
-      localStorage.setItem('lastVersionSeen', APP_VERSION); 
-      
-      if (deferredPrompt) {
-        document.getElementById('install-popup').classList.add('show');
-      } else {
-        checkUserStatus(); 
-      }
-    };
-
-    window.installApp = async () => {
-      document.getElementById('install-popup').classList.remove('show');
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-      }
-      checkUserStatus();
-    };
-
-    window.dismissInstall = () => {
-      document.getElementById('install-popup').classList.remove('show');
-      checkUserStatus();
-    };
-    
-    window.onload = () => {
-      document.getElementById("year").textContent = new Date().getFullYear();
-      if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
-      else checkUserStatus();
-    };
-
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      if (isIOS) {
-        document.body.classList.add('ios-theme');
-        console.log("🍏 iOS Detectado: Activando diseño Apple Premium.");
-      } else {
-        console.log("🤖 Android/PC Detectado: Manteniendo diseño Neón.");
-      }
-    });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('App lista para instalar'))
-          .catch(err => console.log('Error al registrar SW', err));
-      });
-    }
-  </script>
+  <script type="module" src="js/main.js"></script>
+  <script src="js/init.js"></script>
 
 </body>
 </html>

@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v2.4.3";
+const APP_VERSION = "v4.0.0";
 
 let isSuperUser = localStorage.getItem('superUser') === 'true';
 if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -37,7 +37,6 @@ window.trackDownload = (id) => {
   runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
 };
 
-// --- SISTEMA DE REPORTES DE LINKS ---
 window.reportError = async (id) => {
   const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
   if (!user) {
@@ -543,18 +542,18 @@ function syncLikeButtons() {
 
 const SCRIPTS_DATA = {
   script1: {
-    title: "Script HUD Personalizado",
-    desc: "Este script cambia por completo la interfaz del juego, dándole un estilo mucho más moderno. Incluye barras de vida personalizadas, contadores precisos y soporte para móviles.",
-    version: "v1.0 (Psych Engine)",
-    images: [
-      "assets/images/webp/logocode.webp",
-      "assets/images/mods/play.webp",
-      "assets/images/mods/fate.webp"
-    ],
-    downloads: [
-      { name: "Descargar Script (Drive)", link: "#" }
-    ]
-  }
+        title: "Menu Pause",
+        desc: "Este script agrega un menú de pausa funcional a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/mp1.webp",
+          "assets/images/scripts/mp2.webp"
+        ],
+        downloads: [
+          { name: "Descarga original (GameBanana)", link: "https://gamebanana.com/mods/464393" },
+          { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
+        ]
+      }
 };
 
 let scriptImagesArray = [];
@@ -601,6 +600,37 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod98_9: {
+    img: "assets/images/mods/bot.webp",
+    title: "Vs BotFriend",
+    desc: "Friday Night Funkin' FNF' Vs Botfriend Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo:",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/657873"},
+      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Stargazer2026/Stargazer.2026.FanChart-PE.1.0.4.zip" }
+    ]
+  },
+  mod99_0: {
+    img: "assets/images/mods/star2026.webp",
+    title: "Stargazer (2026) FanChart",
+    desc: "Friday Night Funkin' FNF' Stargazer (2026) FanChart Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nEste solo esta optimizado y para que fuera compatible con iOS.\n\nPeso del archivo: 18.88MB",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/657873"},
+      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Stargazer2026/Stargazer.2026.FanChart-PE.1.0.4.zip" }
+    ]
+  },
+  mod99_1: {
+    img: "assets/images/mods/wii.webp",
+    title: "VS Matt V3",
+    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga Directa ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Wii/MattV3.Port.zip"},
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1GxlBf_tDX8qFJttqmb_DJH9s3xr4TeFZ/view?usp=drivesdk" },
+      { name: "Descarga ZIP (MediaFire)", link: "https://www.mediafire.com/file/dva94kid8frmrew/MattV3_%2528Port%2529.zip/file" }
+    ]
+  },
   mod99_2: {
     img: "assets/images/mods/play.webp",
     title: "Child's Play Pico Mix",
@@ -739,14 +769,17 @@ const APK_DATA = {
     img: "assets/images/webp/logoplusengine.webp",
     title: "Plus Engine",
     desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2",
+    version: "v1.2.6 HOTFIX",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Mac.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
+      { name: "Descarga Directa Windows 32 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
+      { name: "Descarga Directa Windows 64 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x64.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
+      { name: "Descarga Directa Mac ARM (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
+      { name: "Descarga Directa Mac Intel (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Android-x64-v7a.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
     ]
   },
   apk5: {
@@ -762,6 +795,54 @@ const APK_DATA = {
       { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
       { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+    ]
+  },
+  apk6: {
+    img: "assets/images/webp/logonova.webp",
+    title: "NovaFleare Engine",
+    desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
+    version: "v1.1.8 HOTFIX",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/windows.zip" },
+      { name: "Descarga Directa Mac14 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS14.zip" },
+      { name: "Descarga Directa Mac15 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS15.tar"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/android.apk"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/iOS.zip" }
+    ]
+  },
+  apk7: {
+    img: "assets/images/webp/logoEK.webp",
+    title: "PsychEngine ExtraKeys",
+    desc: "¡Bienvenido a la organización más genial del mundo!\n\n Alojamiento de Psych Engine con claves adicionales , Psych EK , claves adicionales de Psych Engine , claves adicionales o PE: ¡EK !",
+    version: "v0.4.6",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-windowsBuild-56acc57.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-linuxBuild-56acc57.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" }
+    ]
+  },
+  apk8: {
+    img: "assets/images/webp/logoshadowengine.webp",
+    title: "Shadow Engine",
+    desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
+    version: "v0.7.0",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases" },
+      { name: "Descarga Directa Windows ARM64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-arm64.zip" },
+      { name: "Descarga Directa Windows i686 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-i686.zip" },
+      { name: "Descarga Directa Windows x86_64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-x86_64.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-macOS-Universal.tar" },
+      { name: "Descarga Directa Linux ARM64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-arm64.tar"},
+      { name: "Descarga Directa Linux ARMV7 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-armv7.tar"},
+      { name: "Descarga Directa Linux i686 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-i686.tar"},
+      { name: "Descarga Directa Linux x86_64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-x86_64.tar"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-Android.apk"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-iOS.ipa" }
     ]
   }
 };
@@ -802,7 +883,6 @@ window.closeApkInfo = () => document.getElementById("apk-popup").classList.remov
 
 onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
 
-// --- LÓGICA DE INSTALACIÓN (PWA) ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -839,4 +919,5 @@ window.onload = () => {
   document.getElementById("year").textContent = new Date().getFullYear();
   if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
   else checkUserStatus();
+
 };

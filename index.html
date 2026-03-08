@@ -82,15 +82,16 @@
         <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
       </div>
       <div class="update-body">
-        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;">¡Novedades v2.4.3!</h2>
-        <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Lo nuevo en esta versión</p>
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;">¡Novedades v4.0.0!</h2>
+        <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Lo nuevo de esta versión:</p>
         <ul class="update-list-modern">
-          <li><span>🔥</span> <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span></li>
-          <li><span>🔥</span> <span><b>Nueva Base:</b> P-Slice Engine.</span></li>
-          <li><span>💻</span> <span><b>Nueva Sección:</b> ¡Scripts ahora disponibles!</span></li>
+         <li style="border-left-color: var(--neon-gold);"><span>🔥</span> <span><b>Nuevo Port:</b> Vs BotFriend.</span></li>
+          <li style="border-left-color: var(--neon-orange);"><span>🔥</span> <span><b>Dos Nuevas Bases:</b> PsychEngine ExtraKeys y Shadow Engine.</span></li>
+          <li style="border-left-color: var(--neon-red);"><span>💻</span> <span><b>Nueva Sección:</b> ¡Scripts ahora disponibles!</span></li>
+          <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Menú mejorado e interfaz refinada.</span></li>
           <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Menú mejorado e interfaz refinada.</span></li>
         </ul>
-        <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido! 👍</button>
+        <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
       </div>
     </div>
   </div>
@@ -139,20 +140,21 @@
     <section id="home" class="section active">
       <div class="hero-banner">
         <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;">¡Bienvenido a FNF' Mobile!</h1>
-        <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;">El mejor lugar para descargar tus ports favoritos optimizados para dispositivos móviles.</p>
+        <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;">El mejor lugar para descargar tus mods favoritos optimizados para dispositivos móviles.</p>
         <button class="btn" style="font-size: 16px; padding: 12px 30px;" onclick="document.querySelectorAll('.nav-item')[2].click()">Explorar MODs 🚀</button>
       </div>
 
       <div class="info-card">
         <h2 class="glow" style="font-size: 22px; margin-top: 0;">✨ ¿De qué trata esta página?</h2>
         <p style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
-          En esta página nos dedicamos a subir la mayoría de <b>MODs, Motores y Scripts para móviles</b>. Nuestro objetivo es traerte las mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.
+          En esta página me dedico a subir la mayoría de <b>MODs, Motores y Scripts para móviles</b>. Mi objetivo es traerles mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.
         </p>
         <ul class="info-list">
           <li>🚀 <b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos.</li>
-          <li>📱 <b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas las gamas.</li>
-          <li>💻 <b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a tus propios juegos.</li>
+          <li>📱 <b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas gamas.</li>
+          <li>💻 <b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a tus propios juegos y perzonalizarlo a su gusto.</li>
           <li>💬 <b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión.</li>
+          <li>🔔 <b>Actualizaciones Constantes:</b> Si tienes dudas o ideas puedes contactarme. ¡Animo!</li>
         </ul>
       </div>
     </section>
@@ -160,14 +162,15 @@
     <section id="apks" class="section">
       <h2 class="glow">Descargas</h2>
       <div class="apks-grid" id="apksContainer">
+        
         <div class="apk-card">
           <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-red" id="led-red-apk1" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk1" style="display:none;" title="Nuevos comentarios"></span>Psych Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk1')">Info</button>
+            <button class="btn" onclick="openApkInfo('apk1')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')">💬 Chat</button>
           </div>
         </div>
@@ -177,9 +180,9 @@
           <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
           <img src="assets/images/webp/logoonline.webp">
-          <h3><span class="led-dot led-red" id="led-red-apk2" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk2" style="display:none;" title="Nuevos comentarios"></span>Psych Online</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk2')">Info</button>
+            <button class="btn" onclick="openApkInfo('apk2')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')">💬 Chat</button>
           </div>
         </div>
@@ -189,9 +192,9 @@
           <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
           <img src="assets/images/webp/logocode.webp">
-          <h3><span class="led-dot led-red" id="led-red-apk3" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk3" style="display:none;" title="Nuevos comentarios"></span>CodeName Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk3')">Info</button>
+            <button class="btn" onclick="openApkInfo('apk3')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')">💬 Chat</button>
           </div>
         </div>
@@ -201,9 +204,9 @@
           <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-red" id="led-red-apk4" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk4" style="display:none;" title="Nuevos comentarios"></span>Plus Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk4')">Info</button>
+            <button class="btn" onclick="openApkInfo('apk4')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')">💬 Chat</button>
           </div>
         </div>
@@ -213,10 +216,46 @@
           <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
           <img src="assets/images/webp/logop.webp">
-          <h3><span class="led-dot led-red" id="led-red-apk5" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk5" style="display:none;" title="Nuevos comentarios"></span>P-Slice Engine</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk5')">Info</button>
+            <button class="btn" onclick="openApkInfo('apk5')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk6">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk6">0</span></div>
+          <img src="assets/images/webp/logof.webp">
+          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk6" style="display:none;" title="Nuevos comentarios"></span>Nova Fleare</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk6')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk7" onclick="toggleGreenLed('apk7', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-apk7" onclick="handleLike('apk7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk7">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk7">0</span></div>
+          <img src="assets/images/webp/logo.webp">
+          <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk7" style="display:none;" title="Nuevos comentarios"></span>PsychEngine EK</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk7')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk7', 'PsychEngine EK')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="apk-card">
+          <button class="admin-led-btn" id="btn-led-apk8" onclick="toggleGreenLed('apk8', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-apk8" onclick="handleLike('apk8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk8">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk8">0</span></div>
+          <img src="assets/images/webp/logose.webp">
+          <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-apk8" style="display:none;" title="Nuevos comentarios"></span>Shadow Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openApkInfo('apk8')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('apk8', 'Shadow Engine')">💬 Chat</button>
           </div>
         </div>
       </div>
@@ -225,15 +264,54 @@
     <section id="mods" class="section">
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
+        <div class="mod-card" data-gama="low" id="card-mod98_9">
+          <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod98_9', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod98_9" onclick="toggleGreenLed('mod98_9', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod98_9" onclick="handleLike('mod98_9', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod98_9">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod98_9">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-mod98_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod98_9" style="display:none;" title="Nuevos comentarios"></span>Vs BotFriend</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod98_9')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod98_9', 'Vs BotFriend')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="mod-card" data-gama="low" id="card-mod99_0">
+          <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_0', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_0" onclick="toggleGreenLed('mod99_0', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod99_0" onclick="handleLike('mod99_0', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_0">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_0">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-mod99_0" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_0" style="display:none;" title="Nuevos comentarios"></span>Stargazer (2026) FanChart</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_0')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_0', 'Stargazer (2026) FanChart')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="mod-card" data-gama="mid" id="card-mod99_1">
+          <span class="gama-badge gama-mid">Media</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_1">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_1">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_1" style="display:none;" title="Nuevos comentarios"></span>Vs Matt V3</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_1')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs. Matt V3')">💬 Chat</button>
+          </div>
+        </div>
+
         <div class="mod-card" data-gama="low" id="card-mod99_2">
           <span class="gama-badge gama-low">Baja</span>
           <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)">📌 Fijar</button>
           <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_2" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_2" style="display:none;" title="Nuevos comentarios"></span>Child's Play Pico Mix (NEW)</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_2')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_2')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Child\'s Play Pico Mix')">💬 Chat</button>
           </div>
         </div>
@@ -244,9 +322,9 @@
           <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_3" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_3" style="display:none;" title="Nuevos comentarios"></span>TaintedFate</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_3')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_3')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')">💬 Chat</button>
           </div>
         </div>
@@ -257,24 +335,10 @@
           <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_4">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_4" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_4" style="display:none;" title="Nuevos comentarios"></span>VS Jeffy V3</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_4')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_4')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy V3')">💬 Chat</button>
-          </div>
-        </div>
-
-        <div class="mod-card" data-gama="low" id="card-mod99_5">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_5', event)">📌 Fijar</button>
-          <button class="admin-led-btn" id="btn-led-mod99_5" onclick="toggleGreenLed('mod99_5', event)">🟢 Act. LED</button>
-          <div class="like-container" id="like-mod99_5" onclick="handleLike('mod99_5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_5">0</span></div>
-          <div class="dl-counter">⬇️ <span id="dl-mod99_5">0</span></div>
-          <img src="assets/images/mods/logonusky.jpeg" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:14px; box-shadow:0 0 12px var(--neon-blue);">
-          <h3><span class="led-dot led-red" id="led-red-mod99_5" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_5" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_5" style="display:none;" title="Nuevos comentarios"></span>VS Nusky</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_5')">Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_5', 'VS Nusky')">💬 Chat</button>
           </div>
         </div>
 
@@ -284,9 +348,9 @@
           <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_6">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_6">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_6" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_6" style="display:none;" title="Nuevos comentarios"></span>Cocoa Noimix</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_6')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_6')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')">💬 Chat</button>
           </div>
         </div>
@@ -297,9 +361,9 @@
           <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_7">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_7">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_7" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_7" style="display:none;" title="Nuevos comentarios"></span>Vs Metal Pipe V2</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_7')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_7')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Vs Metal Pipe V2')">💬 Chat</button>
           </div>
         </div>
@@ -310,9 +374,9 @@
           <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_8">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_8">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_8" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_8" style="display:none;" title="Nuevos comentarios"></span>Rolling Girl</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_8')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_8')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')">💬 Chat</button>
           </div>
         </div>
@@ -323,9 +387,9 @@
           <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_9">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_9">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod99_9" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_9" style="display:none;" title="Nuevos comentarios"></span>Herobrine Tales</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_9')">Info</button>
+            <button class="btn" onclick="openModInfo('mod99_9')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine Tales')">💬 Chat</button>
           </div>
         </div>
@@ -336,9 +400,9 @@
           <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod100">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod100">0</span></div>
-          <h3><span class="led-dot led-red" id="led-red-mod100" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
+          <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod100" style="display:none;" title="Nuevos comentarios"></span>Vs. TheOdd1sOut</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod100')">Info</button>
+            <button class="btn" onclick="openModInfo('mod100')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('mod100', 'Vs. TheOdd1sOut')">💬 Chat</button>
           </div>
         </div>
@@ -346,7 +410,7 @@
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: Se Detuvo</p></div>
       </div>
     </section>
 
@@ -359,11 +423,10 @@
           <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)">🟢 Act. LED</button>
           <div class="like-container" id="like-script1" onclick="handleLike('script1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-script1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-script1">0</span></div>
-          <img src="assets/images/webp/logocode.webp" style="height: 120px;">
-          <h3><span class="led-dot led-red" id="led-red-script1" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-script1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-script1" style="display:none;" title="Nuevos comentarios"></span>Script HUD Personalizado</h3>
+          <h3><span class="led-dot led-red" id="led-red-script1" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-script1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-script1" style="display:none;" title="Nuevos comentarios"></span>Menu Pause</h3>
           <div class="card-buttons">
-            <button class="btn" onclick="openScriptInfo('script1')">Info</button>
-            <button class="btn btn-chat" onclick="openModComments('script1', 'Script HUD')">💬 Chat</button>
+            <button class="btn" onclick="openScriptInfo('script1')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')">💬 Chat</button>
           </div>
         </div>
       </div>
@@ -380,7 +443,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.4.3 <br>
+      © <span id="year"></span> LaloCF | V4.0.0 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>

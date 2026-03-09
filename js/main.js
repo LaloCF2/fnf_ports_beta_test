@@ -386,6 +386,17 @@ window.selectSection = (id, el) => {
   if(el) {
       document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
       el.classList.add("active");
+      
+      // --- MAGIA DE LA GOTA AL HACER CLIC ---
+      const drop = document.getElementById("waterDrop");
+      const nav = document.querySelector(".bottom-nav");
+      if (drop && nav && document.body.classList.contains("ios-theme")) {
+        drop.classList.add("snap");
+        const navRect = nav.getBoundingClientRect();
+        const itemRect = el.getBoundingClientRect();
+        drop.style.left = (itemRect.left - navRect.left + (itemRect.width / 2)) + "px";
+      }
+      // --------------------------------------
   }
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -603,11 +614,11 @@ const MOD_DATA = {
   mod98_9: {
     img: "assets/images/mods/bot.webp",
     title: "Vs BotFriend",
-    desc: "Friday Night Funkin' FNF' Vs Botfriend Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo:",
+    desc: "Friday Night Funkin' FNF' Vs Botfriend Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 72.87MB",
     version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
     downloads: [
-      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/657873"},
-      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Stargazer2026/Stargazer.2026.FanChart-PE.1.0.4.zip" }
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/463070"},
+      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/BtF/V.S.Botfriend.zip" }
     ]
   },
   mod99_0: {
@@ -827,7 +838,7 @@ const APK_DATA = {
     ]
   },
   apk8: {
-    img: "assets/images/webp/logoshadowengine.webp",
+    img: "assets/images/webp/logose.webp",
     title: "Shadow Engine",
     desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
     version: "v0.7.0",
@@ -921,3 +932,4 @@ window.onload = () => {
   else checkUserStatus();
 
 };
+

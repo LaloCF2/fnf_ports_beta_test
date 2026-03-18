@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v4.0.0";
+const APP_VERSION = "v4.1.0";
 
 let isSuperUser = localStorage.getItem('superUser') === 'true';
 if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -351,11 +351,11 @@ window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")
 onValue(ref(db, ".info/connected"), (snap) => {
   if (snap.val() === true) {
     document.getElementById("statusDot").classList.add("online");
-    document.getElementById("statusText").innerText = "Servidor: Online";
+    document.getElementById("statusText").innerText = "Servidor: Activo";
     document.getElementById("statusText").style.color = "#00ff41";
   } else {
     document.getElementById("statusDot").classList.remove("online");
-    document.getElementById("statusText").innerText = "Desconectado";
+    document.getElementById("statusText").innerText = "Servidor: Desconectado";
     document.getElementById("statusText").style.color = "#aaa";
   }
 });
@@ -386,17 +386,6 @@ window.selectSection = (id, el) => {
   if(el) {
       document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
       el.classList.add("active");
-      
-      // --- MAGIA DE LA GOTA AL HACER CLIC ---
-      const drop = document.getElementById("waterDrop");
-      const nav = document.querySelector(".bottom-nav");
-      if (drop && nav && document.body.classList.contains("ios-theme")) {
-        drop.classList.add("snap");
-        const navRect = nav.getBoundingClientRect();
-        const itemRect = el.getBoundingClientRect();
-        drop.style.left = (itemRect.left - navRect.left + (itemRect.width / 2)) + "px";
-      }
-      // --------------------------------------
   }
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -488,7 +477,7 @@ window.saveRegistration = () => {
   const name = document.getElementById('regName').value.trim();
   const link = document.getElementById('regLink').value.trim() || "#";
   const avatar = document.getElementById('regAvatar').value.trim() || "";
-  if(name.length < 3) return alert("Nombre muy corto.");
+  if(name.length < 3) return alert("El nombre es corto, intenta agregarle mas caracteres.");
   
   const oldProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
   const key = oldProfile ? oldProfile.key : 'user_' + Math.random().toString(36).substr(2, 9);
@@ -563,6 +552,17 @@ const SCRIPTS_DATA = {
         downloads: [
           { name: "Descarga original (GameBanana)", link: "https://gamebanana.com/mods/464393" },
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
+        ]
+      },
+   script2: {
+        title: "FPS Counter",
+        desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/sc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
       }
 };
@@ -932,4 +932,241 @@ window.onload = () => {
   else checkUserStatus();
 
 };
+
+let currentLang = localStorage.getItem('fnf_lang') || 'es';
+
+window.toggleLanguage = () => {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  localStorage.setItem('fnf_lang', currentLang);
+  applyLanguage();
+};
+
+function applyLanguage() {
+  const elements = document.querySelectorAll('[data-es][data-en]');
+  elements.forEach(el => {
+    el.classList.add('lang-fade');
+    setTimeout(() => {
+      el.innerHTML = el.getAttribute(`data-${currentLang}`);
+      el.classList.remove('lang-fade');
+    }, 150);
+  });
+  const btn = document.getElementById('langBtn');
+  if (btn) btn.innerHTML = currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+}
+
+const initV4 = setInterval(() => {
+  if(document.getElementById('langBtn')) {
+    clearInterval(initV4);
+    applyLanguage();
+    
+    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    if (profile) {
+      const nameInput = document.getElementById('editProfileName');
+      const avatarInput = document.getElementById('editProfileAvatar');
+      const preview = document.getElementById('profile-avatar-preview');
+      
+      if(nameInput && profile.name) nameInput.value = profile.name;
+      if(avatarInput && profile.avatar) {
+        avatarInput.value = profile.avatar;
+        if(preview) preview.src = profile.avatar;
+      }
+    }
+
+    const avatarInput = document.getElementById('editProfileAvatar');
+    if(avatarInput) {
+      avatarInput.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        const preview = document.getElementById('profile-avatar-preview');
+        if(preview) {
+          preview.src = url ? url : "https://via.placeholder.com/80/555/fff?text=?";
+        }
+      });
+    }
+  }
+}, 500);
+
+window.saveProfileChanges = () => {
+  let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+  
+  const name = document.getElementById('editProfileName').value.trim();
+  const avatar = document.getElementById('editProfileAvatar').value.trim();
+  
+  if(name.length < 3) return alert(currentLang === 'es' ? "El nombre es corto, intenta agregarle mas caracteres." : "The name is too short, try adding more characters.");
+  
+  profile.name = name;
+  profile.avatar = avatar;
+  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+  
+  document.getElementById('profile-popup').classList.remove('show');
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+  } else {
+    alert(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+  }
+};
+
+window.currentItemRatingId = null;
+
+setTimeout(() => {
+    if(window.openModInfo) {
+        const origOpenModInfo = window.openModInfo;
+        window.openModInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'mod');
+          origOpenModInfo(id);
+        };
+    }
+    if(window.openApkInfo) {
+        const origOpenApkInfo = window.openApkInfo;
+        window.openApkInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'apk');
+          origOpenApkInfo(id);
+        };
+    }
+    if(window.openScriptInfo) {
+        const origOpenScriptInfo = window.openScriptInfo;
+        window.openScriptInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'script');
+          origOpenScriptInfo(id);
+        };
+    }
+}, 1000);
+
+window.rateItem = (type, stars) => {
+  if (!window.currentItemRatingId) return;
+  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+  
+  if (!profile) {
+    alert(currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
+    return;
+  }
+  
+  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+  if (myRates[window.currentItemRatingId]) {
+      alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
+      return;
+  }
+  
+  myRates[window.currentItemRatingId] = stars;
+  localStorage.setItem('my_ratings', JSON.stringify(myRates));
+  
+  window.updateStarsUI(type, stars);
+  const txt = document.getElementById(`${type}-rating-text`);
+  if(txt) txt.innerText = currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
+};
+
+window.loadItemRating = (id, type) => {
+    const container = document.getElementById(`rating-container-${type}`);
+    if(!container) return;
+    
+    const spans = container.querySelectorAll('span');
+    const txt = document.getElementById(`${type}-rating-text`);
+    if(txt) txt.innerText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
+
+    const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+    if (myRates[id]) {
+        window.updateStarsUI(type, myRates[id]);
+        if(txt) txt.innerText = currentLang === 'es' ? "Tu calificación" : "Your rating";
+    } else {
+        spans.forEach(s => { s.style.color = 'gold'; s.style.textShadow = 'none'; });
+    }
+};
+
+window.updateStarsUI = (type, stars) => {
+    const container = document.getElementById(`rating-container-${type}`);
+    if(!container) return;
+    const spans = container.querySelectorAll('span');
+    spans.forEach((s, index) => {
+        if (index < stars) {
+            s.style.color = 'gold';
+            s.style.textShadow = '0 0 10px gold';
+        } else {
+            s.style.color = '#555';
+            s.style.textShadow = 'none';
+        }
+    });
+};
+
+
+// =======================================================
+// === SISTEMA DE PÍLDORA iOS (ARRASTRABLE) ===
+// =======================================================
+(() => {
+    // 1. Detectar si es iOS (iPhone, iPad, iPod)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    // Esperar a que el HTML cargue
+    setTimeout(() => {
+        const nav = document.querySelector('.bottom-nav');
+        const pill = document.getElementById('ios-pill');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        if (isIOS && nav && pill) {
+          nav.classList.add('is-ios'); // Enciende el CSS de la píldora
+          
+          // 2. Modificar el click normal para que la píldora lo siga
+          const originalSelectSection = window.selectSection;
+          window.selectSection = (sec, el) => {
+            if(originalSelectSection) originalSelectSection(sec, el);
+            
+            const index = Array.from(navItems).indexOf(el);
+            if (index !== -1) {
+              pill.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+              pill.style.transform = `translateX(${index * 100}%)`;
+            }
+          };
+
+          // 3. Lógica para arrastrar con el dedo (Deslizar)
+          let isDraggingPill = false;
+
+          nav.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Evita que la pantalla haga scroll al deslizar el menú
+            isDraggingPill = true;
+            pill.style.transition = 'none'; // Sin transición para que siga el dedo al instante
+            
+            const touch = e.touches[0];
+            const navRect = nav.getBoundingClientRect();
+            let xPos = touch.clientX - navRect.left;
+            xPos = Math.max(0, Math.min(xPos, navRect.width)); // Limites de la pantalla
+            
+            const itemWidth = navRect.width / navItems.length;
+            
+            // Mover la píldora visualmente
+            let visualX = xPos - (itemWidth / 2);
+            visualX = Math.max(0, Math.min(visualX, navRect.width - itemWidth));
+            pill.style.transform = `translateX(${visualX}px)`;
+            
+            // Detectar qué botón está tocando el dedo y activarlo
+            const hoveredIndex = Math.floor(xPos / itemWidth);
+            const targetItem = navItems[hoveredIndex];
+            
+            if (targetItem && !targetItem.classList.contains('active')) {
+               const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+               // Cambiamos de sección rápidamente
+               document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+               document.getElementById(sectionId).classList.add('active');
+               document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+               targetItem.classList.add('active');
+               window.scrollTo({top:0, behavior:'smooth'});
+            }
+          }, { passive: false });
+
+          // 4. Soltar el dedo (Snap al botón más cercano)
+          nav.addEventListener('touchend', () => {
+            if (isDraggingPill) {
+              isDraggingPill = false;
+              pill.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; // Suavidad de vuelta
+              const activeItem = document.querySelector('.nav-item.active');
+              const index = Array.from(navItems).indexOf(activeItem);
+              if (index !== -1) {
+                pill.style.transform = `translateX(${index * 100}%)`; // Acomodo perfecto
+              }
+            }
+          });
+        }
+    }, 1000); // Esperamos 1 segundo para asegurar que el nav ya existe
+})();
 

@@ -1,8 +1,3 @@
-@html, body {
-  touch-action: pan-y !important; 
-  overscroll-behavior-y: none !important; 
-}
-
 @font-face {
   font-family: "MiFuente";
   src: url("../assets/fonts/funkin.ttf") format("opentype");
@@ -420,38 +415,44 @@ body.ios-theme .carousel-btn { background: rgba(255,255,255,0.1) !important; bac
 
 body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #fff !important; }
 body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important; }
+
 body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .server-status { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; }
 
+    .lang-btn, .profile-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; user-select: none; }
+    .lang-btn:hover, .profile-btn:hover { transform: scale(1.1); }
+    #profile-avatar-preview { box-shadow: 0 0 15px var(--neon-blue); background-color: #222; }
+    #rating-container-apk span, #rating-container-mod span, #rating-container-script span { transition: transform 0.2s ease, color 0.2s ease; display: inline-block; }
+    #rating-container-apk span:hover, #rating-container-mod span:hover, #rating-container-script span:hover { transform: scale(1.3); color: #fff !important; text-shadow: 0 0 10px gold; }
+    .lang-fade { animation: fadeText 0.3s ease-in-out; }
+    @keyframes fadeText { 0% { opacity: 0; } 100% { opacity: 1; } }
+
 /* =========================================
-   EFECTO GOTA DE AGUA ARRASTRABLE (SOLO iOS)
+   === PÍLDORA LIQUID GLASS (SOLO iOS) ===
    ========================================= */
-.water-drop {
-  display: none;
-}
-body.ios-theme .water-drop {
-  display: block;
+
+.ios-glass-pill {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 55px;
-  height: 55px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px) saturate(200%);
-  -webkit-backdrop-filter: blur(12px) saturate(200%);
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; 
-  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 8px 15px rgba(0, 0, 0, 0.3);
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  width: calc(100% / 6); /* El ancho exacto de 1 botón */
+  background: rgba(255, 255, 255, 0.15); /* Blanco semi-transparente */
+  backdrop-filter: blur(15px); /* Desenfoque de cristal */
+  -webkit-backdrop-filter: blur(15px); /* Soporte para Safari/iOS */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px; /* Forma de píldora */
   z-index: 0;
-  pointer-events: none;
-  animation: morphLiquid 3s ease-in-out infinite alternate;
+  pointer-events: none; /* Deja que el dedo toque los botones de abajo */
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: none; /* Oculto por defecto en Android y PC */
 }
-body.ios-theme .nav-item {
-  z-index: 1;
+
+/* ESTO ES LO QUE CAMBIÓ: Solo modificamos los botones si detecta que es iOS */
+.bottom-nav.is-ios .ios-glass-pill {
+  display: block;
+}
+
+.bottom-nav.is-ios .nav-item {
+  z-index: 1; /* Pone el texto y el icono por encima del cristal */
   position: relative;
-}
-body.ios-theme .water-drop.snap {
-  transition: left 0.4s cubic-bezier(0.25, 1.5, 0.5, 1);
-}
-@keyframes morphLiquid {
-  0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
-  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
 }

@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v4.1.0";
+const APP_VERSION = "v5.0.0";
 
 let isSuperUser = localStorage.getItem('superUser') === 'true';
 if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -565,7 +565,7 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
       }
-};
+    };
 
 let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
@@ -930,7 +930,6 @@ window.onload = () => {
   document.getElementById("year").textContent = new Date().getFullYear();
   if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
   else checkUserStatus();
-
 };
 
 let currentLang = localStorage.getItem('fnf_lang') || 'es';
@@ -1092,81 +1091,114 @@ window.updateStarsUI = (type, stars) => {
 
 
 // =======================================================
-// === SISTEMA DE PÍLDORA iOS (ARRASTRABLE) ===
+// === SISTEMA DE PÍLDORA iOS (ANIMADO Y SIN ERRORES) ===
 // =======================================================
 (() => {
-    // 1. Detectar si es iOS (iPhone, iPad, iPod)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    
-    // Esperar a que el HTML cargue
+    const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+    const isIOS = isTrueIOS || forceIOS;
+
+    window.toggleForceIOS = () => {
+        const current = localStorage.getItem('force_ios_ui') === 'true';
+        localStorage.setItem('force_ios_ui', !current);
+        alert(!current ? "🍏 Interfaz iOS Forzada ACTIVADA. Recargando..." : "🤖 Interfaz iOS Forzada DESACTIVADA. Recargando...");
+        location.reload();
+    };
+
+    const initAdminBtn = setInterval(() => {
+        const btn = document.getElementById('btnForceIOS');
+        if (btn) {
+            btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS';
+            clearInterval(initAdminBtn);
+        }
+    }, 500);
+
     setTimeout(() => {
         const nav = document.querySelector('.bottom-nav');
         const pill = document.getElementById('ios-pill');
         const navItems = document.querySelectorAll('.nav-item');
 
         if (isIOS && nav && pill) {
-          nav.classList.add('is-ios'); // Enciende el CSS de la píldora
+          nav.classList.add('is-ios');
           
-          // 2. Modificar el click normal para que la píldora lo siga
-          const originalSelectSection = window.selectSection;
-          window.selectSection = (sec, el) => {
-            if(originalSelectSection) originalSelectSection(sec, el);
-            
-            const index = Array.from(navItems).indexOf(el);
-            if (index !== -1) {
-              pill.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-              pill.style.transform = `translateX(${index * 100}%)`;
+          // 🔥 NOVEDAD: Ajustar el ancho inicial exactamente a la medida del primer botón
+          if(navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+          
+          // 🔥 Función maestra para soltar y que rebote a su lugar (CON PRECISIÓN MILIMÉTRICA)
+          const snapPill = (index) => {
+            pill.classList.remove('is-dragging'); // Le devuelve la animación de resorte
+            const target = navItems[index];
+            if(target) {
+                pill.style.width = `${target.offsetWidth}px`; // Se adapta milimétricamente al ancho de ESE botón
+                pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`; // Se mueve exactamente al inicio de ese botón
             }
           };
 
-          // 3. Lógica para arrastrar con el dedo (Deslizar)
+          const originalSelectSection = window.selectSection;
+          window.selectSection = (sec, el) => {
+            if(originalSelectSection) originalSelectSection(sec, el);
+            const index = Array.from(navItems).indexOf(el);
+            if (index !== -1) snapPill(index);
+          };
+
           let isDraggingPill = false;
 
-          nav.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Evita que la pantalla haga scroll al deslizar el menú
+          const moveDrag = (e) => {
+            if (!e.touches && !isDraggingPill) return;
+            if (e.touches) e.preventDefault();
+
             isDraggingPill = true;
-            pill.style.transition = 'none'; // Sin transición para que siga el dedo al instante
-            
-            const touch = e.touches[0];
+            pill.classList.add('is-dragging'); // Apaga el resorte para seguir tu dedo
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const navRect = nav.getBoundingClientRect();
-            let xPos = touch.clientX - navRect.left;
-            xPos = Math.max(0, Math.min(xPos, navRect.width)); // Limites de la pantalla
+            let xPos = clientX - navRect.left;
+            xPos = Math.max(0, Math.min(xPos, navRect.width));
             
             const itemWidth = navRect.width / navItems.length;
-            
-            // Mover la píldora visualmente
             let visualX = xPos - (itemWidth / 2);
             visualX = Math.max(0, Math.min(visualX, navRect.width - itemWidth));
-            pill.style.transform = `translateX(${visualX}px)`;
             
-            // Detectar qué botón está tocando el dedo y activarlo
+            // LA MAGIA DE LA GOTA: scaleX la hace ancha, scaleY la hace chaparrita
+            pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+            
             const hoveredIndex = Math.floor(xPos / itemWidth);
             const targetItem = navItems[hoveredIndex];
             
             if (targetItem && !targetItem.classList.contains('active')) {
                const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
-               // Cambiamos de sección rápidamente
                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                document.getElementById(sectionId).classList.add('active');
                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                targetItem.classList.add('active');
                window.scrollTo({top:0, behavior:'smooth'});
             }
-          }, { passive: false });
+          };
 
-          // 4. Soltar el dedo (Snap al botón más cercano)
-          nav.addEventListener('touchend', () => {
+          const endDrag = () => {
             if (isDraggingPill) {
               isDraggingPill = false;
-              pill.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; // Suavidad de vuelta
               const activeItem = document.querySelector('.nav-item.active');
               const index = Array.from(navItems).indexOf(activeItem);
-              if (index !== -1) {
-                pill.style.transform = `translateX(${index * 100}%)`; // Acomodo perfecto
-              }
+              if (index !== -1) snapPill(index);
             }
+          };
+
+          nav.addEventListener('touchmove', moveDrag, { passive: false });
+          nav.addEventListener('touchend', endDrag);
+
+          nav.addEventListener('mousedown', () => isDraggingPill = true);
+          nav.addEventListener('mousemove', moveDrag);
+          nav.addEventListener('mouseup', endDrag);
+          nav.addEventListener('mouseleave', endDrag);
+
+          // 🔥 Si el usuario acuesta el celular o cambia el tamaño de ventana
+          window.addEventListener('resize', () => {
+              const activeItem = document.querySelector('.nav-item.active');
+              const index = Array.from(navItems).indexOf(activeItem);
+              if (index !== -1) snapPill(index);
           });
         }
-    }, 1000); // Esperamos 1 segundo para asegurar que el nav ya existe
+    }, 1000); 
 })();
 

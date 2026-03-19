@@ -15,6 +15,28 @@
 
   <link rel="stylesheet" href="css/style.css">
   
+  <style>
+    .lang-btn, .profile-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; user-select: none; }
+    .lang-btn:hover, .profile-btn:hover { transform: scale(1.1); }
+    #profile-avatar-preview { box-shadow: 0 0 15px var(--neon-blue); background-color: #222; }
+    #rating-container-apk span, #rating-container-mod span, #rating-container-script span { transition: transform 0.2s ease, color 0.2s ease; display: inline-block; }
+    #rating-container-apk span:hover, #rating-container-mod span:hover, #rating-container-script span:hover { transform: scale(1.3); color: #fff !important; text-shadow: 0 0 10px gold; }
+    .lang-fade { animation: fadeText 0.3s ease-in-out; }
+    @keyframes fadeText { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+    .ios-glass-pill { position: absolute !important; left: 0; top: 5px; bottom: 5px; }
+
+    @keyframes spinSettings { 100% { transform: rotate(360deg); } }
+    .settings-btn { 
+        display: block; 
+        position: fixed; top: 80px; right: 30px; z-index: 9999; 
+        font-size: 24px; cursor: pointer; transition: transform 0.3s ease; user-select: none;
+        text-shadow: 0 0 10px var(--neon-blue);
+    }
+    .settings-btn:hover, .settings-btn:active { animation: spinSettings 2s linear infinite; }
+    .color-picker-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; }
+    #themeColor { cursor: pointer; border: none; width: 40px; height: 40px; background: none; }
+  </style>
 </head>
 
 <body>
@@ -49,17 +71,42 @@
 
   <div id="toast-container" class="toast-container"></div>
   
-  <div class="lang-btn" onclick="toggleLanguage()" id="langBtn" style="position:fixed; top:15px; left:15px; z-index:9999; background:var(--neon-blue, #00eaff); color:black; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px #00eaff;">🇬🇧 EN</div>
+  <div class="lang-btn" onclick="toggleLanguage()" id="langBtn" style="position:fixed; top:15px; left:15px; z-index:9999; background:var(--neon-blue, #00eaff); color:black; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px var(--neon-blue);">🇬🇧 EN</div>
   <div class="profile-btn" onclick="document.getElementById('profile-popup').classList.add('show')" id="profileBtn" style="position:fixed; top:15px; left:95px; z-index:9999; background:var(--neon-pink, #ff00ff); color:white; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px #ff00ff;">👤 <span data-es="Perfil" data-en="Profile">Perfil</span></div>
+
+  <div id="settingsBtn" class="settings-btn" onclick="document.getElementById('settings-popup').classList.add('show')">⚙️</div>
 
   <div class="admin-float-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')">🛠️</div>
   <div class="theme-btn" onclick="toggleTheme()">☼</div>
+
+  <div id="settings-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 20px; max-width: 400px;">
+      <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
+      <h2 class="glow" data-es="Ajustes FNF'" data-en="FNF' Settings">Ajustes FNF'</h2>
+      <p style="font-size: 13px; color: #aaa; margin-bottom: 15px;" data-es="Personalización exclusiva de Interfaz" data-en="Exclusive Interface Customization">Personalización exclusiva de Interfaz</p>
+      
+      <div class="color-picker-wrapper">
+        <input type="color" id="themeColor" value="#00eaff">
+        <span data-es="Color del Tema" data-en="Theme Color" style="font-weight: bold; color: var(--neon-blue);">Color del Tema</span>
+      </div>
+
+      <div class="font-picker-wrapper" style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #333;">
+        <span style="display:block; margin-bottom: 8px; font-weight: bold; color: #fff;" data-es="Fuente Personalizada (.ttf)" data-en="Custom Font (.ttf)">Fuente Personalizada (.ttf)</span>
+        <p style="font-size: 11px; color: #888; margin-bottom: 10px;" data-es="Sube tu archivo .ttf para cambiar el estilo de letra de toda la página." data-en="Upload a .ttf file to change the text style of the entire page.">Sube tu archivo .ttf para cambiar el estilo de letra de toda la página.</p>
+        <input type="file" id="customFontUpload" accept=".ttf" style="width: 100%; color: #fff; font-size: 12px;">
+      </div>
+
+      <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
+          <button class="btn" style="width:100%; background: #444;" onclick="resetSettings()" data-es="Restablecer Por Defecto" data-en="Reset to Default">Restablecer Por Defecto</button>
+      </div>
+    </div>
+  </div>
 
   <div id="profile-popup" class="popup">
     <div class="popup-content" style="text-align: center; padding: 20px;">
       <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')">✖</span>
       <h2 class="glow" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</h2>
-      <img id="profile-avatar-preview" src="https://via.placeholder.com/80/555/fff?text=?" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid #00eaff; object-fit: cover;">
+      <img id="profile-avatar-preview" src="https://via.placeholder.com/80/555/fff?text=?" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--neon-blue); object-fit: cover;">
       <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;" data-es="Actualiza tus datos y tu Avatar usando un enlace de internet." data-en="Update your data and Avatar using an internet URL.">Actualiza tus datos y tu Avatar usando un enlace de internet.</p>
       <input type="text" id="editProfileName" class="reg-input" placeholder="Tu Apodo">
       <input type="url" id="editProfileAvatar" class="reg-input" placeholder="URL de nueva imagen (Opcional)">
@@ -92,8 +139,12 @@
     <div class="popup-content" style="padding: 20px; text-align: center;">
       <span class="popup-close" onclick="document.getElementById('admin-tools-popup').classList.remove('show')">✖</span>
       <h2 class="glow">Panel de Control Global</h2>
-      <textarea id="globalNotifText" class="reg-input" placeholder="Mensaje de notificación" rows="3" style="resize:none;"></textarea>
+      <textarea id="globalNotifText" class="reg-input" placeholder="Ej: ¡Nuevo Mod de Pico ya disponible!" rows="3" style="resize:none;"></textarea>
       <button class="btn" onclick="sendGlobalNotification()" style="width: 100%;">🔔 Enviar Notificación</button>
+      
+      <hr style="border: 1px solid #333; margin: 15px 0;">
+      <h3 style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Opciones de Desarrollador:</h3>
+      <button class="btn" id="btnForceIOS" onclick="toggleForceIOS()" style="width: 100%; background: #222; border: 1px solid #00eaff; color: #00eaff;">🍏 Forzar Interfaz iOS</button>
     </div>
   </div>
 
@@ -104,12 +155,14 @@
         <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
       </div>
       <div class="update-body">
-        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v4.1.0!" data-en="What's New v4.1.0!">¡Novedades v4.1.0!</h2>
-        <ul class="update-list-modern" style="margin-top:15px;">
-          <li style="border-left: 4px solid var(--neon-gold); padding:5px; margin-bottom:5px;"><span>🔥</span> <span data-es="Nueva interfaz mejorada" data-en="New Improved Interface">Nueva interfaz mejorada</span></li>
-          <li style="border-left: 4px solid var(--neon-blue); padding:5px; margin-bottom:5px;"><span>🌍</span> <span data-es="Nuevo script añadido" data-en="New Script Added">Nuevo script añadido</span></li>
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.0.0!" data-en="What's New v5.0.0!">¡Novedades v5.0.0!</h2>
+        <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
+          <li style="border-left: 4px solid var(--neon-gold); padding:5px; margin-bottom:5px; background: rgba(255,255,255,0.05);"><span>🔥</span> <span data-es="Personalización a tu gusto (Ajustes)" data-en="Absolute Customization (Settings)">Personalización Absoluta (Ajustes)</span></li>
+          <li style="border-left: 4px solid var(--neon-blue); padding:5px; margin-bottom:5px; background: rgba(255,255,255,0.05);"><span>🔥</span> <span data-es="Soporte para Fuentes Personalizadas (.ttf)" data-en="Support for Custom .ttf Fonts">Soporte para Fuentes Personalizadas (.ttf)</span></li>
+          <li style="border-left: 4px solid var(--neon-purple); padding:5px; margin-bottom:5px; background: rgba(255,255,255,0.05);"><span>⚙️</span> <span data-es="Mejora en la Interfaz" data-en="Interface Improvements">Mejora en la Interfaz</span></li>
+          <li style="border-left: 4px solid var(--neon-red); padding:5px; margin-bottom:5px; background: rgba(255,255,255,0.05);"><span>🔤</span> <span data-es="Traduccion al idioma Ingles 47%" data-en="Translation to English 47%">Traducción al idioma Inglés 47%</span></li>
         </ul>
-        <button class="btn-update-action" onclick="closeUpdatePopup()" data-es="¡Entendido!" data-en="Got it!">¡Entendido!</button>
+        <button class="btn-update-action" onclick="closeUpdatePopup()" data-es="¡Entendido!" data-en="Got it!" style="margin-top: 15px;">¡Entendido!</button>
       </div>
     </div>
   </div>
@@ -117,7 +170,7 @@
   <div id="install-popup" class="popup">
     <div class="popup-content" style="text-align: center; padding: 25px; max-width: 350px;">
       <h2 class="glow" style="margin-top:0; font-size:22px;" data-es="📱 Instalar App" data-en="📱 Install App">📱 Instalar App</h2>
-      <div style="display: flex; gap: 10px;">
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()" data-es="Luego" data-en="Later">Luego</button>
         <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Sí, instalar" data-en="Install">Sí, instalar</button>
       </div>
@@ -128,7 +181,7 @@
     <div class="popup-content" style="text-align: center; padding: 20px;">
       <h2 class="glow" data-es="Registro de Usuario" data-en="User Registration">Registro de Usuario</h2>
       <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo">
-      <input type="url" id="regLink" class="reg-input" placeholder="Link Canal de Youtube (Opcional)">
+      <input type="url" id="regLink" class="reg-input" placeholder="Link de tu canal de YouTube (Opcional)">
       <input type="url" id="regAvatar" class="reg-input" placeholder="URL Foto (Opcional)">
       <button class="btn" onclick="saveRegistration()" style="width: 100%" data-es="Aceptar" data-en="Accept">Aceptar</button>
     </div>
@@ -186,7 +239,7 @@
           <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;" title="¡Actualizado!"></span>Psych Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;"></span>Psych Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk1')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')">💬 Chat</button>
@@ -197,7 +250,7 @@
           <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
           <img src="assets/images/webp/logoonline.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;" title="¡Actualizado!"></span>Psych Online</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;"></span>Psych Online</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk2')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')">💬 Chat</button>
@@ -208,7 +261,7 @@
           <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
           <img src="assets/images/webp/logocode.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;" title="¡Actualizado!"></span>CodeName Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;"></span>CodeName Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk3')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')">💬 Chat</button>
@@ -219,7 +272,7 @@
           <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;" title="¡Actualizado!"></span>Plus Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;"></span>Plus Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk4')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')">💬 Chat</button>
@@ -230,7 +283,7 @@
           <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
           <img src="assets/images/webp/logop.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;" title="¡Actualizado!"></span>P-Slice Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;"></span>P-Slice Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk5')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')">💬 Chat</button>
@@ -241,7 +294,7 @@
           <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk6">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk6">0</span></div>
           <img src="assets/images/webp/logof.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;" title="¡Actualizado!"></span>Nova Fleare</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;"></span>Nova Fleare</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk6')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')">💬 Chat</button>
@@ -252,7 +305,7 @@
           <div class="like-container" id="like-apk7" onclick="handleLike('apk7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk7">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk7">0</span></div>
           <img src="assets/images/webp/logo.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;" title="¡Actualizado!"></span>PsychEngine EK</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;"></span>PsychEngine EK</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk7')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk7', 'PsychEngine EK')">💬 Chat</button>
@@ -263,7 +316,7 @@
           <div class="like-container" id="like-apk8" onclick="handleLike('apk8', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk8">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk8">0</span></div>
           <img src="assets/images/webp/logose.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;" title="¡Actualizado!"></span>Shadow Engine</h3>
+          <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;"></span>Shadow Engine</h3>
           <div class="card-buttons">
             <button class="btn" onclick="openApkInfo('apk8')" data-es="Más Info" data-en="More Info">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('apk8', 'Shadow Engine')">💬 Chat</button>
@@ -413,7 +466,7 @@
     <section id="scripts" class="section">
       <h2 class="glow" data-es="Scripts y Utilidades" data-en="Scripts & Utilities">Scripts y Utilidades</h2>
       <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;" data-es="Agrega código personalizado a tus propios mods y motores." data-en="Add custom code to your own mods and engines.">Agrega código personalizado a tus propios mods y motores.</p>
-
+      
       <div class="mods-grid" id="scriptsContainer">
         <div class="apk-card" id="card-script1">
           <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)">🟢 Act. LED</button>
@@ -425,7 +478,7 @@
             <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')">💬 Chat</button>
           </div>
         </div>
-        
+
         <div class="mods-grid" id="scriptsContainer">
         <div class="apk-card" id="card-script2">
           <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)">🟢 Act. LED</button>
@@ -440,7 +493,7 @@
       </div>
     </section>
 
-<section id="help" class="section">
+    <section id="help" class="section">
       <h2 class="glow" data-es="Tutoriales y Ayuda" data-en="Tutorials & Help">Tutoriales y Ayuda</h2>
       <div class="info-card" style="margin-bottom: 20px;">
 
@@ -472,7 +525,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V4.1.0 <br>
+      © <span id="year"></span> LaloCF | V5.0.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span></div>
     </footer>
   </div>
@@ -484,7 +537,7 @@
         <img id="apk-img">
         <h2 id="apk-title"></h2>
         <p id="apk-desc"></p>
-        <h3 id="apk-version" style="color:#00eaff; margin-bottom:10px;"></h3>
+        <h3 id="apk-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
         <div id="rating-container-apk" style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
           <span onclick="window.rateAppItem('apk', 1)">★</span><span onclick="window.rateAppItem('apk', 2)">★</span><span onclick="window.rateAppItem('apk', 3)">★</span><span onclick="window.rateAppItem('apk', 4)">★</span><span onclick="window.rateAppItem('apk', 5)">★</span>
           <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="apk-rating-text" data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
@@ -501,7 +554,7 @@
         <img id="popup-img">
         <h2 id="popup-title"></h2>
         <p id="popup-desc"></p>
-        <h3 id="popup-version" style="color:#00eaff; margin-bottom:10px;"></h3>
+        <h3 id="popup-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
         <div id="rating-container-mod" style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
           <span onclick="window.rateAppItem('mod', 1)">★</span><span onclick="window.rateAppItem('mod', 2)">★</span><span onclick="window.rateAppItem('mod', 3)">★</span><span onclick="window.rateAppItem('mod', 4)">★</span><span onclick="window.rateAppItem('mod', 5)">★</span>
           <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="mod-rating-text" data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
@@ -522,7 +575,7 @@
         </div>
         <h2 id="script-title"></h2>
         <p id="script-desc"></p>
-        <h3 id="script-version" style="color:#00eaff; margin-bottom:10px;"></h3>
+        <h3 id="script-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
         <div id="rating-container-script" style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
           <span onclick="window.rateAppItem('script', 1)">★</span><span onclick="window.rateAppItem('script', 2)">★</span><span onclick="window.rateAppItem('script', 3)">★</span><span onclick="window.rateAppItem('script', 4)">★</span><span onclick="window.rateAppItem('script', 5)">★</span>
           <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="script-rating-text" data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
@@ -541,12 +594,12 @@
           <div style="display:flex; gap:12px;">
             <div id="mc-myAvatar" class="yt-avatar" style="background:#555">?</div>
             <div style="flex:1">
-              <div id="mc-displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;">Usuario: Cargando...</div>
-              <textarea id="mc-commentText" placeholder="Escribe tu opinión o reporte..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+              <div id="mc-displayMyName" style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;" data-es=\"Usuario: Cargando...\" data-en=\"User: Loading...\">Usuario: Cargando...</div>
+              <textarea id="mc-commentText" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100" style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
               <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span id="mc-charCounter">0</span> / 100</div>
               <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
-                <button class="btn" style="background:#444" onclick="document.getElementById('mc-commentText').value=''">Cancelar</button>
-                <button class="btn" onclick="addModComment()">Comentar</button>
+                <button class="btn" style="background:#444" onclick="document.getElementById('mc-commentText').value=''" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+                <button class="btn" onclick="addModComment()" data-es="Comentar" data-en="Post">Comentar</button>
               </div>
             </div>
           </div>
@@ -560,27 +613,48 @@
   <script src="js/init.js"></script>
 
   <script>
+    const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
+    document.documentElement.style.setProperty('--neon-blue', savedColor);
+
+    const applyCustomFont = (base64Font) => {
+        const newStyle = document.createElement('style');
+        newStyle.appendChild(document.createTextNode(`
+            @font-face {
+                font-family: 'CustomUserFont';
+                src: url('${base64Font}') format('truetype');
+            }
+            body, h1, h2, h3, p, span, div, button, input, textarea, a {
+                font-family: 'CustomUserFont', sans-serif !important;
+            }
+        `));
+        document.head.appendChild(newStyle);
+    };
+    const savedFont = localStorage.getItem('customUserFont');
+    if(savedFont) applyCustomFont(savedFont);
+
     document.addEventListener('DOMContentLoaded', () => {
-      let currentLang = localStorage.getItem('fnf_lang') || 'es';
+      window.currentLang = localStorage.getItem('fnf_lang') || 'es';
 
       window.toggleLanguage = () => {
-        currentLang = currentLang === 'es' ? 'en' : 'es';
-        localStorage.setItem('fnf_lang', currentLang);
+        window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
+        localStorage.setItem('fnf_lang', window.currentLang);
         applyLanguage();
       };
 
       function applyLanguage() {
         const elements = document.querySelectorAll('[data-es][data-en]');
         elements.forEach(el => {
-          el.innerHTML = el.getAttribute(`data-${currentLang}`);
+          el.classList.add('lang-fade');
+          setTimeout(() => {
+            el.innerHTML = el.getAttribute(`data-${window.currentLang}`);
+            el.classList.remove('lang-fade');
+          }, 150);
         });
         const btn = document.getElementById('langBtn');
-        if (btn) btn.innerHTML = currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+        if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
       }
-
       applyLanguage();
 
-      // Cargar info del perfil si existe
       setTimeout(() => {
         const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
         if (profile) {
@@ -595,7 +669,6 @@
         }
       }, 500);
 
-      // Previsualizar foto en tiempo real
       const avInput = document.getElementById('editProfileAvatar');
       if(avInput) {
         avInput.addEventListener('input', (e) => {
@@ -609,47 +682,32 @@
         let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
         const name = document.getElementById('editProfileName').value.trim();
         const avatar = document.getElementById('editProfileAvatar').value.trim();
-        
-        if(name.length < 3) return alert(currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
-        
+        if(name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
         profile.name = name;
         profile.avatar = avatar;
         localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
         document.getElementById('profile-popup').classList.remove('show');
-        alert(currentLang === 'es' ? "¡Perfil actualizado con éxito!" : "Profile successfully updated!");
+        alert(window.currentLang === 'es' ? "¡Perfil actualizado con éxito!" : "Profile successfully updated!");
       };
 
-      // Control de Estrellas (Sobrescribimos despues de que tu main.js cargue)
       window.currentItemRatingId = null;
-
       setTimeout(() => {
-          if(window.openModInfo) {
-              const origModInfo = window.openModInfo;
-              window.openModInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'mod'); origModInfo(id); };
-          }
-          if(window.openApkInfo) {
-              const origApkInfo = window.openApkInfo;
-              window.openApkInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'apk'); origApkInfo(id); };
-          }
-          if(window.openScriptInfo) {
-              const origScriptInfo = window.openScriptInfo;
-              window.openScriptInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'script'); origScriptInfo(id); };
-          }
+          if(window.openModInfo) { const orig = window.openModInfo; window.openModInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'mod'); orig(id); }; }
+          if(window.openApkInfo) { const orig = window.openApkInfo; window.openApkInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'apk'); orig(id); }; }
+          if(window.openScriptInfo) { const orig = window.openScriptInfo; window.openScriptInfo = (id) => { window.currentItemRatingId = id; loadItemRating(id, 'script'); orig(id); }; }
       }, 1500);
 
       window.rateAppItem = (type, stars) => {
         if (!window.currentItemRatingId) return;
         const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-        if (!profile) return alert(currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
-        
+        if (!profile) return alert(window.currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
         const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-        if (myRates[window.currentItemRatingId]) return alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
-        
+        if (myRates[window.currentItemRatingId]) return alert(window.currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
         myRates[window.currentItemRatingId] = stars;
         localStorage.setItem('my_ratings', JSON.stringify(myRates));
         updateStarsUI(type, stars);
         const txt = document.getElementById(`${type}-rating-text`);
-        if(txt) txt.innerText = currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
+        if(txt) txt.innerText = window.currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
       };
 
       function loadItemRating(id, type) {
@@ -657,15 +715,10 @@
           if(!container) return;
           const spans = container.querySelectorAll('span');
           const txt = document.getElementById(`${type}-rating-text`);
-          if(txt) txt.innerText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
-
+          if(txt) txt.innerText = window.currentLang === 'es' ? "Califica este contenido" : "Rate this content";
           const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-          if (myRates[id]) {
-              updateStarsUI(type, myRates[id]);
-              if(txt) txt.innerText = currentLang === 'es' ? "Tu calificación" : "Your rating";
-          } else {
-              spans.forEach(s => { s.style.color = 'gold'; s.style.textShadow = 'none'; });
-          }
+          if (myRates[id]) { updateStarsUI(type, myRates[id]); if(txt) txt.innerText = window.currentLang === 'es' ? "Tu calificación" : "Your rating"; } 
+          else { spans.forEach(s => { s.style.color = 'gold'; s.style.textShadow = 'none'; }); }
       }
 
       function updateStarsUI(type, stars) {
@@ -673,16 +726,156 @@
           if(!container) return;
           const spans = container.querySelectorAll('span');
           spans.forEach((s, index) => {
-              if (index < stars) {
-                  s.style.color = 'gold';
-                  s.style.textShadow = '0 0 10px gold';
+              if (index < stars) { s.style.color = 'gold'; s.style.textShadow = '0 0 10px gold'; } 
+              else { s.style.color = '#555'; s.style.textShadow = 'none'; }
+          });
+      }
+
+      const colorInput = document.getElementById('themeColor');
+      if(colorInput) {
+          colorInput.value = savedColor;
+          colorInput.addEventListener('input', (e) => {
+              const newColor = e.target.value;
+              document.documentElement.style.setProperty('--neon-blue', newColor);
+              localStorage.setItem('customThemeColor', newColor);
+          });
+      }
+
+      const fontInput = document.getElementById('customFontUpload');
+      if(fontInput) {
+          fontInput.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if(file && file.name.toLowerCase().endsWith('.ttf')) {
+                  const reader = new FileReader();
+                  reader.onload = function(evt) {
+                      const base64 = evt.target.result;
+                      try {
+                          localStorage.setItem('customUserFont', base64);
+                          applyCustomFont(base64);
+                          alert(window.currentLang === 'es' ? "¡Fuente aplicada con éxito!" : "Font applied successfully!");
+                      } catch(err) {
+                          alert(window.currentLang === 'es' ? "El archivo es muy pesado para guardarlo permanentemente, pero se aplicará ahora." : "File too large to save permanently, but applied for now.");
+                          applyCustomFont(base64);
+                      }
+                  };
+                  reader.readAsDataURL(file);
               } else {
-                  s.style.color = '#555';
-                  s.style.textShadow = 'none';
+                  alert(window.currentLang === 'es' ? "Por favor, sube un archivo .ttf válido." : "Please upload a valid .ttf file.");
               }
           });
       }
+
+      window.resetSettings = () => {
+          if(confirm(window.currentLang === 'es' ? "¿Restablecer diseño predeterminado?" : "Reset to default design?")) {
+              localStorage.removeItem('customThemeColor');
+              localStorage.removeItem('customUserFont');
+              location.reload();
+          }
+      };
+
+      const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+      const isIOS = isTrueIOS || forceIOS;
+
+      window.toggleForceIOS = () => {
+          const current = localStorage.getItem('force_ios_ui') === 'true';
+          localStorage.setItem('force_ios_ui', !current);
+          alert(!current ? "🍏 Interfaz iOS Forzada ACTIVADA. Recargando..." : "🤖 Interfaz iOS Forzada DESACTIVADA. Recargando...");
+          location.reload();
+      };
+
+      const initAdminBtn = setInterval(() => {
+          const btn = document.getElementById('btnForceIOS');
+          if (btn) { btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+      }, 500);
+
+      setTimeout(() => {
+          const nav = document.querySelector('.bottom-nav');
+          const pill = document.getElementById('ios-pill');
+          const navItems = document.querySelectorAll('.nav-item');
+          const settingsBtn = document.getElementById('settingsBtn');
+
+          if (isIOS) {
+            if(settingsBtn) settingsBtn.style.display = 'block';
+            if(nav && pill) {
+                nav.classList.add('is-ios');
+                if(navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+                
+                const snapPill = (index) => {
+                  pill.classList.remove('is-dragging'); 
+                  const target = navItems[index];
+                  if(target) {
+                      pill.style.width = `${target.offsetWidth}px`;
+                      pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`; 
+                  }
+                };
+
+                const originalSelectSection = window.selectSection;
+                window.selectSection = (sec, el) => {
+                  if(originalSelectSection) originalSelectSection(sec, el);
+                  const index = Array.from(navItems).indexOf(el);
+                  if (index !== -1) snapPill(index);
+                };
+
+                let isDraggingPill = false;
+
+                const moveDrag = (e) => {
+                  if (!e.touches && !isDraggingPill) return;
+                  if (e.touches) e.preventDefault();
+
+                  isDraggingPill = true;
+                  pill.classList.add('is-dragging'); 
+
+                  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                  const navRect = nav.getBoundingClientRect();
+                  let xPos = clientX - navRect.left;
+                  xPos = Math.max(0, Math.min(xPos, navRect.width));
+                  
+                  const itemWidth = navRect.width / navItems.length;
+                  let visualX = xPos - (itemWidth / 2);
+                  visualX = Math.max(0, Math.min(visualX, navRect.width - itemWidth));
+                  
+                  pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+                  
+                  const hoveredIndex = Math.floor(xPos / itemWidth);
+                  const targetItem = navItems[hoveredIndex];
+                  
+                  if (targetItem && !targetItem.classList.contains('active')) {
+                     const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                     document.getElementById(sectionId).classList.add('active');
+                     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                     targetItem.classList.add('active');
+                     window.scrollTo({top:0, behavior:'smooth'});
+                  }
+                };
+
+                const endDrag = () => {
+                  if (isDraggingPill) {
+                    isDraggingPill = false;
+                    const activeItem = document.querySelector('.nav-item.active');
+                    const index = Array.from(navItems).indexOf(activeItem);
+                    if (index !== -1) snapPill(index);
+                  }
+                };
+
+                nav.addEventListener('touchmove', moveDrag, { passive: false });
+                nav.addEventListener('touchend', endDrag);
+
+                nav.addEventListener('mousedown', () => isDraggingPill = true);
+                nav.addEventListener('mousemove', moveDrag);
+                nav.addEventListener('mouseup', endDrag);
+                nav.addEventListener('mouseleave', endDrag);
+
+                window.addEventListener('resize', () => {
+                    const activeItem = document.querySelector('.nav-item.active');
+                    const index = Array.from(navItems).indexOf(activeItem);
+                    if (index !== -1) snapPill(index);
+                });
+            }
+          }
+      }, 1000);
     });
   </script>
 </body>
-</html>                                                                                                                 
+</html>                                                                                                                

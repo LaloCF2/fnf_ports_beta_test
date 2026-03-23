@@ -1090,115 +1090,327 @@ window.updateStarsUI = (type, stars) => {
 };
 
 
-// =======================================================
-// === SISTEMA DE PÍLDORA iOS (ANIMADO Y SIN ERRORES) ===
-// =======================================================
-(() => {
-    const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
-    const isIOS = isTrueIOS || forceIOS;
+    // 1. CARGAR VALORES INICIALES AL INSTANTE (Antes de que cargue el resto)
+    const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
+    document.documentElement.style.setProperty('--neon-blue', savedColor);
+    
+    const savedPillInset = localStorage.getItem('pillInset') || '5';
+    document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
 
-    window.toggleForceIOS = () => {
-        const current = localStorage.getItem('force_ios_ui') === 'true';
-        localStorage.setItem('force_ios_ui', !current);
-        alert(!current ? "🍏 Interfaz iOS Forzada ACTIVADA. Recargando..." : "🤖 Interfaz iOS Forzada DESACTIVADA. Recargando...");
-        location.reload();
+    const savedBlur = localStorage.getItem('glassBlur') || '15';
+    document.documentElement.style.setProperty('--glass-blur', savedBlur + 'px');
+
+    if(localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
+
+    // 2. CARGAR FUENTE
+    const applyCustomFont = (base64Font) => {
+        const newStyle = document.createElement('style');
+        newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
+        document.head.appendChild(newStyle);
+    };
+    const savedFont = localStorage.getItem('customUserFont');
+    if(savedFont) applyCustomFont(savedFont);
+
+    // 3. SISTEMA CHROMA (RGB ANIMADO)
+    let chromaInterval;
+    const toggleChroma = (enable) => {
+        if(enable) {
+            let hue = 0;
+            clearInterval(chromaInterval);
+            chromaInterval = setInterval(() => {
+                hue = (hue + 2) % 360;
+                document.documentElement.style.setProperty('--neon-blue', `hsl(${hue}, 100%, 50%)`);
+            }, 50);
+        } else {
+            clearInterval(chromaInterval);
+            document.documentElement.style.setProperty('--neon-blue', localStorage.getItem('customThemeColor') || '#00eaff');
+        }
     };
 
-    const initAdminBtn = setInterval(() => {
-        const btn = document.getElementById('btnForceIOS');
-        if (btn) {
-            btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS';
-            clearInterval(initAdminBtn);
+    // 4. SISTEMA DE PARTÍCULAS
+    let particleInterval;
+    const toggleParticles = (enable) => {
+        const container = document.getElementById('particles-container');
+        if(!container) return; // Por si acaso no encuentra el contenedor
+        if(enable) {
+            container.style.display = 'block';
+            particleInterval = setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'fnf-particle';
+                p.innerText = Math.random() > 0.5 ? '🎵' : '✦';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                p.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 8000);
+            }, 400); // Aparece una partícula cada 400ms
+        } else {
+            clearInterval(particleInterval);
+            container.style.display = 'none';
+            container.innerHTML = '';
         }
-    }, 500);
+    };
 
-    setTimeout(() => {
-        const nav = document.querySelector('.bottom-nav');
-        const pill = document.getElementById('ios-pill');
-        const navItems = document.querySelectorAll('.nav-item');
+// === SISTEMA DE TEMAS CSS (SKINS) ===
+    const savedTheme = localStorage.getItem('activeTheme') || 'default';
+    const themeLink = document.getElementById('theme-stylesheet');
+    
+    // Si guardó el tema pro, cargamos el archivo style2.css
+    if(savedTheme === 'pro') {
+        themeLink.href = 'css/style2.css';
+    }
 
-        if (isIOS && nav && pill) {
-          nav.classList.add('is-ios');
-          
-          // 🔥 NOVEDAD: Ajustar el ancho inicial exactamente a la medida del primer botón
-          if(navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
-          
-          // 🔥 Función maestra para soltar y que rebote a su lugar (CON PRECISIÓN MILIMÉTRICA)
-          const snapPill = (index) => {
-            pill.classList.remove('is-dragging'); // Le devuelve la animación de resorte
-            const target = navItems[index];
-            if(target) {
-                pill.style.width = `${target.offsetWidth}px`; // Se adapta milimétricamente al ancho de ESE botón
-                pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`; // Se mueve exactamente al inicio de ese botón
-            }
-          };
+    // Función para abrir/cerrar el menú lateral animado
+    window.toggleProMenu = () => {
+        document.body.classList.toggle('pro-menu-open');
+        window.triggerVibrate(15);
+    };
 
-          const originalSelectSection = window.selectSection;
-          window.selectSection = (sec, el) => {
-            if(originalSelectSection) originalSelectSection(sec, el);
-            const index = Array.from(navItems).indexOf(el);
-            if (index !== -1) snapPill(index);
-          };
+    document.addEventListener('DOMContentLoaded', () => {
+      window.currentLang = localStorage.getItem('fnf_lang') || 'es';
 
-          let isDraggingPill = false;
+      // --- SISTEMA DE VIBRACIÓN GLOBAL ---
+      window.triggerVibrate = (ms = 15) => { if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) navigator.vibrate(ms); };
+      document.body.addEventListener('click', (e) => {
+          if(e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) window.triggerVibrate(15);
+      });
 
-          const moveDrag = (e) => {
-            if (!e.touches && !isDraggingPill) return;
-            if (e.touches) e.preventDefault();
+      // --- IDIOMA ---
+      window.toggleLanguage = () => {
+        window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
+        localStorage.setItem('fnf_lang', window.currentLang);
+        applyLanguage();
+      };
+      function applyLanguage() {
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+          el.classList.add('lang-fade');
+          setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
+        });
+        const btn = document.getElementById('langBtn');
+        if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+      }
+      applyLanguage();
 
-            isDraggingPill = true;
-            pill.classList.add('is-dragging'); // Apaga el resorte para seguir tu dedo
+      // --- PERFIL ---
+      setTimeout(() => {
+        const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+        if (profile) {
+          if(document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
+          if(document.getElementById('editProfileAvatar') && profile.avatar) {
+            document.getElementById('editProfileAvatar').value = profile.avatar;
+            document.getElementById('profile-avatar-preview').src = profile.avatar;
+          }
+        }
+      }, 500);
 
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const navRect = nav.getBoundingClientRect();
-            let xPos = clientX - navRect.left;
-            xPos = Math.max(0, Math.min(xPos, navRect.width));
-            
-            const itemWidth = navRect.width / navItems.length;
-            let visualX = xPos - (itemWidth / 2);
-            visualX = Math.max(0, Math.min(visualX, navRect.width - itemWidth));
-            
-            // LA MAGIA DE LA GOTA: scaleX la hace ancha, scaleY la hace chaparrita
-            pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
-            
-            const hoveredIndex = Math.floor(xPos / itemWidth);
-            const targetItem = navItems[hoveredIndex];
-            
-            if (targetItem && !targetItem.classList.contains('active')) {
-               const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
-               document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-               document.getElementById(sectionId).classList.add('active');
-               document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-               targetItem.classList.add('active');
-               window.scrollTo({top:0, behavior:'smooth'});
-            }
-          };
+      const avInput = document.getElementById('editProfileAvatar');
+      if(avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
 
-          const endDrag = () => {
-            if (isDraggingPill) {
-              isDraggingPill = false;
-              const activeItem = document.querySelector('.nav-item.active');
-              const index = Array.from(navItems).indexOf(activeItem);
-              if (index !== -1) snapPill(index);
-            }
-          };
+      window.saveProfileChanges = () => {
+        let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+        const name = document.getElementById('editProfileName').value.trim();
+        if(name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
+        profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
+        localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+        document.getElementById('profile-popup').classList.remove('show');
+        alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+      };
 
-          nav.addEventListener('touchmove', moveDrag, { passive: false });
-          nav.addEventListener('touchend', endDrag);
-
-          nav.addEventListener('mousedown', () => isDraggingPill = true);
-          nav.addEventListener('mousemove', moveDrag);
-          nav.addEventListener('mouseup', endDrag);
-          nav.addEventListener('mouseleave', endDrag);
-
-          // 🔥 Si el usuario acuesta el celular o cambia el tamaño de ventana
-          window.addEventListener('resize', () => {
-              const activeItem = document.querySelector('.nav-item.active');
-              const index = Array.from(navItems).indexOf(activeItem);
-              if (index !== -1) snapPill(index);
+      // --- AJUSTES V5.2.0 (EVENTOS DE LOS BOTONES) ---
+      
+      const colorInput = document.getElementById('themeColor');
+      if(colorInput) {
+          colorInput.value = savedColor;
+          colorInput.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--neon-blue', e.target.value);
+              localStorage.setItem('customThemeColor', e.target.value);
+              if(document.getElementById('chromaToggle').checked) {
+                  document.getElementById('chromaToggle').checked = false; // Apaga chroma si elige color manual
+                  toggleChroma(false);
+                  localStorage.setItem('chromaMode', 'false');
+              }
           });
-        }
-    }, 1000); 
-})();
+      }
+
+      const chromaToggle = document.getElementById('chromaToggle');
+      if(chromaToggle) {
+          chromaToggle.checked = localStorage.getItem('chromaMode') === 'true';
+          if(chromaToggle.checked) toggleChroma(true);
+          chromaToggle.addEventListener('change', (e) => {
+              localStorage.setItem('chromaMode', e.target.checked);
+              toggleChroma(e.target.checked);
+          });
+      }
+
+      const particlesToggle = document.getElementById('particlesToggle');
+      if(particlesToggle) {
+          particlesToggle.checked = localStorage.getItem('particlesMode') === 'true';
+          if(particlesToggle.checked && localStorage.getItem('lowEndMode') !== 'true') toggleParticles(true);
+          particlesToggle.addEventListener('change', (e) => {
+              localStorage.setItem('particlesMode', e.target.checked);
+              toggleParticles(e.target.checked);
+          });
+      }
+
+      const blurSlider = document.getElementById('blurSlider');
+      if(blurSlider) {
+          blurSlider.value = savedBlur;
+          blurSlider.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--glass-blur', e.target.value + 'px');
+              localStorage.setItem('glassBlur', e.target.value);
+          });
+      }
+
+      const lowEndToggle = document.getElementById('lowEndToggle');
+      if(lowEndToggle) {
+          lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
+          lowEndToggle.addEventListener('change', (e) => {
+              localStorage.setItem('lowEndMode', e.target.checked);
+              if(e.target.checked) {
+                  document.body.classList.add('low-end-mode');
+                  toggleParticles(false); // Fuerza apagar partículas
+              } else {
+                  document.body.classList.remove('low-end-mode');
+                  if(document.getElementById('particlesToggle').checked) toggleParticles(true);
+              }
+              window.triggerVibrate(30);
+          });
+      }
+
+      const hapticToggle = document.getElementById('hapticToggle');
+      if(hapticToggle) {
+          hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
+          hapticToggle.addEventListener('change', (e) => {
+              localStorage.setItem('hapticMode', e.target.checked);
+              if(e.target.checked) navigator.vibrate(50); 
+          });
+      }
+
+      const pillSlider = document.getElementById('pillSizeSlider');
+      if(pillSlider) {
+          pillSlider.value = savedPillInset;
+          pillSlider.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
+              localStorage.setItem('pillInset', e.target.value);
+          });
+      }
+
+      const fontInput = document.getElementById('customFontUpload');
+      if(fontInput) {
+          fontInput.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if(file && file.name.toLowerCase().endsWith('.ttf')) {
+                  const reader = new FileReader();
+                  reader.onload = function(evt) {
+                      try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); } 
+                      catch(err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
+      }
+
+      window.resetSettings = () => {
+          if(confirm("¿Restablecer diseño predeterminado?")) {
+              localStorage.clear(); // Limpia toda la configuración visual
+              location.reload();
+          }
+      };
+
+      // --- PÍLDORA iOS MAESTRA ---
+      const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+      const isIOS = isTrueIOS || forceIOS;
+
+      window.toggleForceIOS = () => {
+          const current = localStorage.getItem('force_ios_ui') === 'true';
+          localStorage.setItem('force_ios_ui', !current);
+          location.reload();
+      };
+
+      const initAdminBtn = setInterval(() => {
+          const btn = document.getElementById('btnForceIOS');
+          if (btn) { btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+      }, 500);
+
+      setTimeout(() => {
+          const nav = document.querySelector('.bottom-nav');
+          const pill = document.getElementById('ios-pill');
+          const navItems = document.querySelectorAll('.nav-item');
+
+          if (isIOS && nav && pill) {
+            nav.classList.add('is-ios');
+            if(navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+            
+            const snapPill = (index) => {
+              pill.classList.remove('is-dragging'); 
+              const target = navItems[index];
+              if(target) {
+                  pill.style.width = `${target.offsetWidth}px`;
+                  pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`; 
+                  window.triggerVibrate(25);
+              }
+            };
+
+            const originalSelectSection = window.selectSection;
+            window.selectSection = (sec, el) => {
+              if(originalSelectSection) originalSelectSection(sec, el);
+              const index = Array.from(navItems).indexOf(el);
+              if (index !== -1) snapPill(index);
+            };
+
+            let isDraggingPill = false;
+
+            const moveDrag = (e) => {
+              if (!e.touches && !isDraggingPill) return;
+              if (e.touches) e.preventDefault();
+              isDraggingPill = true;
+              pill.classList.add('is-dragging'); 
+
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const navRect = nav.getBoundingClientRect();
+              let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
+              
+              const itemWidth = navRect.width / navItems.length;
+              let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
+              pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+              
+              const hoveredIndex = Math.floor(xPos / itemWidth);
+              const targetItem = navItems[hoveredIndex];
+              
+              if (targetItem && !targetItem.classList.contains('active')) {
+                 const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                 document.getElementById(sectionId).classList.add('active');
+                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                 targetItem.classList.add('active');
+                 window.scrollTo({top:0, behavior:'smooth'});
+                 window.triggerVibrate(15);
+              }
+            };
+
+            const endDrag = () => {
+              if (isDraggingPill) {
+                isDraggingPill = false;
+                const activeItem = document.querySelector('.nav-item.active');
+                const index = Array.from(navItems).indexOf(activeItem);
+                if (index !== -1) snapPill(index);
+              }
+            };
+
+            nav.addEventListener('touchmove', moveDrag, { passive: false });
+            nav.addEventListener('touchend', endDrag);
+            nav.addEventListener('mousedown', () => isDraggingPill = true);
+            nav.addEventListener('mousemove', moveDrag);
+            nav.addEventListener('mouseup', endDrag);
+            nav.addEventListener('mouseleave', endDrag);
+
+            window.addEventListener('resize', () => {
+                const activeItem = document.querySelector('.nav-item.active');
+                const index = Array.from(navItems).indexOf(activeItem);
+                if (index !== -1) snapPill(index);
+            });
+          }
+      }, 1000);
+    });
 

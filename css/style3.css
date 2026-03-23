@@ -1,0 +1,273 @@
+/* =======================================================
+   === TEMA 3: SNOKIDO CLONE (style3.css) ===
+   === PARTE 1: Reset, Cabezal y Limpieza ===
+   ======================================================= */
+
+/* 1. COLORES EXACTOS ESTILO SNOKIDO */
+:root {
+  --text: #ffffff;
+  --bg: #141419;           /* Fondo general súper oscuro */
+  --header-top: #1e1e24;   /* Barra superior gris oscuro */
+  --header-bot: #141419;   /* Barra inferior igual al fondo */
+  --card-bg: #22222a;      /* Tarjetas grises */
+  --snokido-blue: #00b8ff; /* Azul celeste brillante */
+  --snokido-red: #ff3366;  /* Rojo/Rosa para botones especiales */
+}
+
+/* 2. LIMPIEZA TOTAL (Escondemos todo lo que no sirve en este tema) */
+.bottom-nav, 
+.ios-glass-pill, 
+.lang-btn, 
+.theme-btn, 
+body::before, 
+.hero-banner, 
+.section > center, 
+.section > h1, 
+.section > h2.glow, 
+.section > h3 { 
+    display: none !important; /* Adiós al título de "Friday Night Funkin" y banners */
+}
+
+/* =========================================
+   === ELIMINAR EL TÍTULO VIEJO EN SNOKIDO ===
+   ========================================= */
+.none-titulo {
+    display: none !important;
+}
+
+/* 3. AJUSTES DEL CUERPO DE LA PÁGINA */
+body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  padding-top: 130px !important; /* Espacio exacto para que el cabezal no tape el contenido */
+  padding-bottom: 30px !important;
+  font-family: Arial, sans-serif !important; /* Fuente limpia estilo web de juegos */
+}
+
+.container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 15px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 4. CABEZAL MAESTRO (HEADER) */
+#snokido-header {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed; top: 0; left: 0; width: 100%;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+}
+
+/* Barra de arriba: Logo a la izq, íconos a la der */
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--header-top);
+  padding: 12px 20px;
+  border-bottom: 2px solid #111;
+}
+
+.logo-text {
+  font-size: 26px; font-weight: 900;
+  color: #fff; text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.top-bar-actions {
+  display: flex; gap: 12px; align-items: center;
+}
+
+/* Íconos de Buscar, Perfil y Tema */
+.action-icon {
+  background: #2a2a35;
+  color: #ccc;
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #333;
+}
+.action-icon:hover {
+  background: var(--snokido-blue);
+  color: #fff;
+  border-color: var(--snokido-blue);
+  box-shadow: 0 0 10px rgba(0, 184, 255, 0.4);
+}
+
+/* Barra de abajo: Botones de Categorías */
+.sub-bar {
+  background: var(--header-bot);
+  padding: 10px 20px;
+  border-bottom: 1px solid #2a2a35;
+  overflow-x: auto;
+}
+.sub-bar::-webkit-scrollbar { display: none; }
+.sub-bar-wrapper { display: flex; gap: 10px; align-items: center; }
+
+/* Botón Home (Casa) */
+.home-nav-item {
+  background: var(--snokido-red);
+  color: #fff;
+  width: 40px; height: 35px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; font-size: 18px; cursor: pointer;
+  box-shadow: 0 3px 0px #b31a47; /* Efecto de botón físico */
+}
+.home-nav-item:active { transform: translateY(3px); box-shadow: none; }
+
+/* Botones de Filtro (Mods, Bases, etc) */
+.filter-btn {
+  background: #2a2a35 !important;
+  color: #bbb !important;
+  border: none !important;
+  padding: 0 18px !important;
+  height: 35px;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 3px 0px #111 !important;
+  transition: 0.1s;
+}
+.filter-btn:hover { background: #3a3a45 !important; color: #fff !important; }
+.filter-btn.active {
+  background: var(--snokido-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 0px #007bb5 !important;
+  transform: translateY(1px);
+}
+
+/* =======================================================
+   === PARTE 2: REJILLA, TARJETAS SNOKIDO Y AJUSTES ===
+   ======================================================= */
+
+/* 1. REJILLA DE TARJETAS (Grids) */
+.apks-grid, .mods-grid {
+  display: grid;
+  /* Cuadros más compactos para que quepan más en pantalla */
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 12px;
+  padding: 15px 0;
+}
+
+/* =========================================
+   === TARJETAS EXACTAS DE SNOKIDO ===
+   ========================================= */
+.apks-grid, .mods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* Cajas pequeñas */
+  gap: 15px;
+  padding: 15px 0;
+}
+
+.apk-card, .mod-card {
+  background: #2a2a35 !important; /* Gris azulado de Snokido */
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  text-align: left !important;
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.apk-card:hover, .mod-card:hover {
+  transform: translateY(-5px); /* Flota al pasar el mouse */
+  box-shadow: 0 6px 15px rgba(0, 184, 255, 0.4) !important;
+}
+
+/* Imagen de la Portada */
+.apk-card img, .mod-card img {
+  width: 100%;
+  height: 110px; /* Tamaño perfecto de portada */
+  object-fit: cover;
+  border-radius: 6px 6px 0 0 !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+/* Título de la tarjeta */
+.apk-card h3, .mod-card h3 {
+  font-size: 13px !important;
+  color: #fff !important;
+  margin: 8px !important;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Pone "..." si no cabe */
+}
+
+/* DESAPARECER LA DESCRIPCIÓN */
+.apk-card p, .mod-card p {
+  display: none !important; 
+}
+
+/* Botones de Jugar/Descargar (Abajo achatados) */
+.apk-card .btn, .mod-card .btn {
+  background: #1a1a24 !important; /* Más oscuro que la tarjeta */
+  color: #fff !important;
+  border: none !important;
+  padding: 6px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  margin: auto 8px 8px 8px !important; /* Empuja el botón hasta abajo */
+  width: calc(100% - 16px) !important;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-align: center;
+}
+
+.apk-card .btn:hover, .mod-card .btn:hover {
+  background: var(--snokido-blue) !important;
+  color: #000 !important;
+}
+
+/* 4. BUSCADOR Y POPUPS (Adaptados a este tema oscuro) */
+.popup-content {
+  background: #1e1e24 !important;
+  border: 1px solid #333 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+}
+
+.search-input, .reg-input {
+  background: #141419 !important;
+  border: 1px solid #3a3a45 !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-input:focus, .reg-input:focus {
+  border-color: var(--snokido-blue) !important;
+  outline: none;
+}
+
+/* 5. RESCATE DEL ENGRANAJE DE AJUSTES */
+/* Como el nuevo cabezal ocupa espacio arriba, bajamos el botón de configuración */
+.settings-btn {
+  top: 140px !important; /* Espacio debajo del header */
+  right: 15px !important;
+  background: var(--header-top) !important;
+  padding: 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid #333 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+  font-size: 20px !important;
+  text-shadow: none !important;
+}
+.settings-btn:hover {
+  border-color: var(--snokido-blue) !important;
+  color: var(--snokido-blue) !important;
+}

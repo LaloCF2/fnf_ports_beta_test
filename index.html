@@ -15,36 +15,23 @@
 
   <link rel="stylesheet" href="css/style.css">
   
-  <style>
-    :root { --pill-inset: 5px; }
-
-    .lang-btn, .profile-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; user-select: none; }
-    .lang-btn:hover, .profile-btn:hover { transform: scale(1.1); }
-    #profile-avatar-preview { box-shadow: 0 0 15px var(--neon-blue); background-color: #222; }
-    #rating-container-apk span, #rating-container-mod span, #rating-container-script span { transition: transform 0.2s ease, color 0.2s ease; display: inline-block; }
-    #rating-container-apk span:hover, #rating-container-mod span:hover, #rating-container-script span:hover { transform: scale(1.3); color: #fff !important; text-shadow: 0 0 10px gold; }
-    .lang-fade { animation: fadeText 0.3s ease-in-out; }
-    @keyframes fadeText { 0% { opacity: 0; } 100% { opacity: 1; } }
-
-    .ios-glass-pill { position: absolute !important; left: 0; top: var(--pill-inset); bottom: var(--pill-inset); }
-
-    @keyframes spinSettings { 100% { transform: rotate(360deg); } }
-    .settings-btn { 
-        display: block; position: fixed; top: 80px; right: 30px; z-index: 9999; 
-        font-size: 24px; cursor: pointer; transition: transform 0.3s ease; user-select: none;
-        text-shadow: 0 0 10px var(--neon-blue);
+  <link id="theme-style" rel="stylesheet" href="">
+  
+  <script>
+    const savedTheme = localStorage.getItem('activeTheme') || 'default';
+    if(savedTheme === 'retro') {
+        document.getElementById('theme-style').href = 'css/style2.css';
+    } else if(savedTheme === 'snokido') {
+        document.getElementById('theme-style').href = 'css/style3.css';
     }
-    .settings-btn:hover, .settings-btn:active { animation: spinSettings 2s linear infinite; }
-    .color-picker-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; }
-    #themeColor { cursor: pointer; border: none; width: 40px; height: 40px; background: none; }
-
-    body.low-end-mode * { box-shadow: none !important; text-shadow: none !important; }
-    body.low-end-mode .ios-glass-pill, body.low-end-mode .popup-content { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: #1a1a1a !important; border: 1px solid #444; }
-    body.low-end-mode .settings-btn { animation: none !important; }
-  </style>
+  </script>
 </head>
 
 <body>
+<body>
+  <div id="pro-menu-overlay" onclick="toggleProMenu()"></div>
+
+  <div id="particles-container"></div>
   <nav class="bottom-nav">
     <div id="ios-pill" class="ios-glass-pill"></div>
 
@@ -85,41 +72,66 @@
   <div class="theme-btn" onclick="toggleTheme()">☼</div>
 
   <div id="settings-popup" class="popup">
-    <div class="popup-content" style="text-align: center; padding: 20px; max-width: 400px;">
+    <div class="popup-content popup-scroll-body" style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; box-sizing: border-box;">
       <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
       <h2 class="glow" data-es="Ajustes FNF'" data-en="FNF' Settings">Ajustes FNF'</h2>
       
-      <div class="color-picker-wrapper">
+      <div class="color-picker-wrapper" style="box-sizing: border-box; width: 100%;">
         <input type="color" id="themeColor" value="#00eaff">
         <span data-es="Color del Tema" data-en="Theme Color" style="font-weight: bold; color: var(--neon-blue);">Color del Tema</span>
       </div>
 
-      <div style="margin-top: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333;">
-        <h3 style="margin-top:0; font-size: 14px; color: var(--neon-blue); text-align: center;" data-es="⚡ Rendimiento y Extras" data-en="⚡ Performance & Extras">⚡ Rendimiento y Extras</h3>
+     <div style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: left; box-sizing: border-box; width: 100%;">
+        <span style="font-weight: bold; color: #fff; display: block; margin-bottom: 10px;" data-es="Skin de la Página" data-en="Page Skin">Skin de la Página</span>
         
-        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer;">
-          <span data-es="Modo Gama Baja (Sin brillos)" data-en="Low-End Mode (No glow/blur)">Modo Gama Baja (Sin brillos)</span>
+        <select id="themeSelector" style="width: 100%; padding: 10px; background: #000; color: var(--neon-blue); border: 1px solid var(--neon-blue); outline: none; font-size: 14px; cursor: pointer;">
+          <option value="default">Tema Moderno (Glassmorphism)</option>
+          <option value="retro">Tema Retro (Arcade 8-Bits)</option>
+          <option value="snokido">Tema Snokido</option>
+        </select>
+      </div>
+
+      <label style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: rgba(0,234,255,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--neon-blue); cursor: pointer; box-sizing: border-box; width: 100%;">
+        <span style="font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue);" data-es="🌈 Modo RGB (Chroma)" data-en="RGB Mode (Chroma)">Modo RGB (Chroma)</span>
+        <input type="checkbox" id="chromaToggle" style="transform: scale(1.3);">
+      </label>
+
+      <div style="margin-top: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; box-sizing: border-box; width: 100%;">
+        <h3 style="margin-top:0; font-size: 14px; color: var(--neon-blue); text-align: center;" data-es="⚡ Visuales y Rendimiento" data-en="⚡ Visuals & Performance">⚡ Visuales y Rendimiento</h3>
+        
+        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+          <span data-es="Partículas Animadas" data-en="Animated Particles">✨ Partículas Animadas</span>
+          <input type="checkbox" id="particlesToggle" style="transform: scale(1.3);">
+        </label>
+
+        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+          <span data-es="Modo Gama Baja" data-en="Low-End Mode">Modo Gama Baja (Cero Lag)</span>
           <input type="checkbox" id="lowEndToggle" style="transform: scale(1.3);">
         </label>
         
-        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer;">
-          <span data-es="Vibración Háptica (Toques)" data-en="Haptic Feedback (Touches)">Vibración Háptica (Toques)</span>
+        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+          <span data-es="Vibración Háptica" data-en="Haptic Feedback">Vibración Háptica (Toques)</span>
           <input type="checkbox" id="hapticToggle" style="transform: scale(1.3);">
         </label>
 
-        <div style="border-top: 1px dashed #555; padding-top: 15px; margin-top: 5px;">
-          <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;" data-es="Grosor de Píldora iOS (Delgada - Gruesa)" data-en="iOS Pill Thickness">Grosor de Píldora iOS (Delgada - Gruesa)</span>
-          <input type="range" id="pillSizeSlider" min="0" max="15" value="5" style="width: 100%; cursor: pointer;">
+        <div style="border-top: 1px dashed #555; padding-top: 15px; margin-top: 5px; width: 100%;">
+          <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;" data-es="Intensidad del Cristal (Blur)" data-en="Glass Intensity (Blur)">Intensidad del Cristal (Blur)</span>
+          <input type="range" id="blurSlider" min="0" max="30" value="15" style="width: 100%; cursor: pointer; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-top: 15px; width: 100%;">
+          <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;" data-es="Grosor de Píldora iOS" data-en="iOS Pill Thickness">Grosor de Píldora iOS</span>
+          <input type="range" id="pillSizeSlider" min="0" max="15" value="5" style="width: 100%; cursor: pointer; box-sizing: border-box;">
         </div>
       </div>
 
-      <div class="font-picker-wrapper" style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #333;">
+      <div class="font-picker-wrapper" style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #333; box-sizing: border-box; width: 100%;">
         <span style="display:block; margin-bottom: 8px; font-weight: bold; color: #fff;" data-es="Fuente Personalizada (.ttf)" data-en="Custom Font (.ttf)">Fuente Personalizada (.ttf)</span>
-        <input type="file" id="customFontUpload" accept=".ttf" style="width: 100%; color: #fff; font-size: 12px;">
+        <input type="file" id="customFontUpload" accept=".ttf" style="width: 100%; color: #fff; font-size: 12px; box-sizing: border-box;">
       </div>
 
-      <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
-          <button class="btn" style="width:100%; background: #444;" onclick="resetSettings()" data-es="Restablecer Por Defecto" data-en="Reset to Default">Restablecer Por Defecto</button>
+      <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; box-sizing: border-box; width: 100%;">
+          <button class="btn" style="width:100%; background: #444; box-sizing: border-box;" onclick="resetSettings()" data-es="Restablecer Por Defecto" data-en="Reset to Default">Restablecer Por Defecto</button>
       </div>
     </div>
   </div>
@@ -209,10 +221,32 @@
     </div>
   </div>
 
+  <header id="snokido-header" class="master-header" style="display: none;">
+    <div class="top-bar">
+      <div class="logo-text">FNF'</div>
+      
+      <div class="top-bar-actions">
+        <div class="action-icon" onclick="toggleTheme()" title="Cambiar Tema">☼</div>
+        <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')" title="Buscar">🔍</div>
+        <div class="action-icon" onclick="document.getElementById('profile-popup').classList.add('show')" title="Perfil">👤</div>
+      </div>
+    </div>
+
+    <nav class="sub-bar">
+      <div class="sub-bar-wrapper">
+        <div class="home-nav-item" onclick="selectSection('home', this)">🏠</div>
+        <button class="filter-btn" onclick="selectSection('apks', this)">Bases</button>
+        <button class="filter-btn" onclick="selectSection('mods', this)">Mods</button>
+        <button class="filter-btn" onclick="selectSection('help', this)">Ayuda</button>
+        <button class="filter-btn" onclick="selectSection('scripts', this)">Scripts</button>
+      </div>
+    </nav>
+  </header>
+
   <div class="container">
     <header style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; position:relative; margin-top: 30px;">
       <div style="text-align:center">
-        <h1 class="glow" id="fnf-title" style="user-select:none; cursor:pointer; margin:0; font-size: 26px;">Friday Night Funkin'</h1>
+        <h1 class="glow" id="fnf-title" style="user-select:none; cursor:pointer; margin:0; font-size: 26px;" class="none-titulo"><h2>Friday Night Funkin'</h2></h1>
         <div class="server-status" style="margin-top: 10px;"><div id="statusDot" class="status-dot"></div> <span id="statusText">Conectando...</span></div>
       </div>
     </header>
@@ -524,7 +558,7 @@
         <img src="assets/images/help/1.jpg" alt="" style="width: 100%; max-width: 300px; border-radius: 8px; margin: 10px 0; border: 1px solid #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.3);">
         <p style="color: #ddd; margin-bottom: 10px;" data-es="2. Una vez completado el paso 1, se tendra que usar un gestor de archivos, ya sea zArchives, Gestor de Archivos+, Files etc. Tienes que tenerlo instalado, si ya lo tienes, que bueno, sino, descargalo desde la PlayStore." data-en="2. "><b>Paso 2:</b> Ve a los archivos de tu celular, abre el APK y dale a Instalar.</p>
         <img src="assets/images/help/2.jpg" alt="" style="width: 100%; max-width: 300px; border-radius: 8px; margin: 10px 0; border: 1px solid #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.3);">
-        <p style="color: #ddd; margin-bottom: 10px;" data-es="3. Abre tu gestor, una vez abierto tendras que activar una opcion para mostrar los archivos ocultos de tu celular" data-en="3. Enjoy the game!"><b>Paso 3:</b> ¡Ábrelo desde tu menú y disfruta el juego!</p>
+        <p style="color: #ddd; margin-bottom: 10px;" data-es="3. Abre tu gestor, una vez abierto tendras que activar una opcion para mostrar los archivos ocultos de tu celular." data-en="3. Enjoy the game!"><b>Paso 3:</b> ¡Ábrelo desde tu menú y disfruta el juego!</p>
       </div>
 
       <div class="info-card">
@@ -706,6 +740,18 @@
         document.getElementById('profile-popup').classList.remove('show');
         alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
       };
+
+      // Lógica del Selector de Temas
+      const themeSelector = document.getElementById('themeSelector');
+      if(themeSelector) {
+          themeSelector.value = savedTheme;
+          themeSelector.addEventListener('change', (e) => {
+              const selected = e.target.value;
+              localStorage.setItem('activeTheme', selected);
+              // Recargamos la página para aplicar el cambio limpiamente
+              location.reload(); 
+          });
+      }
       
       const colorInput = document.getElementById('themeColor');
       if(colorInput) {
@@ -864,4 +910,4 @@
     });
   </script>
 </body>
-</html>                                                                                                               
+</html>                                                                                                             

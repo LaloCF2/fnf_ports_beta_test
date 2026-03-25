@@ -501,21 +501,19 @@ body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .serv
    === TAMAÑO DE ICONOS RESPONSIVO ===
    ========================================= */
 
-/* 1. Tamaño por defecto (Para Computadoras / PC) */
 .nav-icon img {
-  width: 28px;  /* Tamaño grande y genial para PC */
+  width: 28px;
   height: 28px;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  transition: all 0.3s ease; /* Hace que el cambio de tamaño sea suave */
+  transition: all 0.3s ease;
 }
 
-/* 2. Tamaño para Celulares BLINDADO */
 @media (max-width: 768px) {
   .nav-icon img {
-    width: 18px !important;  /* El important obliga al código a obedecer sí o sí */
-    height: 18px !important;
+    width: 22px !important;
+    height: 22px !important;
   }
   
   .nav-text {

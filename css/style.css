@@ -511,16 +511,15 @@ body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .serv
   transition: all 0.3s ease; /* Hace que el cambio de tamaño sea suave */
 }
 
-/* 2. Tamaño para Celulares (Pantallas menores a 768px) */
+/* 2. Tamaño para Celulares BLINDADO */
 @media (max-width: 768px) {
   .nav-icon img {
-    width: 20px; /* Tamaño más chiquito y perfecto para móviles */
-    height: 20px;
+    width: 18px !important;  /* El important obliga al código a obedecer sí o sí */
+    height: 18px !important;
   }
   
-  /* Opcional: También hacemos el texto un poquitito más chico en celular para que no estorbe */
   .nav-text {
-    font-size: 11px;
+    font-size: 10px !important;
   }
 }
 

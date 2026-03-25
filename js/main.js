@@ -858,56 +858,6 @@ const APK_DATA = {
   }
 };
 
-  const basesDeDatosImagenes = {
-    'zarchiver': [
-      'assets/images/help/za/za1.webp',
-      'assets/images/help/za/za2.webp',
-      'assets/images/help/za/za3.webp',
-      'assets/images/help/za/za4.webp',
-      'assets/images/help/za/za5.webp'
-    ],
-    'gestor': [
-      'URL_GESTOR_1.jpg',
-      'URL_GESTOR_2.jpg',
-      'URL_GESTOR_3.jpg'
-    ],
-    'files': [
-      'URL_FILES_1.jpg',
-      'URL_FILES_2.jpg'
-    ]
-  };
-
-  let galeriaActual = '';
-  let indiceImagen = 0;
-
-  function abrirGaleria(app) {
-    galeriaActual = app;
-    indiceImagen = 0;
-    document.getElementById('mi-lightbox').style.display = 'flex';
-    actualizarPantalla();
-  }
-
-  function cerrarGaleria() {
-    document.getElementById('mi-lightbox').style.display = 'none';
-  }
-
-  function cambiarImagen(direccion) {
-    const imagenes = basesDeDatosImagenes[galeriaActual];
-    indiceImagen += direccion;
-    
-    // Si se pasa de la última, regresa a la primera. Si retrocede en la primera, va a la última.
-    if (indiceImagen >= imagenes.length) indiceImagen = 0;
-    if (indiceImagen < 0) indiceImagen = imagenes.length - 1;
-    
-    actualizarPantalla();
-  }
-
-  function actualizarPantalla() {
-    const imagenes = basesDeDatosImagenes[galeriaActual];
-    document.getElementById('imagen-gigante').src = imagenes[indiceImagen];
-    document.getElementById('contador-imagenes').innerText = (indiceImagen + 1) + " DE " + imagenes.length;
-  }
-
 window.openModInfo = (id) => { 
   const d = MOD_DATA[id]; 
   document.getElementById("popup-img").src = d.img; 

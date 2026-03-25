@@ -858,6 +858,56 @@ const APK_DATA = {
   }
 };
 
+  const basesDeDatosImagenes = {
+    'zarchiver': [
+      'assets/images/help/za/za1.webp',
+      'assets/images/help/za/za2.webp',
+      'assets/images/help/za/za3.webp',
+      'assets/images/help/za/za4.webp',
+      'assets/images/help/za/za5.webp'
+    ],
+    'gestor': [
+      'URL_GESTOR_1.jpg',
+      'URL_GESTOR_2.jpg',
+      'URL_GESTOR_3.jpg'
+    ],
+    'files': [
+      'URL_FILES_1.jpg',
+      'URL_FILES_2.jpg'
+    ]
+  };
+
+  let galeriaActual = '';
+  let indiceImagen = 0;
+
+  function abrirGaleria(app) {
+    galeriaActual = app;
+    indiceImagen = 0;
+    document.getElementById('mi-lightbox').style.display = 'flex';
+    actualizarPantalla();
+  }
+
+  function cerrarGaleria() {
+    document.getElementById('mi-lightbox').style.display = 'none';
+  }
+
+  function cambiarImagen(direccion) {
+    const imagenes = basesDeDatosImagenes[galeriaActual];
+    indiceImagen += direccion;
+    
+    // Si se pasa de la última, regresa a la primera. Si retrocede en la primera, va a la última.
+    if (indiceImagen >= imagenes.length) indiceImagen = 0;
+    if (indiceImagen < 0) indiceImagen = imagenes.length - 1;
+    
+    actualizarPantalla();
+  }
+
+  function actualizarPantalla() {
+    const imagenes = basesDeDatosImagenes[galeriaActual];
+    document.getElementById('imagen-gigante').src = imagenes[indiceImagen];
+    document.getElementById('contador-imagenes').innerText = (indiceImagen + 1) + " DE " + imagenes.length;
+  }
+
 window.openModInfo = (id) => { 
   const d = MOD_DATA[id]; 
   document.getElementById("popup-img").src = d.img; 
@@ -1090,7 +1140,6 @@ window.updateStarsUI = (type, stars) => {
 };
 
 
-    // 1. CARGAR VALORES INICIALES AL INSTANTE (Antes de que cargue el resto)
     const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
     document.documentElement.style.setProperty('--neon-blue', savedColor);
     
@@ -1102,7 +1151,6 @@ window.updateStarsUI = (type, stars) => {
 
     if(localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
 
-    // 2. CARGAR FUENTE
     const applyCustomFont = (base64Font) => {
         const newStyle = document.createElement('style');
         newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
@@ -1111,7 +1159,6 @@ window.updateStarsUI = (type, stars) => {
     const savedFont = localStorage.getItem('customUserFont');
     if(savedFont) applyCustomFont(savedFont);
 
-    // 3. SISTEMA CHROMA (RGB ANIMADO)
     let chromaInterval;
     const toggleChroma = (enable) => {
         if(enable) {
@@ -1127,11 +1174,10 @@ window.updateStarsUI = (type, stars) => {
         }
     };
 
-    // 4. SISTEMA DE PARTÍCULAS
     let particleInterval;
     const toggleParticles = (enable) => {
         const container = document.getElementById('particles-container');
-        if(!container) return; // Por si acaso no encuentra el contenedor
+        if(!container) return;
         if(enable) {
             container.style.display = 'block';
             particleInterval = setInterval(() => {
@@ -1143,7 +1189,7 @@ window.updateStarsUI = (type, stars) => {
                 p.style.animationDuration = (Math.random() * 4 + 4) + 's';
                 container.appendChild(p);
                 setTimeout(() => p.remove(), 8000);
-            }, 400); // Aparece una partícula cada 400ms
+            }, 400);
         } else {
             clearInterval(particleInterval);
             container.style.display = 'none';
@@ -1151,16 +1197,13 @@ window.updateStarsUI = (type, stars) => {
         }
     };
 
-// === SISTEMA DE TEMAS CSS (SKINS) ===
     const savedTheme = localStorage.getItem('activeTheme') || 'default';
     const themeLink = document.getElementById('theme-stylesheet');
     
-    // Si guardó el tema pro, cargamos el archivo style2.css
     if(savedTheme === 'pro') {
         themeLink.href = 'css/style2.css';
     }
 
-    // Función para abrir/cerrar el menú lateral animado
     window.toggleProMenu = () => {
         document.body.classList.toggle('pro-menu-open');
         window.triggerVibrate(15);
@@ -1169,13 +1212,11 @@ window.updateStarsUI = (type, stars) => {
     document.addEventListener('DOMContentLoaded', () => {
       window.currentLang = localStorage.getItem('fnf_lang') || 'es';
 
-      // --- SISTEMA DE VIBRACIÓN GLOBAL ---
       window.triggerVibrate = (ms = 15) => { if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) navigator.vibrate(ms); };
       document.body.addEventListener('click', (e) => {
           if(e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) window.triggerVibrate(15);
       });
 
-      // --- IDIOMA ---
       window.toggleLanguage = () => {
         window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
         localStorage.setItem('fnf_lang', window.currentLang);
@@ -1191,7 +1232,6 @@ window.updateStarsUI = (type, stars) => {
       }
       applyLanguage();
 
-      // --- PERFIL ---
       setTimeout(() => {
         const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
         if (profile) {
@@ -1225,7 +1265,7 @@ window.updateStarsUI = (type, stars) => {
               document.documentElement.style.setProperty('--neon-blue', e.target.value);
               localStorage.setItem('customThemeColor', e.target.value);
               if(document.getElementById('chromaToggle').checked) {
-                  document.getElementById('chromaToggle').checked = false; // Apaga chroma si elige color manual
+                  document.getElementById('chromaToggle').checked = false;
                   toggleChroma(false);
                   localStorage.setItem('chromaMode', 'false');
               }
@@ -1312,7 +1352,7 @@ window.updateStarsUI = (type, stars) => {
 
       window.resetSettings = () => {
           if(confirm("¿Restablecer diseño predeterminado?")) {
-              localStorage.clear(); // Limpia toda la configuración visual
+              localStorage.clear();
               location.reload();
           }
       };

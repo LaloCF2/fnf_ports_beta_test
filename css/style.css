@@ -496,3 +496,43 @@ body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .serv
     body.low-end-mode .ios-glass-pill, body.low-end-mode .popup-content { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: #1a1a1a !important; border: 1px solid #444; }
     body.low-end-mode .settings-btn { animation: none !important; }
     body.low-end-mode #particles-container { display: none !important; }
+
+/* =========================================
+   === TAMAÑO DE ICONOS RESPONSIVO ===
+   ========================================= */
+
+/* 1. Tamaño por defecto (Para Computadoras / PC) */
+.nav-icon img {
+  width: 28px;  /* Tamaño grande y genial para PC */
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  transition: all 0.3s ease; /* Hace que el cambio de tamaño sea suave */
+}
+
+/* 2. Tamaño para Celulares (Pantallas menores a 768px) */
+@media (max-width: 768px) {
+  .nav-icon img {
+    width: 20px; /* Tamaño más chiquito y perfecto para móviles */
+    height: 20px;
+  }
+  
+  /* Opcional: También hacemos el texto un poquitito más chico en celular para que no estorbe */
+  .nav-text {
+    font-size: 11px;
+  }
+}
+
+.nav-item.active .nav-icon img {
+  filter: drop-shadow(0 0 5px var(--neon-blue));
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+.list-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}

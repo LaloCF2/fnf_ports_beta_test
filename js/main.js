@@ -37,7 +37,7 @@ if (secretUid) {
 
   window.history.replaceState({}, document.title, window.location.pathname);
 
-  alert("🛠️ ¡Privilegios de Administrador Activados en este dispositivo!");
+  alert("🛠️ ¡Privilegios de Administrador Activados en este dispositivo a travez de un enlace compartido!");
   window.location.reload();
 }
 
@@ -608,10 +608,10 @@ const MOD_DATA = {
    mod98_8: {
     img: "assets/images/mods/fan.webp",
     title: "Naomi FanCharts",
-    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 44.10MB",
+    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 79.87MB",
     version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
     downloads: [
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1uXJLV_0LdxY7JrEc4_E3Q2N8af1030XX/view?usp=drive_link" },
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
     ]
   },
   mod98_9: {
@@ -1679,5 +1679,51 @@ window.toggleFaq = function(button) {
   // Pequeña vibración de interfaz (opcional)
   if(window.triggerVibrate) window.triggerVibrate(10);
 };
+// ==========================================
+
+// ==========================================
+// 💎 SISTEMA DE ENLACES SECRETOS (UNLOCKS)
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Revisamos si en el enlace viene la palabra "?unlock=algo"
+  const urlParams = new URLSearchParams(window.location.search);
+  const modToUnlock = urlParams.get('unlock');
+
+  // Si traen una llave en el enlace...
+  if (modToUnlock) {
+    // Guardamos en la memoria de su celular que ya tienen permiso de ver ese mod
+    let misSecretos = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
+    if (!misSecretos.includes(modToUnlock)) {
+      misSecretos.push(modToUnlock);
+      localStorage.setItem('unlocked_mods', JSON.stringify(misSecretos));
+      
+      // Mostramos el fiestón de celebración
+      setTimeout(() => {
+        document.getElementById('secret-unlocked-popup').classList.add('show');
+        if(window.triggerVibrate) window.triggerVibrate([30, 50, 30]); // Doble vibración
+      }, 1000);
+    }
+    
+    // Limpiamos el enlace de arriba para que se vea normal (tusitio.com) y no puedan copiar el secreto tan fácil
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // 2. Revelar los mods secretos que el usuario ya tenga guardados
+  const misSecretosGuardados = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
+  
+  // Opcional: Si eres Admin, tú siempre puedes ver todos los mods secretos
+  const esAdmin = localStorage.getItem('superUser') === 'true';
+
+  document.querySelectorAll('.secret-mod').forEach(card => {
+    // Le quitamos el "card-" al id
+    const exactId = card.id.replace('card-', ''); 
+    
+    // Si el usuario tiene la llave, o si eres tú el Admin, lo hacemos visible
+    if (misSecretosGuardados.includes(exactId) || esAdmin) {
+      card.classList.remove('hidden');
+    }
+  });
+});
 // ==========================================
 

@@ -751,6 +751,51 @@ body.is-admin .admin-fix-btn {
   padding: 20px;
 }
 
+/* =========================================
+   === SISTEMA DE MODS SECRETOS ===
+   ========================================= */
+
+/* Por defecto, los mods secretos no existen visualmente */
+.secret-mod.hidden {
+  display: none !important;
+}
+
+/* Cuando el usuario lo desbloquea, le damos un brillo especial para que destaque */
+.secret-mod {
+  border: 2px solid #ff00ea !important; /* Borde rosa neón especial */
+  box-shadow: 0 0 20px rgba(255, 0, 234, 0.4) !important;
+  animation: revealSecret 1s ease forwards;
+}
+
+@keyframes revealSecret {
+  0% { transform: scale(0.8); opacity: 0; filter: blur(10px); }
+  50% { transform: scale(1.05); filter: blur(0px); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+#secret-unlocked-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(10, 10, 10, 0.95);
+  border: 3px solid #ff00ea;
+  padding: 30px;
+  border-radius: 15px;
+  z-index: 999999;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(255, 0, 234, 0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#secret-unlocked-popup.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
 .status-dot.green { background-color: #00ff41; box-shadow: 0 0 8px #00ff41; }
 .status-dot.yellow { background-color: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
 .status-dot.red { background-color: #ff3366; box-shadow: 0 0 8px #ff3366; }

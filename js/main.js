@@ -1727,3 +1727,82 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // ==========================================
 
+// ==========================================
+// 📤 SISTEMA PARA COMPARTIR ENLACES DIRECTOS
+// ==========================================
+
+let linkParaCompartir = "";
+let textoParaCompartir = "";
+
+// 1. Abre el menú y prepara el enlace
+window.abrirMenuCompartir = (id, nombreMod) => {
+  // Construye la URL exacta (Ej: lalocf.com/?share=mod98_8)
+  const baseUrl = window.location.origin + window.location.pathname;
+  linkParaCompartir = `${baseUrl}?share=${id}`;
+  textoParaCompartir = `🔥 ¡Mira este increíble Mod para Psych Engine: *${nombreMod}*! Descárgalo aquí:\n`;
+
+  // Muestra el menú
+  document.getElementById('share-modal').classList.add('show');
+};
+
+// 2. Funciones de Redes Sociales
+window.enviarWhatsApp = () => {
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoParaCompartir + linkParaCompartir)}`;
+  window.open(url, '_blank');
+};
+
+window.enviarTelegram = () => {
+  const url = `https://t.me/share/url?url=${encodeURIComponent(linkParaCompartir)}&text=${encodeURIComponent(textoParaCompartir)}`;
+  window.open(url, '_blank');
+};
+
+window.copiarEnlace = () => {
+  navigator.clipboard.writeText(textoParaCompartir + linkParaCompartir).then(() => {
+    const msg = document.getElementById('mensaje-copiado');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+  });
+};
+
+// ==========================================
+// 🚀 DETECTOR DE ENLACES MÁGICOS AL INICIAR
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const idCompartido = urlParams.get('share');
+
+  // Si alguien entró usando un link compartido (?share=mod98_8)
+  if (idCompartido) {
+    
+    // Le damos 1 segundo a la página para que termine de cargar todo
+    setTimeout(() => {
+      
+      // Verificamos si es un Mod, un Apk o un Script y lo abrimos automáticamente
+      if (idCompartido.includes('mod') && window.openModInfo) {
+        window.openModInfo(idCompartido);
+      } else if (idCompartido.includes('apk') && window.openApkInfo) {
+        window.openApkInfo(idCompartido);
+      } else if (idCompartido.includes('script') && window.openScriptInfo) {
+        window.openScriptInfo(idCompartido);
+      }
+
+      // 🔥 MAGIA PURA: Le agregamos el efecto de brillos al popup que se acaba de abrir
+      // Asegúrate de que el ID sea el correcto del contenedor de información de tu popup principal
+      const contenidoPopup = document.querySelector('#mod-info-popup .popup-content') || document.querySelector('.popup.show .popup-content');
+      
+      if (contenidoPopup) {
+        contenidoPopup.classList.add('brillo-epico');
+        
+        // El brillo dura 6 segundos y luego se apaga para no molestar a la vista
+        setTimeout(() => {
+          contenidoPopup.classList.remove('brillo-epico');
+        }, 6000);
+      }
+      
+      // Limpiamos la URL de arriba para que quede limpia
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+    }, 1000);
+  }
+});
+

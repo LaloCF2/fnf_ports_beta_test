@@ -796,6 +796,43 @@ body.is-admin .admin-fix-btn {
   pointer-events: auto;
 }
 
+/* =========================================
+   === SISTEMA DE COMPARTIR Y BRILLOS ===
+   ========================================= */
+
+/* Animación épica de brillos para el popup compartido */
+@keyframes efectoCompartido {
+  0% { box-shadow: 0 0 10px #ff00ea, 0 0 20px #00eaff, inset 0 0 10px rgba(255,0,234,0.3); }
+  50% { box-shadow: 0 0 30px #ff00ea, 0 0 60px #00eaff, inset 0 0 30px rgba(0,234,255,0.5); border-color: #fff; }
+  100% { box-shadow: 0 0 10px #ff00ea, 0 0 20px #00eaff, inset 0 0 10px rgba(255,0,234,0.3); }
+}
+
+.brillo-epico {
+  animation: efectoCompartido 1.5s infinite alternate !important;
+  border: 2px solid #00eaff !important;
+}
+
+/* Botones redondos de las redes sociales */
+.social-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.social-btn:hover {
+  transform: scale(1.1);
+}
+
+.btn-whatsapp { background: #25D366; color: white; }
+.btn-telegram { background: #0088cc; color: white; }
+.btn-copiar { background: #333; color: white; border: 1px solid #fff; }
+
 .status-dot.green { background-color: #00ff41; box-shadow: 0 0 8px #00ff41; }
 .status-dot.yellow { background-color: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
 .status-dot.red { background-color: #ff3366; box-shadow: 0 0 8px #ff3366; }

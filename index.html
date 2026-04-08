@@ -308,7 +308,7 @@
       <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar..." onkeyup="filterContent()">
     </div>
     
-    <div id="filterContainer" class="filter-bar" style="display:none;">
+   <div id="filterContainer" class="filter-bar" style="display:none;">
       <div class="filter-btn active" onclick="setFilter('all', this)" data-es="Todos" data-en="All">Todos</div>
       <div class="filter-btn" onclick="setFilter('low', this)">🟢 <span data-es="Gama Baja" data-en="Low End">Gama Baja</span></div>
       <div class="filter-btn" onclick="setFilter('mid', this)">🟡 <span data-es="Gama Media" data-en="Mid End">Gama Media</span></div>
@@ -547,6 +547,7 @@
   <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_7')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
     <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
   </button>
+  
   <div class="like-container" id="like-mod98_7" onclick="handleLike('mod98_7', this)" style="display: flex; align-items: center; gap: 4px;">
     <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
     <span class="like-count" id="count-mod98_7">0</span>
@@ -554,6 +555,13 @@
   <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_7">0</span>
   </div>
+  
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod98_7', 'FNF From The Top!')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
   <h3><span class="led-dot led-green" id="led-green-mod98_7" style="display:none;"></span>FNF From The Top!</h3>
   <div class="card-buttons">
     <button class="btn" onclick="openModInfo('mod98_7')" data-es="Más Info" data-en="More Info">Más Info</button>
@@ -563,377 +571,461 @@
   </div>
 </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod98_8">
-          <span class="gama-badge gama-low">Media-Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod98_8', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod98_8" onclick="toggleGreenLed('mod98_8', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
-          
-          <div class="like-container" id="like-mod98_8" onclick="handleLike('mod98_8', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod98_8">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_8">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod98_8" style="display:none;"></span>Naomi FanChart</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod98_8')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod98_8', 'Naomi FanChart')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+<div class="mod-card" data-gama="low" id="card-mod98_8">
+  <span class="gama-badge gama-low">Media-Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod98_8', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod98_8" onclick="toggleGreenLed('mod98_8', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+  
+  <div class="like-container" id="like-mod98_8" onclick="handleLike('mod98_8', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod98_8">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_8">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod98_9">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod98_9', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod98_9" onclick="toggleGreenLed('mod98_9', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod98_8', 'Naomi FanChart')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod98_9" onclick="handleLike('mod98_9', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod98_9">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_9">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod98_9" style="display:none;"></span>Vs BotFriend</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod98_9')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod98_9', 'Vs BotFriend')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod98_8" style="display:none;"></span>Naomi FanChart</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod98_8')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod98_8', 'Naomi FanChart')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_0">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_0', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_0" onclick="toggleGreenLed('mod99_0', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_0')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_0')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+<div class="mod-card" data-gama="low" id="card-mod98_9">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod98_9', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod98_9" onclick="toggleGreenLed('mod98_9', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
 
-          <div class="like-container" id="like-mod99_0" onclick="handleLike('mod99_0', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_0">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_0">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_0" style="display:none;"></span>Stargazer (2026)</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_0')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_0', 'Stargazer')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div class="like-container" id="like-mod98_9" onclick="handleLike('mod98_9', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod98_9">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_9">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="mid" id="card-mod99_1">
-          <span class="gama-badge gama-mid">Media</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_1')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_1')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod98_9', 'Vs BotFriend')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_1">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_1">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;"></span>Vs Matt V3</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_1')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs Matt V3')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod98_9" style="display:none;"></span>Vs BotFriend</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod98_9')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod98_9', 'Vs BotFriend')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_2">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_2')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_2')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+<div class="mod-card" data-gama="low" id="card-mod99_0">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_0', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_0" onclick="toggleGreenLed('mod99_0', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_0')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_0')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
 
-          <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_2">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_2">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;"></span>Child's Play Pico</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_2')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Childs Play')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div class="like-container" id="like-mod99_0" onclick="handleLike('mod99_0', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_0">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_0">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_3">
-          <span class="gama-badge gama-low">Media-Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_3', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_3')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_3')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_0', 'Stargazer (2026)')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_3">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_3">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;"></span>TaintedFate</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_3')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod99_0" style="display:none;"></span>Stargazer (2026)</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_0')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_0', 'Stargazer')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_4">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_4', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_4')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_4')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+<div class="mod-card" data-gama="mid" id="card-mod99_1">
+  <span class="gama-badge gama-mid">Media</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_1')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_1')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
 
-          <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_4">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_4">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;"></span>VS Jeffy V3</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_4')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_1">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_1">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_6">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_6', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_6')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_6')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_1', 'Vs Matt V3')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_6">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_6">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;"></span>Cocoa Noimix</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_6')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;"></span>Vs Matt V3</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_1')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs Matt V3')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_7">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_7', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_7')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_7')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+<div class="mod-card" data-gama="low" id="card-mod99_2">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_2')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_2')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
 
-          <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_7">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_7">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;"></span>Vs Metal Pipe V2</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_7')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Metal Pipe')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_2">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_2">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod99_8">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_8', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_2', 'Child\'s Play Pico')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_8">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_8">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;"></span>Rolling Girl</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_8')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;"></span>Child's Play Pico</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_2')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Childs Play')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="mod-card" data-gama="mid" id="card-mod99_9">
-          <span class="gama-badge gama-mid">Media</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod99_9', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+<div class="mod-card" data-gama="low" id="card-mod99_3">
+  <span class="gama-badge gama-low">Media-Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_3', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_3')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_3')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
 
-          <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod99_9">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_9">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;"></span>Herobrine Tales</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod99_9')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_3">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_3">0</span>
+  </div>
 
-        <div class="mod-card" data-gama="low" id="card-mod100">
-          <span class="gama-badge gama-low">Baja</span>
-          <button class="admin-pin-btn" onclick="toggleModPin('mod100', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
-          </button>
-          <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <button class="admin-new-btn" onclick="toggleNewMod('card-mod100')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
-          </button>
-          <button class="admin-fix-btn" onclick="fixBrokenLink('mod100')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
-          </button>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_3', 'TaintedFate')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-          <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-mod100">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod100">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;"></span>Vs. TheOdd1sOut</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openModInfo('mod100')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('mod100', 'TheOdd1sOut')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;"></span>TaintedFate</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_3')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="low" id="card-mod99_4">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_4', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_4')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_4')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_4">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_4">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_4', 'VS Jeffy V3')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;"></span>VS Jeffy V3</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_4')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="low" id="card-mod99_6">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_6', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_6')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_6')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_6">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_6">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_6', 'Cocoa Noimix')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;"></span>Cocoa Noimix</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_6')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="low" id="card-mod99_7">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_7', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_7')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_7')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_7">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_7">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_7', 'Vs Metal Pipe V2')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;"></span>Vs Metal Pipe V2</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_7')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Metal Pipe')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="low" id="card-mod99_8">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_8', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_8')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_8">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_8">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_8', 'Rolling Girl')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;"></span>Rolling Girl</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_8')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="mid" id="card-mod99_9">
+  <span class="gama-badge gama-mid">Media</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod99_9', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_9')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod99_9">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod99_9">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod99_9', 'Herobrine Tales')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;"></span>Herobrine Tales</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod99_9')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="mod-card" data-gama="low" id="card-mod100">
+  <span class="gama-badge gama-low">Baja</span>
+  <button class="admin-pin-btn" onclick="toggleModPin('mod100', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+  </button>
+  <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <button class="admin-new-btn" onclick="toggleNewMod('card-mod100')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+  </button>
+  <button class="admin-fix-btn" onclick="fixBrokenLink('mod100')" style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+    <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix" style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+  </button>
+
+  <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-mod100">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod100">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('mod100', 'Vs. TheOdd1sOut')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;"></span>Vs. TheOdd1sOut</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openModInfo('mod100')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('mod100', 'TheOdd1sOut')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
       </div>
     </section>
@@ -1456,5 +1548,45 @@
       ¡Ir a Descargarlo!
     </button>
   </div>
+
+<div id="progress-modal" class="popup">
+    <div class="popup-content" style="border: 2px solid #b400ff; box-shadow: 0 0 20px rgba(180, 0, 255, 0.5); text-align: center; max-width: 320px; position: relative;">
+      <span onclick="document.getElementById('progress-modal').classList.remove('show')" style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white; text-shadow: 0 0 5px red;">&times;</span>
+      <h2 style="color: #00eaff; text-shadow: 0 0 10px #00eaff; margin-bottom: 15px; font-size: 20px;">Próximo Lanzamiento</h2>
+      <img id="prog-mod-img" src="assets/images/placeholder.webp" alt="Mod en progreso" style="width: 100%; border-radius: 8px; border: 1px solid #b400ff; margin-bottom: 15px; object-fit: cover; max-height: 160px;">
+      <h3 id="prog-mod-name" style="color: white; font-size: 18px; margin-bottom: 10px;">Cargando proyecto...</h3>
+      <p style="color: #ddd; font-size: 14px; margin-bottom: 5px;">Estado: <b id="prog-mod-pct" style="color: #00ff41; font-size: 16px;">0%</b> Completado</p>
+      <div style="width: 100%; height: 12px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #444; margin-bottom: 15px;">
+        <div id="prog-mod-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #b400ff, #00eaff); box-shadow: 0 0 10px #00eaff; transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+      </div>
+      <p id="prog-mod-desc" style="color: #aaa; font-size: 12px; font-style: italic;">Conectando con la base de datos...</p>
+    </div>
+  </div>
+
+<div id="share-modal" class="popup">
+    <div class="popup-content" style="border: 2px solid #fff; text-align: center; max-width: 300px; padding: 25px; position: relative;">
+      
+      <span onclick="document.getElementById('share-modal').classList.remove('show')" style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white;">&times;</span>
+
+      <h3 style="color: #00eaff; margin-bottom: 20px;">¡Comparte este Mod!</h3>
+      
+      <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+        <button class="social-btn btn-whatsapp" onclick="enviarWhatsApp()">
+          <img src="https://cdn-icons-png.flaticon.com/128/3670/3670051.png" style="width: 25px;">
+        </button>
+        
+        <button class="social-btn btn-telegram" onclick="enviarTelegram()">
+          <img src="https://cdn-icons-png.flaticon.com/128/2111/2111646.png" style="width: 25px;">
+        </button>
+
+        <button class="social-btn btn-copiar" onclick="copiarEnlace()">
+          <img src="https://cdn-icons-png.flaticon.com/128/1621/1621635.png" style="width: 20px;">
+        </button>
+      </div>
+
+      <p id="mensaje-copiado" style="color: #00ff41; font-size: 12px; display: none; font-weight: bold;">¡Enlace copiado al portapapeles!</p>
+    </div>
+  </div>
+
 </body>
-</html>                                                                                            
+</html>                                                                                          

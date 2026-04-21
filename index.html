@@ -78,6 +78,28 @@
     <img src="https://cdn-icons-png.flaticon.com/128/12180/12180668.png" alt="Tema Claro/Oscuro" style="width: 24px; height: 24px; object-fit: contain;">
   </div>
 
+  <div class="notif-container">
+  <button class="notif-bell-btn" onclick="toggleNotificaciones()">
+    <img src="https://cdn-icons-png.flaticon.com/128/8509/8509651.png" alt="Notificaciones">
+    <span class="notif-badge" id="badge-contador" style="display: none;">0</span>
+  </button>
+</div>
+
+<div id="panel-notificaciones" class="notif-panel hidden">
+  <div class="notif-header">
+    <h3>Notificaciones</h3>
+    <button class="close-notif" onclick="toggleNotificaciones()">❌</button>
+  </div>
+
+  <div id="admin-notif-area" class="admin-area hidden">
+    <textarea id="txt-nueva-notif" placeholder="Escribe un nuevo aviso para los usuarios..."></textarea>
+    <button class="btn-enviar-notif" onclick="enviarNotificacion()">Enviar Notificación</button>
+  </div>
+
+  <div id="lista-notificaciones" class="notif-list">
+    </div>
+</div>
+
   <div id="settings-popup" class="popup">
     <div class="popup-content popup-scroll-body" style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; box-sizing: border-box;">
       <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
@@ -213,31 +235,21 @@
         <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
       </div>
       <div class="update-body">
-        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.1.0!" data-en="What's New v5.1.0!">¡Novedades v5.1.0!</h2>
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.1.1!" data-en="What's New v5.1.1!">¡Novedades v5.1.1!</h2>
         <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
           <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
     <img src="https://cdn-icons-png.flaticon.com/128/5361/5361704.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-    <span data-es="Mejoras en el apartado de Ayuda" data-en="Help Section Improvements" style="font-size: 13.5px; line-height: 1.3;">Mejoras en el apartado de Ayuda</span>
-</li>
-
-<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-  <img src="https://cdn-icons-png.flaticon.com/128/5361/5361704.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-  <span data-es="Se mejoro el poder calificar con estrellas las Bases, Mods y Scripts" data-en="Improved Star Rating for Bases, Mods and Scripts" style="font-size: 13.5px; line-height: 1.3;">Se mejoro el poder calificar con estrellas las Bases, Mods y Scripts</span>
-</li>
-
-<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue_dark); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-  <img src="https://cdn-icons-png.flaticon.com/128/5361/5361704.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-  <span data-es="Se mejoro el boton de Reportar Enlaces caidos" data-en="Improved Report Links Button" style="font-size: 13.5px; line-height: 1.3;">Se mejoro el boton de Reportar Enlaces caidos</span>
-</li>
-
-<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-orange); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-  <img src="https://cdn-icons-png.flaticon.com/128/6041/6041172.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-  <span data-es="Se soluciono el error del porque la imagen no cargaba en la base <b>PsychEngineEK</b>" data-en="Fixed issue with image loading in <b>PsychEngineEK</b> base" style="font-size: 13.5px; line-height: 1.3;">Se soluciono el error del porque la imagen no cargaba en la base <b>PsychEngineEK</b></span>
+    <span data-es=" Se mejoro el apartado de Notificaciones" data-en="Improved Notifications Section" style="font-size: 13.5px; line-height: 1.3;"> Se mejoro el apartado de Notificaciones</span>
 </li>
 
 <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-  <img src="https://cdn-icons-png.flaticon.com/128/12388/12388400.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-  <span data-es="Se actualizo el Port: <b>Naomi FanCharts</b>" data-en="Updated Port: <b>Naomi FanCharts</b>" style="font-size: 13.5px; line-height: 1.3;">Se actualizo el Port: <b>Naomi FanCharts</b></span>
+    <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
+    <span data-es="Se añadio una nueva script: <b>Controller Engine</b>" data-en="Added new <b>Controller Engine</b> script" style="font-size: 13.5px; line-height: 1.3;"> Se añadio una nueva script <b>Controller Engine</b></span>
+</li>
+
+<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+    <img src="https://cdn-icons-png.flaticon.com/128/5432/5432968.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
+    <span data-es="Mas Mejoras y Correciones de errores menores" data-en="More Improvements and Bug Fixes" style="font-size: 13.5px; line-height: 1.3;"> More Improvements and Bug Fixes</span>
 </li>
 
         </ul>
@@ -360,172 +372,228 @@
       <div class="apks-grid" id="apksContainer">
 
         <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk1">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk1">0</span>
-          </div>
-          <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;"></span>Psych Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk1')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk1">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk1">0</span>
+  </div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk2" onclick="toggleGreenLed('apk2', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk2">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk2">0</span>
-          </div>
-          <img src="assets/images/webp/logoonline.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;"></span>Psych Online</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk2')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk1', 'Psych Engine')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk3" onclick="toggleGreenLed('apk3', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk3">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk3">0</span>
-          </div>
-          <img src="assets/images/webp/logocode.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;"></span>CodeName Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk3')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <img src="assets/images/webp/logopsych.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;"></span>Psych Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk1')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk4" onclick="toggleGreenLed('apk4', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk4">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk4">0</span>
-          </div>
-          <img src="assets/images/webp/logopsych.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;"></span>Plus Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk4')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk2" onclick="toggleGreenLed('apk2', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk2">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk2">0</span>
+  </div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk5" onclick="toggleGreenLed('apk5', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk5">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk5">0</span>
-          </div>
-          <img src="assets/images/webp/logop.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;"></span>P-Slice Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk5')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk2', 'Psych Online')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk6">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk6">0</span>
-          </div>
-          <img src="assets/images/webp/logof.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;"></span>Nova Fleare</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk6')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <img src="assets/images/webp/logoonline.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;"></span>Psych Online</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk2')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk7" onclick="toggleGreenLed('apk7', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk7" onclick="handleLike('apk7', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk7">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk7">0</span>
-          </div>
-          <img src="assets/images/webp/logo.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;"></span>PsychEngine EK</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk7')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk7', 'PsychEngine EK')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk3" onclick="toggleGreenLed('apk3', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk3">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk3">0</span>
+  </div>
 
-        <div class="apk-card">
-          <button class="admin-led-btn" id="btn-led-apk8" onclick="toggleGreenLed('apk8', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-apk8" onclick="handleLike('apk8', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-apk8">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk8">0</span>
-          </div>
-          <img src="assets/images/webp/logose.webp">
-          <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;"></span>Shadow Engine</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openApkInfo('apk8')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('apk8', 'Shadow Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk3', 'CodeName Engine')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logocode.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;"></span>CodeName Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk3')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk4" onclick="toggleGreenLed('apk4', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk4">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk4">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk4', 'Plus Engine')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logopsych.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;"></span>Plus Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk4')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk5" onclick="toggleGreenLed('apk5', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk5">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk5">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk5', 'P-Slice Engine')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logop.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;"></span>P-Slice Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk5')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk6">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk6">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk6', 'Nova Fleare')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logof.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;"></span>Nova Fleare</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk6')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk7" onclick="toggleGreenLed('apk7', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk7" onclick="handleLike('apk7', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk7">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk7">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk7', 'PsychEngine EK')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logoek.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;"></span>PsychEngine EK</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk7')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk7', 'PsychEngine EK')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card">
+  <button class="admin-led-btn" id="btn-led-apk8" onclick="toggleGreenLed('apk8', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-apk8" onclick="handleLike('apk8', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-apk8">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-apk8">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('apk8', 'Shadow Engine')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <img src="assets/images/webp/logose.webp">
+  <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;"></span>Shadow Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openApkInfo('apk8')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('apk8', 'Shadow Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
       </div>
     </section>
 
@@ -534,7 +602,8 @@
       <div class="mods-grid" id="modsContainer">
 
         <div class="mod-card secret-mod hidden" data-gama="mid" id="card-mod98_7">
-  <span class="gama-badge gama-mid" style="background: #ff00ea; color: white; border: 1px solid white;">💎 EXCLUSIVO</span>
+  <span class="gama-badge gama-mid">Media</span>
+  
   <button class="admin-pin-btn" onclick="toggleModPin('mod98_7', event)" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
   </button>
@@ -1035,44 +1104,85 @@
       <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;" data-es="Agrega código personalizado a tus propios mods y motores." data-en="Add custom code to your own mods and engines.">Agrega código personalizado a tus propios mods y motores.</p>
       
       <div class="apk-card" id="card-script1">
-          <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-script1" onclick="handleLike('script1', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-script1">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script1">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-script1" style="display:none;"></span>Menu Pause</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openScriptInfo('script1')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-script1" onclick="handleLike('script1', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-script1">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script1">0</span>
+  </div>
 
-        <div class="apk-card" id="card-script2">
-          <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
-          </button>
-          <div class="like-container" id="like-script2" onclick="handleLike('script2', this)" style="display: flex; align-items: center; gap: 4px;">
-            <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
-            <span class="like-count" id="count-script2">0</span>
-          </div>
-          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
-            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script2">0</span>
-          </div>
-          <h3><span class="led-dot led-green" id="led-green-script2" style="display:none;"></span>FPS Counter</h3>
-          <div class="card-buttons">
-            <button class="btn" onclick="openScriptInfo('script2')" data-es="Más Info" data-en="More Info">Más Info</button>
-            <button class="btn btn-chat" onclick="openModComments('script2', 'FPS Counter')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
-            </button>
-          </div>
-        </div>
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('script1', 'Menu Pause')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-script1" style="display:none;"></span>Menu Pause</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openScriptInfo('script1')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card" id="card-script2">
+  <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-script2" onclick="handleLike('script2', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-script2">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script2">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('script2', 'FPS Counter')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-script2" style="display:none;"></span>FPS Counter</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openScriptInfo('script2')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('script2', 'FPS Counter')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card" id="card-script3">
+  <button class="admin-led-btn" id="btn-led-script3" onclick="toggleGreenLed('script3', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-script3" onclick="handleLike('script3', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-script3">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script3">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('script3', 'FPS Counter')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-script3" style="display:none;"></span>Controller Engine</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openScriptInfo('script3')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('script3', 'Controller Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
       </div>
     </section>
 
@@ -1210,7 +1320,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V5.1.0 <br>
+      © <span id="year"></span> LaloCF | V5.1.1 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span></div>
     </footer>
   </div>
@@ -1540,7 +1650,7 @@
   <div id="secret-unlocked-popup">
     <h2 style="color: #ff00ea; text-shadow: 0 0 15px #ff00ea; font-size: 28px; margin-bottom: 10px;">¡BINGO! 🎉</h2>
     <p style="color: white; font-size: 16px; margin-bottom: 20px;">
-      El Mod <b>FNF From The Top!</b> fue Desbloqueado. <br>
+      La descarga del Mod fue Desbloqueado. <br>
       ¡Disfruta del Mod!.
     </p>
     <button onclick="document.getElementById('secret-unlocked-popup').classList.remove('show')" 
@@ -1549,26 +1659,12 @@
     </button>
   </div>
 
-<div id="progress-modal" class="popup">
-    <div class="popup-content" style="border: 2px solid #b400ff; box-shadow: 0 0 20px rgba(180, 0, 255, 0.5); text-align: center; max-width: 320px; position: relative;">
-      <span onclick="document.getElementById('progress-modal').classList.remove('show')" style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white; text-shadow: 0 0 5px red;">&times;</span>
-      <h2 style="color: #00eaff; text-shadow: 0 0 10px #00eaff; margin-bottom: 15px; font-size: 20px;">Próximo Lanzamiento</h2>
-      <img id="prog-mod-img" src="assets/images/placeholder.webp" alt="Mod en progreso" style="width: 100%; border-radius: 8px; border: 1px solid #b400ff; margin-bottom: 15px; object-fit: cover; max-height: 160px;">
-      <h3 id="prog-mod-name" style="color: white; font-size: 18px; margin-bottom: 10px;">Cargando proyecto...</h3>
-      <p style="color: #ddd; font-size: 14px; margin-bottom: 5px;">Estado: <b id="prog-mod-pct" style="color: #00ff41; font-size: 16px;">0%</b> Completado</p>
-      <div style="width: 100%; height: 12px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #444; margin-bottom: 15px;">
-        <div id="prog-mod-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #b400ff, #00eaff); box-shadow: 0 0 10px #00eaff; transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
-      </div>
-      <p id="prog-mod-desc" style="color: #aaa; font-size: 12px; font-style: italic;">Conectando con la base de datos...</p>
-    </div>
-  </div>
-
 <div id="share-modal" class="popup">
     <div class="popup-content" style="border: 2px solid #fff; text-align: center; max-width: 300px; padding: 25px; position: relative;">
       
       <span onclick="document.getElementById('share-modal').classList.remove('show')" style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white;">&times;</span>
 
-      <h3 style="color: #00eaff; margin-bottom: 20px;">¡Comparte este Mod!</h3>
+      <h3 style="color: #00eaff; margin-bottom: 20px;">¡Comparte esto!</h3>
       
       <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
         <button class="social-btn btn-whatsapp" onclick="enviarWhatsApp()">
@@ -1588,5 +1684,196 @@
     </div>
   </div>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
+    authDomain: "fnf-mobile-lalocf.firebaseapp.com",
+    databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
+    projectId: "fnf-mobile-lalocf",
+    storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
+    messagingSenderId: "407243542354",
+    appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let notificacionesBD = []; 
+  let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
+
+  // --- FUNCIÓN PARA DETECTAR SI ERES EL PATRÓN (ADMIN) ---
+  // Blindada: Solo regresa true si hay pruebas irrefutables.
+  function comprobarSiEsAdmin() {
+    // 1. Revisar si tienes la llave secreta en el navegador
+    if (localStorage.getItem('modo_patron_activado') === 'true') return true;
+
+    // 2. Si entraste con el enlace maestro, te damos la llave y acceso
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('set_admin')) {
+      localStorage.setItem('modo_patron_activado', 'true');
+      return true;
+    }
+
+    // 3. Revisamos variables antiguas (Asegúrate de que tu login real use una de estas)
+    const posiblesVariables = ['isAdmin', 'admin', 'adminMode', 'admin_mode', 'is_admin', 'admin_logged'];
+    for (let v of posiblesVariables) {
+      if (localStorage.getItem(v) === 'true' || sessionStorage.getItem(v) === 'true') {
+        return true;
+      }
+    }
+
+    return false; // Si no hay llave, eres usuario mortal.
+  }
+
+  // --- ABRIR Y CERRAR PANEL ---
+  window.toggleNotificaciones = function() {
+    const panel = document.getElementById('panel-notificaciones');
+    const adminArea = document.getElementById('admin-notif-area');
+    
+    panel.classList.toggle('hidden');
+
+    if (!panel.classList.contains('hidden')) {
+      window.marcarComoLeidas();
+
+      // Verificamos quién eres
+      const esAdmin = comprobarSiEsAdmin();
+      
+      // Si eres admin, muestra la caja de texto. Si no, escóndela.
+      if (esAdmin) {
+        adminArea.style.display = 'block'; 
+      } else {
+        adminArea.style.display = 'none';
+      }
+    }
+  }
+
+  // --- CAMPANA ROJA ---
+  window.actualizarCampana = function() {
+    const badge = document.getElementById('badge-contador');
+    let noLeidas = 0;
+
+    notificacionesBD.forEach(notif => {
+      if (!idNotificacionesLeidas.includes(notif.id)) {
+        noLeidas++;
+      }
+    });
+
+    if (noLeidas > 0) {
+      badge.style.display = 'block';
+      badge.innerText = noLeidas > 9 ? '9+' : noLeidas;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  window.marcarComoLeidas = function() {
+    notificacionesBD.forEach(notif => {
+      if (!idNotificacionesLeidas.includes(notif.id)) {
+        idNotificacionesLeidas.push(notif.id);
+      }
+    });
+    localStorage.setItem('notifsLeidas', JSON.stringify(idNotificacionesLeidas));
+    window.actualizarCampana();
+  }
+
+  // --- DIBUJAR MENSAJES ---
+  window.renderizarNotificaciones = function() {
+    const lista = document.getElementById('lista-notificaciones');
+    lista.innerHTML = ''; 
+
+    // Verificamos quién eres
+    const esAdmin = comprobarSiEsAdmin();
+
+    if (notificacionesBD.length === 0) {
+      lista.innerHTML = '<p style="text-align:center; color:#888; font-size:13px; margin-top: 20px;">No hay notificaciones nuevas.</p>';
+      return;
+    }
+
+    const notifsOrdenadas = [...notificacionesBD].reverse();
+
+    notifsOrdenadas.forEach(notif => {
+      const div = document.createElement('div');
+      div.className = 'notif-item';
+      
+      let htmlContent = `
+        <p class="notif-text">${notif.texto}</p>
+        <p class="notif-date">${notif.fecha}</p>
+      `;
+
+      // Solo si eres el jefe, agregamos los botones de control
+      if (esAdmin) {
+        htmlContent += `
+          <div class="admin-controls">
+            <button class="btn-editar" onclick="editarNotificacion('${notif.id}')">Editar</button>
+            <button class="btn-borrar" onclick="borrarNotificacion('${notif.id}')">Borrar</button>
+          </div>
+        `;
+      }
+
+      div.innerHTML = htmlContent;
+      lista.appendChild(div);
+    });
+
+    window.actualizarCampana();
+  }
+
+  // --- ACCIONES DE ADMIN ---
+  window.enviarNotificacion = function() {
+    if(!comprobarSiEsAdmin()) return; // Doble candado: Si no es admin, no manda nada.
+
+    const txtArea = document.getElementById('txt-nueva-notif');
+    const texto = txtArea.value.trim();
+    
+    if (texto === '') return;
+
+    const fechaActual = new Date().toLocaleString('es-MX', { 
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit' 
+    });
+
+    const idUnico = 'notif_' + Date.now();
+    
+    set(ref(db, 'notificaciones/' + idUnico), {
+      id: idUnico,
+      texto: texto,
+      fecha: fechaActual
+    });
+
+    txtArea.value = '';
+  }
+
+  window.borrarNotificacion = function(id) {
+    if(!comprobarSiEsAdmin()) return; // Candado de seguridad
+    if(confirm('¿Seguro que quieres borrar esta notificación?')) {
+      remove(ref(db, 'notificaciones/' + id));
+    }
+  }
+
+  window.editarNotificacion = function(id) {
+    if(!comprobarSiEsAdmin()) return; // Candado de seguridad
+    const notifActual = notificacionesBD.find(n => n.id === id);
+    const nuevoTexto = prompt('Edita tu notificación:', notifActual.texto);
+    
+    if (nuevoTexto !== null && nuevoTexto.trim() !== '') {
+      update(ref(db, 'notificaciones/' + id), {
+        texto: nuevoTexto
+      });
+    }
+  }
+
+  // --- ESCUCHADOR EN TIEMPO REAL ---
+  const notificacionesRef = ref(db, 'notificaciones');
+  onValue(notificacionesRef, (snapshot) => {
+    notificacionesBD = [];
+    snapshot.forEach((childSnapshot) => {
+      notificacionesBD.push(childSnapshot.val());
+    });
+    window.renderizarNotificaciones();
+  });
+</script>
+
 </body>
-</html>                                                                                          
+</html>

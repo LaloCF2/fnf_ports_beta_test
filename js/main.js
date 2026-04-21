@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.0";
+const APP_VERSION = "v5.1.1";
 const MI_UID_ADMIN = "user_a655u37rr"; 
 
 let isSuperUser = false;
@@ -558,7 +558,18 @@ const SCRIPTS_DATA = {
         downloads: [
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
-      }
+      },
+    script3: {
+        title: "Controller Engine",
+        desc: "Este script agrega un mando virtual a tu juego psych engine dandole una apariencia igual al de Gombo Cat.\nTotalmente funcional para Pc, Android y iOS.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/mc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
+        ]
+      },
     };
 
 let scriptImagesArray = [];
@@ -605,8 +616,18 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod98_7: {
+    img: "assets/images/webp/FromTheTop.webp",
+    title: "From The Top!",
+    desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
+    version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
+    downloads: [
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
+      { name: "Descarga Psych Engine Opt", link: "https://lalocf2.github.io/fnf_ports/?share=apk1" }
+    ]
+  },
    mod98_8: {
-    img: "assets/images/mods/fan.webp",
+    img: "assets/images/webp/logopsychengine.webp",
     title: "Naomi FanCharts",
     desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 79.87MB",
     version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
@@ -750,9 +771,9 @@ const APK_DATA = {
       { name: "Descarga Directa Windows32 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
       { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Directa Android Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
       { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
+      { name: "Descarga Directa iOS Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
     ]
   },
   apk2: {
@@ -869,13 +890,11 @@ const APK_DATA = {
 
 window.openModInfo = (id) => { 
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
-    // Sacamos el nombre del mod directo de la tarjeta para ponerlo en el letrero
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
-    
-    // Mostramos el popup de mantenimiento en vez del normal
+
     document.getElementById('maintenance-popup').classList.add('show');
-    return; // Este return corta la función para que NO se abra el popup de descargas
+    return;
   }
   const d = MOD_DATA[id]; 
   document.getElementById("popup-img").src = d.img; 
@@ -1519,13 +1538,8 @@ window.toggleNewMod = async (cardId) => {
 };
 
 // ==========================================
-// 🚨 SISTEMA DE CUARENTENA Y TELEGRAM V2 (Con Nombres y Popups)
-// ==========================================
-
-// Usamos window. para que la variable se pueda leer desde otras funciones
 window.brokenLinksData = {};
 
-// 1. ESCUCHADOR
 onValue(ref(db, 'broken_links'), (snap) => {
   window.brokenLinksData = snap.val() || {};
   
@@ -1539,7 +1553,6 @@ onValue(ref(db, 'broken_links'), (snap) => {
   });
 });
 
-// 2. FUNCIÓN DE REPORTE (A TELEGRAM)
 window.reportError = async (modId) => {
   const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
   
@@ -1557,17 +1570,15 @@ window.reportError = async (modId) => {
 
     alert('🛑 ¡MOD BLOQUEADO! El Administrador ha sido notificado.');
 
-    // 🤖 TELEGRAM: Sacamos el nombre exacto del Mod
     let modName = "Nombre Desconocido";
     const modTitleElement = document.querySelector('#card-' + modId + ' h3');
     if (modTitleElement) {
-      modName = modTitleElement.textContent.trim(); // Extrae el texto "Naomi FanChart", etc.
+      modName = modTitleElement.textContent.trim();
     }
 
     const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI"; 
     const chatId = "5429172831"; 
-    
-    // Armamos el mensaje VIP con ID y Nombre
+
     const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod a sido puesto en cuarentena automáticamente.\n\n🛠️ ¡Entra a repararlo!`;
     
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -1580,7 +1591,6 @@ window.reportError = async (modId) => {
   }
 };
 
-// 3. FUNCIÓN PARA REPARAR
 window.fixBrokenLink = async (modId) => {
   if (!isSuperUser) return; 
   if (confirm('🛠️ ¿Ya solucionaste el link de este mod?')) {
@@ -1588,39 +1598,30 @@ window.fixBrokenLink = async (modId) => {
   }
 };
 // ==========================================
-// ==========================================
-// ⭐ SISTEMA DE CALIFICACIÓN POR ESTRELLAS
-// ==========================================
 
-// 1. Escuchar la base de datos para calcular los promedios
 onValue(ref(db, 'ratings'), (snap) => {
   const ratingsData = snap.val() || {};
   const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
   const miLlave = userProfile ? userProfile.key : null;
 
-  // Recorremos todas las tarjetas de los mods en la pantalla
   document.querySelectorAll('.mod-card').forEach(card => {
-    // Sacamos el ID exacto del mod (ej. mod98_8)
     const exactModId = card.id.replace('card-', ''); 
     const modRatings = ratingsData[exactModId] || {};
-    
-    // Calculamos el promedio
+
     const votosArray = Object.values(modRatings);
     const totalVotos = votosArray.length;
     let promedio = 0;
     
     if (totalVotos > 0) {
       const suma = votosArray.reduce((acc, val) => acc + val, 0);
-      promedio = (suma / totalVotos).toFixed(1); // Deja solo 1 decimal (ej. 4.5)
+      promedio = (suma / totalVotos).toFixed(1);
     }
 
-    // Escribimos el promedio en la tarjeta
     const textoPromedio = document.getElementById(`rating-text-${exactModId}`);
     if (textoPromedio) {
       textoPromedio.innerText = `${promedio} ⭐ (${totalVotos})`;
     }
 
-    // Pintamos de dorado las estrellas si el usuario actual ya votó
     const starsContainer = document.getElementById(`stars-${exactModId}`);
     if (starsContainer) {
       const miVotoAnterior = miLlave ? modRatings[miLlave] : 0;
@@ -1629,11 +1630,11 @@ onValue(ref(db, 'ratings'), (snap) => {
       spans.forEach(span => {
         const valorEstrella = parseInt(span.getAttribute('data-val'));
         if (miVotoAnterior >= valorEstrella) {
-          span.innerText = '★'; // Estrella llena
-          span.style.color = '#ffd700'; // Dorado Neón
+          span.innerText = '★';
+          span.style.color = '#ffd700';
           span.style.textShadow = '0 0 8px #ffd700';
         } else {
-          span.innerText = '☆'; // Estrella vacía
+          span.innerText = '☆';
           span.style.color = '#555';
           span.style.textShadow = 'none';
         }
@@ -1642,84 +1643,62 @@ onValue(ref(db, 'ratings'), (snap) => {
   });
 });
 
-// 2. Función que se activa cuando alguien toca una estrella
 window.rateMod = async (modId, calificacion) => {
   const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
   
-  // Si no ha iniciado sesión, abrimos el popup de registro
   if (!user) {
     document.getElementById('register-popup').classList.add('show');
     return;
   }
-  
-  // Guardamos o actualizamos su calificación en Firebase (del 1 al 5)
+
   await set(ref(db, `ratings/${modId}/${user.key}`), calificacion);
-  
-  // Pequeña vibración para confirmar (si el celular lo soporta)
+
   if(window.triggerVibrate) window.triggerVibrate(15);
 };
 // ==========================================
-// ==========================================
-// 📚 SISTEMA DE ACORDEÓN PARA AYUDA
-// ==========================================
+
 window.toggleFaq = function(button) {
-  // Cambiamos el color del botón y giramos la flecha
   button.classList.toggle('active');
-  
-  // Seleccionamos la caja de información que está justo debajo de ese botón
+
   const content = button.nextElementSibling;
   
-  // Abrimos o cerramos el contenido con un deslizamiento suave
   if (content.classList.contains('open')) {
     content.classList.remove('open');
   } else {
     content.classList.add('open');
   }
-  
-  // Pequeña vibración de interfaz (opcional)
+
   if(window.triggerVibrate) window.triggerVibrate(10);
 };
 // ==========================================
 
-// ==========================================
-// 💎 SISTEMA DE ENLACES SECRETOS (UNLOCKS)
-// ==========================================
-
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Revisamos si en el enlace viene la palabra "?unlock=algo"
   const urlParams = new URLSearchParams(window.location.search);
   const modToUnlock = urlParams.get('unlock');
 
-  // Si traen una llave en el enlace...
   if (modToUnlock) {
-    // Guardamos en la memoria de su celular que ya tienen permiso de ver ese mod
     let misSecretos = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
     if (!misSecretos.includes(modToUnlock)) {
       misSecretos.push(modToUnlock);
       localStorage.setItem('unlocked_mods', JSON.stringify(misSecretos));
       
-      // Mostramos el fiestón de celebración
       setTimeout(() => {
         document.getElementById('secret-unlocked-popup').classList.add('show');
-        if(window.triggerVibrate) window.triggerVibrate([30, 50, 30]); // Doble vibración
+        if(window.triggerVibrate) window.triggerVibrate([30, 50, 30]);
       }, 1000);
     }
-    
-    // Limpiamos el enlace de arriba para que se vea normal (tusitio.com) y no puedan copiar el secreto tan fácil
+
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // 2. Revelar los mods secretos que el usuario ya tenga guardados
   const misSecretosGuardados = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
   
-  // Opcional: Si eres Admin, tú siempre puedes ver todos los mods secretos
   const esAdmin = localStorage.getItem('superUser') === 'true';
 
   document.querySelectorAll('.secret-mod').forEach(card => {
-    // Le quitamos el "card-" al id
+
     const exactId = card.id.replace('card-', ''); 
-    
-    // Si el usuario tiene la llave, o si eres tú el Admin, lo hacemos visible
+
     if (misSecretosGuardados.includes(exactId) || esAdmin) {
       card.classList.remove('hidden');
     }
@@ -1727,25 +1706,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // ==========================================
 
-// ==========================================
-// 📤 SISTEMA PARA COMPARTIR ENLACES DIRECTOS
-// ==========================================
-
 let linkParaCompartir = "";
 let textoParaCompartir = "";
 
-// 1. Abre el menú y prepara el enlace
 window.abrirMenuCompartir = (id, nombreMod) => {
-  // Construye la URL exacta (Ej: lalocf.com/?share=mod98_8)
   const baseUrl = window.location.origin + window.location.pathname;
   linkParaCompartir = `${baseUrl}?share=${id}`;
-  textoParaCompartir = `🔥 ¡Mira este increíble Mod para Psych Engine: *${nombreMod}*! Descárgalo aquí:\n`;
+  textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
 
-  // Muestra el menú
   document.getElementById('share-modal').classList.add('show');
 };
 
-// 2. Funciones de Redes Sociales
 window.enviarWhatsApp = () => {
   const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoParaCompartir + linkParaCompartir)}`;
   window.open(url, '_blank');
@@ -1764,20 +1735,15 @@ window.copiarEnlace = () => {
   });
 };
 
-// ==========================================
-// 🚀 DETECTOR DE ENLACES MÁGICOS AL INICIAR
-// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const idCompartido = urlParams.get('share');
 
-  // Si alguien entró usando un link compartido (?share=mod98_8)
   if (idCompartido) {
     
-    // Le damos 1 segundo a la página para que termine de cargar todo
+
     setTimeout(() => {
-      
-      // Verificamos si es un Mod, un Apk o un Script y lo abrimos automáticamente
+
       if (idCompartido.includes('mod') && window.openModInfo) {
         window.openModInfo(idCompartido);
       } else if (idCompartido.includes('apk') && window.openApkInfo) {
@@ -1786,20 +1752,16 @@ document.addEventListener("DOMContentLoaded", () => {
         window.openScriptInfo(idCompartido);
       }
 
-      // 🔥 MAGIA PURA: Le agregamos el efecto de brillos al popup que se acaba de abrir
-      // Asegúrate de que el ID sea el correcto del contenedor de información de tu popup principal
       const contenidoPopup = document.querySelector('#mod-info-popup .popup-content') || document.querySelector('.popup.show .popup-content');
       
       if (contenidoPopup) {
         contenidoPopup.classList.add('brillo-epico');
-        
-        // El brillo dura 6 segundos y luego se apaga para no molestar a la vista
+
         setTimeout(() => {
           contenidoPopup.classList.remove('brillo-epico');
         }, 6000);
       }
-      
-      // Limpiamos la URL de arriba para que quede limpia
+
       window.history.replaceState({}, document.title, window.location.pathname);
 
     }, 1000);

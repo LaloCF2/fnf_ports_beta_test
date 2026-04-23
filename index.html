@@ -1704,31 +1704,25 @@
   let notificacionesBD = []; 
   let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
 
-  // --- FUNCIÓN PARA DETECTAR SI ERES EL PATRÓN (ADMIN) ---
-  // Blindada: Solo regresa true si hay pruebas irrefutables.
+  // =========================================================
+  // 🚀 LA VERDADERA LLAVE MAESTRA (Conectada a tu main.js)
+  // =========================================================
   function comprobarSiEsAdmin() {
-    // 1. Revisar si tienes la llave secreta en el navegador
-    if (localStorage.getItem('modo_patron_activado') === 'true') return true;
-
-    // 2. Si entraste con el enlace maestro, te damos la llave y acceso
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('set_admin')) {
-      localStorage.setItem('modo_patron_activado', 'true');
-      return true;
-    }
-
-    // 3. Revisamos variables antiguas (Asegúrate de que tu login real use una de estas)
-    const posiblesVariables = ['isAdmin', 'admin', 'adminMode', 'admin_mode', 'is_admin', 'admin_logged'];
-    for (let v of posiblesVariables) {
-      if (localStorage.getItem(v) === 'true' || sessionStorage.getItem(v) === 'true') {
-        return true;
+    try {
+      // Leemos el mismo perfil que usa tu código original
+      const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+      
+      // Verificamos si es tu UID de administrador
+      if (userProfile && userProfile.key === "user_a655u37rr") {
+        return true; // ¡Es el jefe!
       }
+    } catch (error) {
+      // Si hay un error leyendo el perfil, no pasa nada, es un usuario normal
     }
-
-    return false; // Si no hay llave, eres usuario mortal.
+    return false; // Usuario normal
   }
 
-  // --- ABRIR Y CERRAR PANEL ---
+  // --- ABRIR Y CERRAR EL PANEL ---
   window.toggleNotificaciones = function() {
     const panel = document.getElementById('panel-notificaciones');
     const adminArea = document.getElementById('admin-notif-area');
@@ -1737,20 +1731,20 @@
 
     if (!panel.classList.contains('hidden')) {
       window.marcarComoLeidas();
-
-      // Verificamos quién eres
+      
       const esAdmin = comprobarSiEsAdmin();
       
-      // Si eres admin, muestra la caja de texto. Si no, escóndela.
+      // Si eres tú, muestra la caja para enviar notificaciones
       if (esAdmin) {
         adminArea.style.display = 'block'; 
       } else {
+        // A los usuarios normales ni siquiera les sale la caja
         adminArea.style.display = 'none';
       }
     }
   }
 
-  // --- CAMPANA ROJA ---
+  // --- NÚMERO ROJO DE LA CAMPANA ---
   window.actualizarCampana = function() {
     const badge = document.getElementById('badge-contador');
     let noLeidas = 0;
@@ -1779,12 +1773,12 @@
     window.actualizarCampana();
   }
 
-  // --- DIBUJAR MENSAJES ---
+  // --- DIBUJAR LOS MENSAJES ---
   window.renderizarNotificaciones = function() {
     const lista = document.getElementById('lista-notificaciones');
     lista.innerHTML = ''; 
 
-    // Verificamos quién eres
+    // Revisamos de nuevo si eres tú
     const esAdmin = comprobarSiEsAdmin();
 
     if (notificacionesBD.length === 0) {
@@ -1803,7 +1797,7 @@
         <p class="notif-date">${notif.fecha}</p>
       `;
 
-      // Solo si eres el jefe, agregamos los botones de control
+      // 🛑 SÓLO SI ERES TÚ, DIBUJA LOS BOTONES DE EDITAR Y BORRAR 🛑
       if (esAdmin) {
         htmlContent += `
           <div class="admin-controls">
@@ -1820,51 +1814,43 @@
     window.actualizarCampana();
   }
 
-  // --- ACCIONES DE ADMIN ---
+  // --- ACCIONES EXCLUSIVAS DEL ADMIN ---
   window.enviarNotificacion = function() {
-    if(!comprobarSiEsAdmin()) return; // Doble candado: Si no es admin, no manda nada.
-
+    if(!comprobarSiEsAdmin()) return; // Candado doble por si acaso
+    
     const txtArea = document.getElementById('txt-nueva-notif');
     const texto = txtArea.value.trim();
-    
     if (texto === '') return;
-
+    
     const fechaActual = new Date().toLocaleString('es-MX', { 
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit' 
     });
-
-    const idUnico = 'notif_' + Date.now();
     
+    const idUnico = 'notif_' + Date.now();
     set(ref(db, 'notificaciones/' + idUnico), {
-      id: idUnico,
-      texto: texto,
-      fecha: fechaActual
+      id: idUnico, texto: texto, fecha: fechaActual
     });
-
     txtArea.value = '';
   }
 
   window.borrarNotificacion = function(id) {
-    if(!comprobarSiEsAdmin()) return; // Candado de seguridad
+    if(!comprobarSiEsAdmin()) return; 
     if(confirm('¿Seguro que quieres borrar esta notificación?')) {
       remove(ref(db, 'notificaciones/' + id));
     }
   }
 
   window.editarNotificacion = function(id) {
-    if(!comprobarSiEsAdmin()) return; // Candado de seguridad
+    if(!comprobarSiEsAdmin()) return;
     const notifActual = notificacionesBD.find(n => n.id === id);
     const nuevoTexto = prompt('Edita tu notificación:', notifActual.texto);
-    
     if (nuevoTexto !== null && nuevoTexto.trim() !== '') {
-      update(ref(db, 'notificaciones/' + id), {
-        texto: nuevoTexto
-      });
+      update(ref(db, 'notificaciones/' + id), { texto: nuevoTexto });
     }
   }
 
-  // --- ESCUCHADOR EN TIEMPO REAL ---
+  // --- ESCUCHAR FIREBASE ---
   const notificacionesRef = ref(db, 'notificaciones');
   onValue(notificacionesRef, (snapshot) => {
     notificacionesBD = [];

@@ -829,30 +829,55 @@ body.is-admin .admin-fix-btn {
 .btn-telegram { background: #0088cc; color: white; }
 .btn-copiar { background: #333; color: white; border: 1px solid #fff; }
 
-
-
-/* =========================================
-   1. EL BOTÓN (Fijo pero Responsivo)
-   ========================================= */
 .notif-container {
   position: fixed;
-  top: 15px;      
-  right: 70px;    /* Distancia original para PC */
+  top: 70px;
+  right: 420px;
   z-index: 9999;
 }
 
-/* =========================================
-   2. LA VENTANA (Ajustable a Celulares)
-   ========================================= */
+.notif-bell-btn {
+  background-color: transparent !important;
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+
+.notif-bell-btn img {
+  width: 35px;
+  height: 35px;
+  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+  transition: transform 0.2s;
+}
+
+.notif-bell-btn:hover img {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, #ff4444, #cc0000);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 50%;
+  border: 2px solid #111;
+  box-shadow: 0 2px 5px rgba(255,0,0,0.5);
+}
+
 .notif-panel {
-  position: absolute; 
-  top: 50px;          
-  right: -20px;       /* Lo centramos un poco respecto a la campana */
+  position: absolute;
+  top: 50px;
+  right: 0;
   width: 340px;
-  max-width: 90vw;    /* 🚀 MAGIA: Nunca será más ancha que el 90% de la pantalla del celular */
   max-height: 480px;
-  
-  /* Efecto Cristal Oscuro Premium */
+
   background: rgba(20, 20, 20, 0.85);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -865,29 +890,14 @@ body.is-admin .admin-fix-btn {
   flex-direction: column;
   z-index: 10000;
   overflow: hidden;
-  
-  /* Animación suave al abrir */
+
   transition: opacity 0.3s ease, transform 0.3s ease;
   transform: translateY(0);
   opacity: 1;
 }
 
 .notif-panel.hidden {
-  display: none; 
-}
-
-/* =========================================
-   📱 REGLAS EXCLUSIVAS PARA CELULARES
-   ========================================= */
-@media screen and (max-width: 768px) {
-  .notif-container {
-    top: 10px;
-    right: 50px; /* Lo pegamos más a la orilla para que no se pierda en el cel */
-  }
-  
-  .notif-panel {
-    right: -40px; /* Ajustamos para que la ventana no se salga de la pantalla del celular */
-  }
+  display: none;
 }
 
 .notif-header {

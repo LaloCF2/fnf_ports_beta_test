@@ -19,11 +19,23 @@
   <link id="theme-style" rel="stylesheet" href="">
   
   <script>
+    // 1. Cargar temas guardados (Retro, Snokido)
     const savedTheme = localStorage.getItem('activeTheme') || 'default';
     if(savedTheme === 'retro') {
-        document.getElementById('theme-style').href = 'css/style2.css';
+        document.write('<link rel="stylesheet" href="css/style2.css">');
     } else if(savedTheme === 'snokido') {
-        document.getElementById('theme-style').href = 'css/style3.css';
+        document.write('<link rel="stylesheet" href="css/style3.css">');
+    }
+
+    // 2. 🚀 DETECTOR DE iOS PARA LIQUID GLASS 🚀
+    const es_iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if(es_iOS) {
+        // Si es Apple, le inyectamos el CSS exclusivo y le ponemos una clase al body
+        document.write('<link rel="stylesheet" href="css/style_liquidglass.css">');
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add('ios-theme');
+        });
     }
   </script>
 </head>
@@ -79,25 +91,23 @@
   </div>
 
   <div class="notif-container">
-  <button class="notif-bell-btn" onclick="toggleNotificaciones()">
-    <img src="https://cdn-icons-png.flaticon.com/128/8509/8509651.png" alt="Notificaciones">
-    <span class="notif-badge" id="badge-contador" style="display: none;">0</span>
-  </button>
-</div>
-
-<div id="panel-notificaciones" class="notif-panel hidden">
-  <div class="notif-header">
-    <h3>Notificaciones</h3>
-    <button class="close-notif" onclick="toggleNotificaciones()">❌</button>
+    <button class="notif-bell-btn" onclick="toggleNotificaciones()">
+      <img src="https://cdn-icons-png.flaticon.com/128/8509/8509651.png" alt="Notificaciones">
+      <span id="badge-contador" class="notif-badge" style="display: none;">0</span>
+    </button>
   </div>
 
-  <div id="admin-notif-area" class="admin-area hidden">
-    <textarea id="txt-nueva-notif" placeholder="Escribe un nuevo aviso para los usuarios..."></textarea>
-    <button class="btn-enviar-notif" onclick="enviarNotificacion()">Enviar Notificación</button>
-  </div>
-
-  <div id="lista-notificaciones" class="notif-list">
+  <div id="panel-notificaciones" class="notif-panel hidden">
+    <div class="notif-header">
+      <h3>Notificaciones</h3>
+      <button class="close-notif" onclick="toggleNotificaciones()">✕</button>
     </div>
+    <div id="admin-notif-area" class="admin-area" style="display: none;">
+      <textarea id="txt-nueva-notif" placeholder="Aviso para los usuarios..."></textarea>
+      <button class="btn-enviar-notif" onclick="enviarNotificacion()">Enviar Aviso</button>
+    </div>
+    <div id="lista-notificaciones" class="notif-list"></div>
+  </div>
 </div>
 
   <div id="settings-popup" class="popup">
@@ -215,8 +225,8 @@
       <span class="popup-close" onclick="document.getElementById('admin-tools-popup').classList.remove('show')">✖</span>
       <h2 class="glow">Panel de Control Global</h2>
       <textarea id="globalNotifText" class="reg-input" placeholder="Ej: Enviar una Notificación" rows="3" style="resize:none;"></textarea>
-     <button class="btn" onclick="sendGlobalNotification()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-  <img src="https://cdn-icons-png.flaticon.com/128/1827/1827370.png" alt="Campana" class="btn-icon">
+     <button class="btn" onclick="sendGlobalNotification()" style="width: 30%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+  <img src="https://cdn-icons-png.flaticon.com/128/1827/1827370.png" style="align-items: center;" alt="Campana" class="btn-icon">
   Enviar Notificación
 </button>
       
@@ -235,21 +245,26 @@
         <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
       </div>
       <div class="update-body">
-        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.1.1!" data-en="What's New v5.1.1!">¡Novedades v5.1.1!</h2>
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.1.2!" data-en="What's New v5.1.2!">¡Novedades v5.1.2!</h2>
         <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
           <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
     <img src="https://cdn-icons-png.flaticon.com/128/5361/5361704.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
     <span data-es=" Se mejoro el apartado de Notificaciones" data-en="Improved Notifications Section" style="font-size: 13.5px; line-height: 1.3;"> Se mejoro el apartado de Notificaciones</span>
 </li>
 
-<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-    <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-    <span data-es="Se añadio una nueva script: <b>Controller Engine</b>" data-en="Added new <b>Controller Engine</b> script" style="font-size: 13.5px; line-height: 1.3;"> Se añadio una nueva script <b>Controller Engine</b></span>
-</li>
+  <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+      <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
+      <span data-es="Se añadio un nuevo Mod: <b>TKOII FanChart</b>" data-en="Added new <b>TKOII FanChart</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo Mod: <b>TKOII FanChart</b></span>
+  </li>
+
+  <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+      <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
+      <span data-es="Se añadio un nuevo Mod: <b>FruitNinja V1.5</b>" data-en="Added new <b>FruitNinja V1.5</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo Mod: <b>FruitNinja V1.5</b></span>
+  </li>
 
 <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
     <img src="https://cdn-icons-png.flaticon.com/128/5432/5432968.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-    <span data-es="Mas Mejoras y Correciones de errores menores" data-en="More Improvements and Bug Fixes" style="font-size: 13.5px; line-height: 1.3;"> More Improvements and Bug Fixes</span>
+    <span data-es="Mejoras y Correciones de errores menores" data-en="More Improvements and Bug Fixes" style="font-size: 13.5px; line-height: 1.3;"> More Improvements and Bug Fixes</span>
 </li>
 
         </ul>
@@ -630,7 +645,7 @@
     </button>
   </div>
 
-    <h3><span class="led-dot led-green" id="led-green-mod98_5" style="display:none;"></span>TKOII FanChart</h3>
+    <h3><span class="led-dot led-green" id="led-green-mod98_5" style="display:none;"></span>FruitNinja V1.5</h3>
   <div class="card-buttons">
     <button class="btn" onclick="openModInfo('mod98_5')" data-es="Más Info" data-en="More Info">Más Info</button>
     <button class="btn btn-chat" onclick="openModComments('mod98_5', 'FruitNinja V1.5')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
@@ -677,9 +692,8 @@
   </div>
 </div>
 
-        <div class="mod-card secret-mod hidden" data-gama="mid" id="card-mod98_7">
-  <span class="gama-badge gama-mid">Media</span>
-  
+        <div class="mod-card" data-gama="low" id="card-mod98_7">
+  <span class="gama-badge gama-low">Baja</span>
   <button class="admin-pin-btn" onclick="toggleModPin('mod98_7', event)" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar" style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
   </button>
@@ -700,17 +714,17 @@
   <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-mod98_7">0</span>
   </div>
-  
+
   <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
-    <button onclick="abrirMenuCompartir('mod98_7', 'FNF From The Top!')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+    <button onclick="abrirMenuCompartir('mod98_7', 'From The Top!')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
       <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
     </button>
   </div>
 
-  <h3><span class="led-dot led-green" id="led-green-mod98_7" style="display:none;"></span>FNF From The Top!</h3>
+    <h3><span class="led-dot led-green" id="led-green-mod98_7" style="display:none;"></span>From The Top!</h3>
   <div class="card-buttons">
     <button class="btn" onclick="openModInfo('mod98_7')" data-es="Más Info" data-en="More Info">Más Info</button>
-    <button class="btn btn-chat" onclick="openModComments('mod98_7', 'FNF From The Top!')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+    <button class="btn btn-chat" onclick="openModComments('mod98_7', 'From The Top!')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
       <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
     </button>
   </div>
@@ -1396,7 +1410,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V5.1.1 <br>
+      © <span id="year"></span> LaloCF | V5.1.2 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span></div>
     </footer>
   </div>
@@ -1480,7 +1494,7 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js" defer></script>
   <script src="js/init.js"></script>
 
   <script>
@@ -1780,25 +1794,18 @@
   let notificacionesBD = []; 
   let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
 
-  // =========================================================
-  // 🚀 LA VERDADERA LLAVE MAESTRA (Conectada a tu main.js)
-  // =========================================================
   function comprobarSiEsAdmin() {
     try {
-      // Leemos el mismo perfil que usa tu código original
       const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-      
-      // Verificamos si es tu UID de administrador
+
       if (userProfile && userProfile.key === "user_a655u37rr") {
-        return true; // ¡Es el jefe!
+        return true;
       }
     } catch (error) {
-      // Si hay un error leyendo el perfil, no pasa nada, es un usuario normal
     }
-    return false; // Usuario normal
+    return false;
   }
 
-  // --- ABRIR Y CERRAR EL PANEL ---
   window.toggleNotificaciones = function() {
     const panel = document.getElementById('panel-notificaciones');
     const adminArea = document.getElementById('admin-notif-area');
@@ -1809,18 +1816,16 @@
       window.marcarComoLeidas();
       
       const esAdmin = comprobarSiEsAdmin();
-      
-      // Si eres tú, muestra la caja para enviar notificaciones
+
       if (esAdmin) {
         adminArea.style.display = 'block'; 
       } else {
-        // A los usuarios normales ni siquiera les sale la caja
+
         adminArea.style.display = 'none';
       }
     }
   }
 
-  // --- NÚMERO ROJO DE LA CAMPANA ---
   window.actualizarCampana = function() {
     const badge = document.getElementById('badge-contador');
     let noLeidas = 0;
@@ -1849,12 +1854,10 @@
     window.actualizarCampana();
   }
 
-  // --- DIBUJAR LOS MENSAJES ---
   window.renderizarNotificaciones = function() {
     const lista = document.getElementById('lista-notificaciones');
     lista.innerHTML = ''; 
 
-    // Revisamos de nuevo si eres tú
     const esAdmin = comprobarSiEsAdmin();
 
     if (notificacionesBD.length === 0) {
@@ -1873,7 +1876,6 @@
         <p class="notif-date">${notif.fecha}</p>
       `;
 
-      // 🛑 SÓLO SI ERES TÚ, DIBUJA LOS BOTONES DE EDITAR Y BORRAR 🛑
       if (esAdmin) {
         htmlContent += `
           <div class="admin-controls">
@@ -1890,9 +1892,8 @@
     window.actualizarCampana();
   }
 
-  // --- ACCIONES EXCLUSIVAS DEL ADMIN ---
   window.enviarNotificacion = function() {
-    if(!comprobarSiEsAdmin()) return; // Candado doble por si acaso
+    if(!comprobarSiEsAdmin()) return;
     
     const txtArea = document.getElementById('txt-nueva-notif');
     const texto = txtArea.value.trim();
@@ -1926,7 +1927,6 @@
     }
   }
 
-  // --- ESCUCHAR FIREBASE ---
   const notificacionesRef = ref(db, 'notificaciones');
   onValue(notificacionesRef, (snapshot) => {
     notificacionesBD = [];

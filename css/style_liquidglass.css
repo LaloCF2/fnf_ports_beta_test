@@ -1,0 +1,46 @@
+/* =========================================
+   🍏 ESTILOS EXCLUSIVOS PARA iOS (LIQUID GLASS)
+   ========================================= */
+
+/* 1. Ocultar el botón de temas (No es necesario en el diseño Apple) */
+body.ios-theme .theme-btn {
+  display: none !important;
+}
+
+/* 2. El Efecto Liquid Glass Premium para iPhone/iPad */
+/* Aplicamos el cristal a todos los contenedores principales de un solo golpe */
+body.ios-theme .bottom-nav,
+body.ios-theme .container,
+body.ios-theme .notif-panel,
+body.ios-theme .info-card,
+body.ios-theme .popup-content,
+body.ios-theme .apk-card,
+body.ios-theme .mod-card {
+  
+  /* Fondo transparente elegante */
+  background: rgba(15, 15, 20, 0.4) !important;
+  
+  /* El desenfoque y saturación que hace la magia de Apple */
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  
+  /* Borde de cristal iluminado */
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+  
+  /* Sombra suave para separar los elementos del fondo */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
+              inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 3. Ajustes sutiles de texto en modo iOS para que resalte más en el cristal */
+body.ios-theme .glow {
+  text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-purple) !important;
+}
+
+body.ios-theme h1, 
+body.ios-theme h2, 
+body.ios-theme h3 {
+  letter-spacing: 0.5px;
+}

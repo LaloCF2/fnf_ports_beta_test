@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.1";
+const APP_VERSION = "v5.1.2";
 const MI_UID_ADMIN = "user_a655u37rr"; 
 
 let isSuperUser = false;
@@ -622,7 +622,8 @@ const MOD_DATA = {
    desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android).",
    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
    downloads: [
-      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" }
+      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" },
+      { name: "Descarga (Drive)", link: "" }
     ]
   },
    mod98_6: {
@@ -1208,6 +1209,7 @@ window.updateStarsUI = (type, stars) => {
         }
     });
 };
+
 // ==========================================
 
 
@@ -1557,6 +1559,7 @@ window.toggleNewMod = async (cardId) => {
 };
 
 // ==========================================
+
 window.brokenLinksData = {};
 
 onValue(ref(db, 'broken_links'), (snap) => {
@@ -1616,6 +1619,7 @@ window.fixBrokenLink = async (modId) => {
     await set(ref(db, `broken_links/${modId}`), null);
   }
 };
+
 // ==========================================
 
 onValue(ref(db, 'ratings'), (snap) => {
@@ -1674,6 +1678,7 @@ window.rateMod = async (modId, calificacion) => {
 
   if(window.triggerVibrate) window.triggerVibrate(15);
 };
+
 // ==========================================
 
 window.toggleFaq = function(button) {
@@ -1689,6 +1694,7 @@ window.toggleFaq = function(button) {
 
   if(window.triggerVibrate) window.triggerVibrate(10);
 };
+
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1723,6 +1729,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 // ==========================================
 
 let linkParaCompartir = "";
@@ -1785,5 +1792,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }, 1000);
   }
+});
+
+// ==========================================
+// 🚀 OPTIMIZACIÓN GLOBAL (SIN TOCAR TU HTML)
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  // Buscamos todas las imágenes de tus mods, bases y scripts
+  const todasLasImagenes = document.querySelectorAll('img');
+
+  todasLasImagenes.forEach(img => {
+    // Solo aplicamos esto a las imágenes de los catálogos, no a los iconos
+    if(img.src.includes('assets/images/mods') || img.src.includes('webp')) {
+      
+      // 1. Le decimos al navegador que no la cargue hasta que se vea en pantalla
+      img.setAttribute('loading', 'lazy');
+      
+      // 2. Le creamos su ruedita de carga por detrás
+      const contenedor = img.parentElement;
+      if(contenedor) {
+        contenedor.style.position = 'relative';
+        
+        const ruedita = document.createElement('div');
+        ruedita.className = 'ruedita-cargando';
+        contenedor.insertBefore(ruedita, img); // Ponemos la ruedita antes de la imagen
+
+        // 3. Cuando la imagen termine de cargar, borramos la ruedita
+        img.onload = () => {
+          ruedita.style.display = 'none';
+          img.classList.add('img-lazy-cargada');
+        };
+      }
+    }
+  });
 });
 

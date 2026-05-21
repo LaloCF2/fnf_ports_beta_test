@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove, update, runTransaction, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
@@ -13,8 +14,147 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.2";
-const MI_UID_ADMIN = "user_a655u37rr"; 
+const APP_VERSION = "v5.2.0";
+const MI_UID_ADMIN = "user_a655u37rr";
+
+// Inicializamos el guardián de Firebase Auth
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+let usuarioActualFirebase = null;
+let avatarSeleccionadoUrl = "https://cdn-icons-png.flaticon.com/128/4140/4140037.png"; // Avatar por defecto
+
+// ==========================================
+// 🛡️ MONITOREO DE SESIÓN EN TIEMPO REAL (AUTO-LOGUEO)
+// ==========================================
+onAuthStateChanged(auth, async (user) => {
+  const overlayAuth = document.getElementById('auth-overlay');
+  const overlayPerfil = document.getElementById('profile-setup-overlay');
+
+  if (user) {
+    // ¡El usuario está logueado con Google!
+    usuarioActualFirebase = user;
+    overlayAuth.style.display = 'none'; // Escondemos la pantalla de login
+
+    // Revisamos si ya tiene registro guardado en tu base de datos
+    const userRef = ref(db, 'usuarios/' + user.uid);
+    try {
+      const snapshot = await get(userRef);
+      const datosPerfil = snapshot.val();
+
+      if (datosPerfil && datosPerfil.usernameModificado === true) {
+        // Caso A: Ya configuró su perfil alguna vez. Sincronizamos e ingresa.
+        const perfilActualizado = {
+          nombre: datosPerfil.nombre,
+          foto: datosPerfil.foto,
+          key: user.uid // Mantenemos tu estructura original para compatibilidad
+        };
+        localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActualizado));
+        overlayPerfil.style.display = 'none'; // Acceso total concedido
+        console.log("Acceso automático concedido a:", datosPerfil.nombre);
+      } else {
+        // Caso B: Cuenta nueva de Google o perfil incompleto. Obligatorio configurar.
+        overlayPerfil.style.display = 'flex';
+        // Pre-llenamos el campo con su nombre de Google por si le gusta
+        document.getElementById('txt-nuevo-username').value = user.displayName || "";
+      }
+    } catch (error) {
+      console.error("Error consultando el perfil del usuario:", error);
+    }
+  } else {
+    // No hay ninguna sesión activa de Google. Mostramos bloqueo de login.
+    localStorage.removeItem('fnf_user_profile');
+    overlayAuth.style.display = 'flex';
+    overlayPerfil.style.display = 'none';
+  }
+});
+
+// ==========================================
+// 🚀 FUNCIONES DE INTERACCIÓN DE USUARIO
+// ==========================================
+
+// 1. Lanzar la ventana emergente oficial de Google
+window.iniciarSesionConGoogle = function() {
+  signInWithPopup(auth, googleProvider)
+    .then((result) => {
+      console.log("Logueado con Google de manera exitosa!");
+    })
+    .catch((error) => {
+      console.error("Error al autenticar con Google:", error);
+      alert("No se pudo conectar con Google. Reintenta.");
+    });
+};
+
+// 2. Cambiar la visualización del avatar en el selector
+window.seleccionarAvatar = function(srcUrl) {
+  avatarSeleccionadoUrl = srcUrl;
+  document.getElementById('avatar-preview').src = srcUrl;
+};
+
+// 3. Guardar la configuración única en la base de datos
+window.guardarPerfilNuevo = async function() {
+  const inputName = document.getElementById('txt-nuevo-username');
+  const nombreLimpio = inputName.value.trim();
+
+  // 🌐 Detectamos en qué idioma está la página ahorita mismo
+  const idiomaActual = localStorage.getItem('idioma_guardado') || 'es'; // Cambia 'idioma_guardado' si tu variable se llama diferente
+
+  // Alerta bilingüe para el nombre corto
+  if (nombreLimpio === "" || nombreLimpio.length < 3) {
+    alert(idiomaActual === 'en' ? "Please enter a valid username (Min 3 letters)." : "Por favor introduce un nombre de usuario válido (Mínimo 3 letras).");
+    return;
+  }
+
+  if (!usuarioActualFirebase) return;
+
+  const btnGuardar = document.getElementById('btn-guardar-perfil');
+  const btnSpan = btnGuardar.querySelector('span'); // Buscamos el <span> que metimos en el HTML
+
+  // Cambiamos el texto respetando el HTML del span
+  if (btnSpan) {
+    btnSpan.innerText = idiomaActual === 'en' ? "⏳ Creating Account..." : "⏳ Creando Cuenta...";
+  } else {
+    btnGuardar.innerText = idiomaActual === 'en' ? "⏳ Creating Account..." : "⏳ Creando Cuenta...";
+  }
+  btnGuardar.disabled = true;
+
+  const nuevoPerfilBD = {
+    nombre: nombreLimpio,
+    foto: avatarSeleccionadoUrl,
+    correo: usuarioActualFirebase.email,
+    usernameModificado: true, // Candado para asegurar que solo lo modifiquen una vez
+    fechaRegistro: new Date().toISOString()
+  };
+
+  try {
+    // Subimos de manera permanente el perfil amarrado al UID de Google
+    await set(ref(db, 'usuarios/' + usuarioActualFirebase.uid), nuevoPerfilBD);
+    
+    // Guardamos localmente para asegurar el correcto funcionamiento del chat y tickets
+    localStorage.setItem('fnf_user_profile', JSON.stringify({
+      nombre: nombreLimpio,
+      foto: avatarSeleccionadoUrl,
+      key: usuarioActualFirebase.uid
+    }));
+
+    // Cerramos el panel de configuración
+    document.getElementById('profile-setup-overlay').style.display = 'none';
+    console.log("¡Perfil guardado de por vida!");
+  } catch (error) {
+    console.error("Error al guardar el perfil:", error);
+    
+    // Alerta bilingüe de error
+    alert(idiomaActual === 'en' ? "Database error. Try again." : "Hubo un error con la base de datos. Intenta de nuevo.");
+    
+    // Regresamos el botón a la normalidad en el idioma correcto
+    if (btnSpan) {
+      btnSpan.innerText = idiomaActual === 'en' ? "✨ Save Profile & Enter" : "✨ Guardar Perfil y Entrar";
+    } else {
+      btnGuardar.innerText = idiomaActual === 'en' ? "✨ Save Profile & Enter" : "✨ Guardar Perfil y Entrar";
+    }
+    btnGuardar.disabled = false;
+  }
+};
 
 let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
@@ -393,24 +533,39 @@ window.setFilter = (filter, btn) => {
   filterContent();
 };
 
-window.filterContent = () => {
-  const search = document.getElementById('globalSearch').value.toLowerCase();
-  const items = document.querySelectorAll('.mod-card');
-  const apks = document.querySelectorAll('.apk-card');
-  
-  items.forEach(item => {
-    if(item.classList.contains('coming-soon-card')) return;
-    const title = item.querySelector('h3').innerText.toLowerCase();
-    const itemGama = item.getAttribute('data-gama') || 'mid';
-    const matchesSearch = title.includes(search);
-    const matchesFilter = currentFilter === 'all' || itemGama === currentFilter;
-    item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
-  });
+// ==========================================
+// 🚀 BUSCADOR OPTIMIZADO (DEBOUNCE)
+// ==========================================
+let tiempoEsperaBusqueda;
 
-  apks.forEach(apk => {
-    const title = apk.querySelector('h3').innerText.toLowerCase();
-    apk.style.display = title.includes(search) ? "block" : "none";
-  });
+window.filterContent = () => {
+  // 1. Cancelamos la búsqueda si el usuario sigue escribiendo rápido
+  clearTimeout(tiempoEsperaBusqueda);
+  
+  // 2. Esperamos un mini-segundo (300ms) antes de buscar
+  tiempoEsperaBusqueda = setTimeout(() => {
+    
+    // 👇 ESTE ES TU CÓDIGO ORIGINAL (INTACTO) 👇
+    const search = document.getElementById('globalSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.mod-card');
+    const apks = document.querySelectorAll('.apk-card');
+    
+    items.forEach(item => {
+      if(item.classList.contains('coming-soon-card')) return;
+      const title = item.querySelector('h3').innerText.toLowerCase();
+      const itemGama = item.getAttribute('data-gama') || 'mid';
+      const matchesSearch = title.includes(search);
+      const matchesFilter = typeof currentFilter !== 'undefined' ? (currentFilter === 'all' || itemGama === currentFilter) : true; 
+      item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
+    });
+
+    apks.forEach(apk => {
+      const title = apk.querySelector('h3').innerText.toLowerCase();
+      apk.style.display = title.includes(search) ? "block" : "none";
+    });
+    // 👆 FIN DE TU CÓDIGO ORIGINAL 👆
+
+  }, 300); // 300 milisegundos de respiro para el celular
 };
 
 async function checkBanStatus() {
@@ -570,6 +725,22 @@ const SCRIPTS_DATA = {
           { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
         ]
       },
+     script4: {
+        title: "MobileFPSOverlay",
+        desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS.",
+        version: "v1.1.0",
+        images: [
+          "assets/images/scripts/MFO/mfo.webp",
+          "assets/images/scripts/MFO/mfo2.webp",
+          "assets/images/scripts/MFO/mfo3.webp",
+          "assets/images/scripts/MFO/mfo4.webp",
+          "assets/images/scripts/MFO/mfo5.webp",
+          "assets/images/scripts/MFO/mfo6.webp"
+        ],
+        downloads: [
+          { name: "Descarga Script Directo (GitHub)", link: "https://drive.google.com/file/d/1l2FaGqINbPzOp6-SgiFGwwUr1v8IjTKZ/view?usp=drive_link" }
+        ]
+      },
     };
 
 let scriptImagesArray = [];
@@ -603,6 +774,8 @@ window.openScriptInfo = (id) => {
   document.getElementById("script-popup").classList.add("show");
 };
 
+
+
 window.closeScriptInfo = () => document.getElementById("script-popup").classList.remove("show");
 
 window.nextScriptImage = () => {
@@ -623,7 +796,7 @@ const MOD_DATA = {
    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
    downloads: [
       { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" },
-      { name: "Descarga (Drive)", link: "" }
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1y239op0zuYMUJiaSK5oDrUQnhKr9E1mG/view?usp=drive_link" }
     ]
   },
    mod98_6: {
@@ -637,7 +810,7 @@ const MOD_DATA = {
     ]
   },
   mod98_7: {
-    img: "assets/images/webp/FromTheTop.webp",
+    img: "assets/images/mods/FromTheTop.webp",
     title: "From The Top!",
     desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
     version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
@@ -1795,35 +1968,158 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 🚀 OPTIMIZACIÓN GLOBAL (SIN TOCAR TU HTML)
+// 🚀 OPTIMIZACIÓN GLOBAL (CORREGIDA)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Buscamos todas las imágenes de tus mods, bases y scripts
   const todasLasImagenes = document.querySelectorAll('img');
 
   todasLasImagenes.forEach(img => {
-    // Solo aplicamos esto a las imágenes de los catálogos, no a los iconos
+    // Filtramos para que solo aplique a los catálogos
     if(img.src.includes('assets/images/mods') || img.src.includes('webp')) {
-      
-      // 1. Le decimos al navegador que no la cargue hasta que se vea en pantalla
+
+      // 1. Aseguramos que no se descarguen de golpe al abrir la página
       img.setAttribute('loading', 'lazy');
       
-      // 2. Le creamos su ruedita de carga por detrás
       const contenedor = img.parentElement;
       if(contenedor) {
         contenedor.style.position = 'relative';
         
-        const ruedita = document.createElement('div');
-        ruedita.className = 'ruedita-cargando';
-        contenedor.insertBefore(ruedita, img); // Ponemos la ruedita antes de la imagen
+        // Evitamos crear rueditas duplicadas si el código se ejecuta dos veces
+        let ruedita = contenedor.querySelector('.ruedita-cargando');
+        if(!ruedita) {
+          ruedita = document.createElement('div');
+          ruedita.className = 'ruedita-cargando';
+          contenedor.insertBefore(ruedita, img);
+        }
 
-        // 3. Cuando la imagen termine de cargar, borramos la ruedita
-        img.onload = () => {
-          ruedita.style.display = 'none';
+        // Función maestra para quitar la ruedita
+        const finalizarCarga = () => {
+          if(ruedita) ruedita.style.display = 'none';
           img.classList.add('img-lazy-cargada');
         };
+
+        // 2. EL TRUCO MÁGICO: ¿La imagen ya cargó desde la raíz/caché?
+        if (img.complete && img.naturalHeight !== 0) {
+          // Si ya está cargada, quitamos la ruedita inmediatamente
+          finalizarCarga();
+        } else {
+          // 3. Si depende del internet, esperamos a que cargue
+          img.onload = finalizarCarga;
+          
+          // Por si alguna imagen se cae o da error de link, que no se quede la ruedita infinita
+          img.onerror = () => {
+            if(ruedita) ruedita.style.display = 'none';
+          };
+        }
       }
     }
   });
 });
 
+// ==========================================
+//  MODO OFFLINE (SERVICE WORKER)
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registro => {
+        console.log('¡Modo Offline activado! Alcance:', registro.scope);
+      })
+      .catch(error => {
+        console.log('Falló el Service Worker:', error);
+      });
+  });
+}
+
+// ==========================================
+// OPTIMIZACIÓN EXTREMA DE SCROLL (PASSIVE LISTENERS)
+// ==========================================
+document.addEventListener('touchstart', function() {}, {passive: true});
+document.addEventListener('touchmove', function() {}, {passive: true});
+document.addEventListener('wheel', function() {}, {passive: true});
+
+// ==========================================
+// 🚀 CONEXIÓN DIRECTA CON BOT DE TELEGRAM (OPTIMIZADA)
+// ==========================================
+window.enviarMensajeAlBot = async function() {
+  const cajaTexto = document.getElementById('txt-mensaje-telegram');
+  const boton = document.getElementById('btn-enviar-telegram');
+  const mensaje = cajaTexto.value.trim();
+
+  // Validamos que no envíen mensajes vacíos
+  if(mensaje === "") {
+    alert("¡Escribe un mensaje primero!");
+    return;
+  }
+
+  // 1. OBTENER EL NOMBRE DEL USUARIO (Mejorado)
+  let nombreUsuario = "👤 Usuario Invitado";
+  try {
+    const perfil = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    // Hacemos que busque el nombre sin importar cómo lo hayas guardado en tu base
+    if(perfil) {
+      nombreUsuario = perfil.nombre || perfil.name || perfil.username || perfil.usuario || perfil.key || "👤 Usuario Registrado";
+    }
+  } catch(error) {
+    console.log("No se encontró un perfil guardado.");
+  }
+
+  // 2. CONFIGURACIÓN DE TU BOT
+  const TELEGRAM_BOT_TOKEN = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI"; 
+  const TELEGRAM_CHAT_ID = "5429172831";
+
+  // 3. ARMAMOS EL MENSAJE CON FORMATO LIMPIO Y ESPACIADO (TICKET PREMIUM)
+  const textoFormateado = 
+`🚨 *NUEVO TICKET DE SOPORTE* 🚨
+
+👤 *De:* ${nombreUsuario}
+━━━━━━━━━━━━━━━━━━━
+💬 *Mensaje:*
+${mensaje}
+━━━━━━━━━━━━━━━━━━━
+🌐 _Enviado desde lalocf.2.gitgub/fnf-ports/`;
+
+  // 4. LO ENVIAMOS A TELEGRAM
+  const urlApi = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  
+  // Efecto visual de carga
+  boton.innerText = "⏳ Enviando...";
+  boton.style.background = "#ffea00"; 
+
+  try {
+    const respuesta = await fetch(urlApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: textoFormateado,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    if(respuesta.ok) {
+      // Éxito
+      cajaTexto.value = "";
+      boton.innerText = "¡Enviado con éxito! ✨";
+      boton.style.background = "#00ff41";
+      
+      setTimeout(() => {
+        boton.innerText = "🚀 Enviar Mensaje";
+        boton.style.background = "var(--neon-blue)";
+      }, 3000);
+    } else {
+      throw new Error("Error en la API");
+    }
+
+  } catch (error) {
+    // Error
+    boton.innerText = "❌ Error al enviar";
+    boton.style.background = "#ff003c";
+    setTimeout(() => {
+      boton.innerText = "🚀 Intentar de nuevo";
+      boton.style.background = "var(--neon-blue)";
+    }, 3000);
+  }
+};
+
+//===============================================//

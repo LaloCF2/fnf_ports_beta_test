@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>FNF' - Mobile</title>
 
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
   <link rel="apple-touch-icon" href="assets/icons/logo192.png">
   <link rel="icon" type="image/png" href="assets/icons/logo192.png">
   <link rel="shortcut icon" href="assets/icons/logo192.png">
@@ -19,7 +21,6 @@
   <link id="theme-style" rel="stylesheet" href="">
   
   <script>
-    // 1. Cargar temas guardados (Retro, Snokido)
     const savedTheme = localStorage.getItem('activeTheme') || 'default';
     if(savedTheme === 'retro') {
         document.write('<link rel="stylesheet" href="css/style2.css">');
@@ -27,11 +28,9 @@
         document.write('<link rel="stylesheet" href="css/style3.css">');
     }
 
-    // 2. 🚀 DETECTOR DE iOS PARA LIQUID GLASS 🚀
     const es_iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
     if(es_iOS) {
-        // Si es Apple, le inyectamos el CSS exclusivo y le ponemos una clase al body
         document.write('<link rel="stylesheet" href="css/style_liquidglass.css">');
         document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.add('ios-theme');
@@ -42,6 +41,47 @@
 
 <body>
 <body>
+  <div id="auth-overlay" class="auth-screen" style="display: none;">
+  <div class="auth-card">
+    <img src="https://avatars.githubusercontent.com/u/198297929?v=4&size=64" alt="Logo App" class="auth-logo">
+    <h2>FNF Mobile Communities</h2>
+    <p data-es="Inicia sesión de forma segura con tu cuenta de Google para acceder a los mejores mods, chats y soporte técnico." 
+       data-en="Sign in securely with your Google account to access the best mods, chats, and technical support.">
+       Inicia sesión de forma segura con tu cuenta de Google para acceder a los mejores mods, chats y soporte técnico.
+    </p>
+    <button id="btn-google-login" onclick="iniciarSesionConGoogle()">
+      <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google Icon">
+      <span data-es="Entrar con Google" data-en="Sign in with Google">Entrar con Google</span>
+    </button>
+  </div>
+</div>
+
+<div id="profile-setup-overlay" class="auth-screen" style="display: none;">
+  <div class="auth-card">
+    <h2 data-es="Configura tu Identidad" data-en="Set Up Your Identity">Configura tu Identidad</h2>
+    <p data-es="¡Atención! Esta es tu única oportunidad para elegir tu nombre de usuario y avatar." 
+       data-en="Warning! This is your only chance to choose your username and avatar.">
+       ¡Atención! Esta es tu única oportunidad para elegir tu nombre de usuario y avatar.
+    </p>
+    
+    <div class="avatar-selection">
+      <img id="avatar-preview" src="https://cdn-icons-png.flaticon.com/128/4140/4140037.png" alt="Avatar Preview">
+      <div class="avatar-options">
+        <img src="https://cdn-icons-png.flaticon.com/128/4140/4140037.png" onclick="seleccionarAvatar(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/128/4139/4139981.png" onclick="seleccionarAvatar(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png" onclick="seleccionarAvatar(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/128/236/236832.png" onclick="seleccionarAvatar(this.src)">
+      </div>
+    </div>
+
+    <input type="text" id="txt-nuevo-username" placeholder="Tu nombre de usuario / Your username" maxlength="16">
+    
+    <button id="btn-guardar-perfil" onclick="guardarPerfilNuevo()">
+      <span data-es="✨ Guardar Perfil y Entrar" data-en="✨ Save Profile & Enter">✨ Guardar Perfil y Entrar</span>
+    </button>
+  </div>
+</div>
+
   <div id="pro-menu-overlay" onclick="toggleProMenu()"></div>
 
   <div id="particles-container"></div>
@@ -187,18 +227,6 @@
     </div>
   </div>
 
-  <div id="profile-popup" class="popup">
-    <div class="popup-content" style="text-align: center; padding: 20px;">
-      <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')">✖</span>
-      <h2 class="glow" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</h2>
-      <img id="profile-avatar-preview" src="https://via.placeholder.com/80/555/fff?text=?" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--neon-blue); object-fit: cover;">
-      <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;" data-es="Actualiza tus datos y tu Avatar usando un enlace de internet." data-en="Update your data and Avatar using an internet URL.">Actualiza tus datos y tu Avatar usando un enlace de internet.</p>
-      <input type="text" id="editProfileName" class="reg-input" placeholder="Tu Apodo">
-      <input type="url" id="editProfileAvatar" class="reg-input" placeholder="URL de nueva imagen (Opcional)">
-      <button class="btn" onclick="saveProfileChanges()" style="width: 100%" data-es="Guardar Cambios" data-en="Save Changes">Guardar Cambios</button>
-    </div>
-  </div>
-
   <div id="ban-popup" class="popup">
     <div class="popup-content" style="padding: 20px;">
       <h2 class="glow" style="text-align: center;">🔨 Control de Baneo</h2>
@@ -245,26 +273,22 @@
         <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
       </div>
       <div class="update-body">
-        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.1.2!" data-en="What's New v5.1.2!">¡Novedades v5.1.2!</h2>
+        <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;" data-es="¡Novedades v5.2.0!" data-en="What's New v5.2.0!">¡Novedades v5.2.0!</h2>
         <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
-          <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-    <img src="https://cdn-icons-png.flaticon.com/128/5361/5361704.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-    <span data-es=" Se mejoro el apartado de Notificaciones" data-en="Improved Notifications Section" style="font-size: 13.5px; line-height: 1.3;"> Se mejoro el apartado de Notificaciones</span>
-</li>
 
   <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
       <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-      <span data-es="Se añadio un nuevo Mod: <b>TKOII FanChart</b>" data-en="Added new <b>TKOII FanChart</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo Mod: <b>TKOII FanChart</b></span>
+      <span data-es="Se añadio un nuevo Script: <b>MobileFPSOverlay</b>" data-en="Added new <b>MobileFPSOverlay</b> script" style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo Script: <b>MobileFPSOverlay</b></span>
   </li>
 
-  <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+  <li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
       <img src="https://cdn-icons-png.flaticon.com/128/2891/2891628.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-      <span data-es="Se añadio un nuevo Mod: <b>FruitNinja V1.5</b>" data-en="Added new <b>FruitNinja V1.5</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo Mod: <b>FruitNinja V1.5</b></span>
+      <span data-es="Se restauron los links del mod: <b>FruitNinja V1.5</b>" data-en="Restored links for <b>FruitNinja V1.5</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se restauron los links del mod: <b>FruitNinja V1.5</b></span>
   </li>
 
-<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+<li style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-yellow); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
     <img src="https://cdn-icons-png.flaticon.com/128/5432/5432968.png" alt="" style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);"> 
-    <span data-es="Mejoras y Correciones de errores menores" data-en="More Improvements and Bug Fixes" style="font-size: 13.5px; line-height: 1.3;"> More Improvements and Bug Fixes</span>
+    <span data-es="Mejoras de Rendimiento y Correciones de errores menores" data-en="Performance Improvements and Minor Bug Fixes" style="font-size: 13.5px; line-height: 1.3;"> More Improvements and Bug Fixes</span>
 </li>
 
         </ul>
@@ -1193,14 +1217,19 @@
       <h2 class="glow" data-es="Scripts y Utilidades" data-en="Scripts & Utilities">Scripts y Utilidades</h2>
       <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;" data-es="Agrega código personalizado a tus propios mods y motores." data-en="Add custom code to your own mods and engines.">Agrega código personalizado a tus propios mods y motores.</p>
       
-      <div class="apk-card" id="card-script1">
+      <div class="apk-card script-card" id="card-script1" data-id="script1" style="position: relative;">
+  
+  <span class="badge-recomendado" style="display: none;">🔥 TOP</span>
+
   <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
   </button>
+  
   <div class="like-container" id="like-script1" onclick="handleLike('script1', this)" style="display: flex; align-items: center; gap: 4px;">
     <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
     <span class="like-count" id="count-script1">0</span>
   </div>
+  
   <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script1">0</span>
   </div>
@@ -1212,6 +1241,7 @@
   </div>
 
   <h3><span class="led-dot led-green" id="led-green-script1" style="display:none;"></span>Menu Pause</h3>
+  
   <div class="card-buttons">
     <button class="btn" onclick="openScriptInfo('script1')" data-es="Más Info" data-en="More Info">Más Info</button>
     <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
@@ -1269,6 +1299,33 @@
   <div class="card-buttons">
     <button class="btn" onclick="openScriptInfo('script3')" data-es="Más Info" data-en="More Info">Más Info</button>
     <button class="btn btn-chat" onclick="openModComments('script3', 'Controller Engine')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+    </button>
+  </div>
+</div>
+
+<div class="apk-card" id="card-script4">
+  <button class="admin-led-btn" id="btn-led-script4" onclick="toggleGreenLed('script4', event)" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+  </button>
+  <div class="like-container" id="like-script4" onclick="handleLike('script4', this)" style="display: flex; align-items: center; gap: 4px;">
+    <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
+    <span class="like-count" id="count-script4">0</span>
+  </div>
+  <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script4">0</span>
+  </div>
+
+  <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+    <button onclick="abrirMenuCompartir('script4', 'MobileFPSOverlay')" style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+      <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share" style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+    </button>
+  </div>
+
+  <h3><span class="led-dot led-green" id="led-green-script4" style="display:none;"></span>MobileFPSOverlay</h3>
+  <div class="card-buttons">
+    <button class="btn" onclick="openScriptInfo('script4')" data-es="Más Info" data-en="More Info">Más Info</button>
+    <button class="btn btn-chat" onclick="openModComments('script4', 'MobileFPSOverlay')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
       <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
     </button>
   </div>
@@ -1406,11 +1463,32 @@
         <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img src="assets/icons/telegram.jpeg"><span class="btn" style="width: 100%;">Telegram</span></a>
         <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img src="assets/icons/instagram.jpeg"><span class="btn" style="width: 100%;">Instagram</span></a>
         <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img src="assets/icons/tiktok.jpeg"><span class="btn" style="width: 100%;">TikTok</span></a>
+        <a class="social-item" href="mailto:ec331325@gmail.com?subject=Soporte%20Técnico%20FNF" target="_blank"><img src="assets/icons/gmail.jpeg"><span class="btn" style="width: 100%;">Gmail</span></a>
       </div>
+
+    </a>
+  </div>
+
+  <div class="ticket-soporte-box" style="margin-top: 20px; padding: 15px; border-radius: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);">
+    <h3 style="margin-bottom: 10px; font-size: 16px; color: var(--neon-blue);">Mensaje Rápido</h3>
+    <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Escríbeme tu duda.</p>
+    
+    <textarea id="txt-mensaje-telegram" 
+              placeholder="Hola, tengo un problema con..." 
+              style="width: 100%; height: 80px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px; font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+    
+    <button id="btn-enviar-telegram" 
+            onclick="enviarMensajeAlBot()" 
+            style="width: 100%; padding: 10px; border-radius: 10px; background: var(--neon-blue); color: black; font-weight: bold; border: none; cursor: pointer;">
+      🚀 Enviar Mensaje
+    </button>
+  </div>
+</div>
+
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V5.1.2 <br>
+      © <span id="year"></span> LaloCF | V5.3.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span></div>
     </footer>
   </div>

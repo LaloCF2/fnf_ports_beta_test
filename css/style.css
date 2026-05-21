@@ -6,6 +6,7 @@
   font-display: swap;
 }
 
+
 body {
   font-family: "MiFuente", system-ui, -apple-system, sans-serif;
 }
@@ -497,6 +498,110 @@ body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .serv
     body.low-end-mode .ios-glass-pill, body.low-end-mode .popup-content { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: #1a1a1a !important; border: 1px solid #444; }
     body.low-end-mode .settings-btn { animation: none !important; }
     body.low-end-mode #particles-container { display: none !important; }
+
+ /* =========================================
+   💧 EFECTO "GOTAS DE AGUA PURA" (LIQUID GLASS iOS V2)
+   ========================================= */
+
+/* Ocultar botones que no sirven en iOS */
+body.ios-theme .theme-btn {
+  display: none !important;
+}
+
+/* =========================================
+   1. EL CRISTAL DE AGUA (Ultra Transparente)
+   ========================================= */
+body.ios-theme .notif-panel,
+body.ios-theme .popup-content,
+body.ios-theme .mod-card,
+body.ios-theme .apk-card,
+body.ios-theme .script-card {
+  
+  /* Fondo CASI INVISIBLE (Agua pura) */
+  background: rgba(255, 255, 255, 0.03) !important;
+  
+  /* Desenfoque fuerte con más brillo para refractar la luz */
+  backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
+  
+  /* Reflejos de luz ultra realistas en los bordes */
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.35) !important; /* Luz fuerte arriba */
+  border-left: 1px solid rgba(255, 255, 255, 0.25) !important;
+  
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.2), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* =========================================
+   2. FÍSICA GELATINOSA (Rebote de Resorte)
+   ========================================= */
+/* Cuando sueltas la tarjeta: Rebota como gelatina */
+body.ios-theme .mod-card,
+body.ios-theme .apk-card,
+body.ios-theme .script-card,
+body.ios-theme button,
+body.ios-theme .nav-item {
+  /* Esta es la curva matemática del resorte */
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              background 0.3s ease !important;
+  will-change: transform;
+}
+
+/* Cuando presionas la tarjeta: Se hunde rápido y suave */
+body.ios-theme .mod-card:active,
+body.ios-theme .apk-card:active,
+body.ios-theme .script-card:active,
+body.ios-theme button:active {
+  transform: scale(0.92) translateZ(0) !important;
+  transition: transform 0.1s cubic-bezier(0.2, 0, 0.2, 1) !important; /* Hundimiento rápido */
+  background: rgba(255, 255, 255, 0.1) !important; /* Brillo de agua al tocar */
+}
+
+/* =========================================
+   3. LA PÍLDORA INFERIOR (Centrada y Flotante)
+   ========================================= */
+body.ios-theme .bottom-nav {
+  position: fixed !important; /* Obliga a la barra a no moverse con el scroll */
+  bottom: 15px !important;
+  
+  /* 🎯 ESTO ARREGLA EL CENTRADO PERFECTO 🎯 */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  
+  width: calc(100% - 30px) !important;
+  max-width: 400px !important; /* Para que no se estire feo en iPads */
+  
+  border-radius: 50px !important; 
+  padding: 8px 15px !important;
+  
+  /* Agua un poco más visible para que resalten los iconos */
+  background: rgba(20, 20, 25, 0.15) !important;
+  backdrop-filter: blur(30px) saturate(200%) brightness(1.2) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(200%) brightness(1.2) !important;
+  
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+  
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  
+  z-index: 1000 !important;
+}
+
+/* Rebote gelatinoso también para los iconos del menú al tocarlos */
+body.ios-theme .bottom-nav .nav-item {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+body.ios-theme .bottom-nav .nav-item:active {
+  transform: scale(0.70) translateZ(0) !important;
+  transition: transform 0.1s cubic-bezier(0.2, 0, 0.2, 1) !important;
+}
+
+  /*------------------------*/
 
 .nav-icon img {
   width: 28px;
@@ -1126,11 +1231,143 @@ body.is-admin .admin-fix-btn {
   to { opacity: 1; }
 }
 
-/* =========================================
-   🚀 RENDERIZADO INTELIGENTE (CPU HACK)
-   ========================================= */
+ /* ========================================= */
 /* Aplica esto a las cajas que contienen tus mods, bases y scripts */
 section, .mod-grid, .apk-grid, .script-grid {
   content-visibility: auto;
   contain-intrinsic-size: 500px; /* Le dice al navegador un tamaño aproximado para que no brinque la pantalla */
 }
+
+ /* ========================================= */
+/* Le decimos al celular que estos elementos van a cambiar o moverse, 
+   para que los procese con la tarjeta gráfica y no se traben */
+.notif-panel, 
+.popup-content, 
+.mod-card, 
+.apk-card, 
+.script-card {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Fuerza a usar aceleración 3D */
+  backface-visibility: hidden;
+}
+
+/* =========================================
+   🔥 ETIQUETAS DE RECOMENDADO
+   ========================================= */
+.badge-recomendado {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(45deg, #ffea00, #ff8300); /* Dorado/Naranja brillante */
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(255, 234, 0, 0.6);
+  z-index: 10;
+  display: none; /* Se oculta por defecto, JavaScript lo mostrará */
+  animation: latido-dorado 2s infinite;
+}
+
+@keyframes latido-dorado {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 234, 0, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 234, 0, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 234, 0, 0.4); }
+}
+
+/* El botón secreto de administrador para recomendar */
+.btn-admin-recomendar {
+  background: #ff00c8;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  display: none; /* Oculto para mortales */
+}
+
+/* =========================================
+   🚀 COMPORTAMIENTO DE SCROLL NATIVO
+   ========================================= */
+html, body {
+  /* Evita el rebote de "Pull-to-refresh" del navegador para sentirse como App instalada */
+  overscroll-behavior-y: none; 
+  scroll-behavior: smooth;
+}
+
+/* Le devolvemos el scroll con aceleración perfecta a tus cuadrículas */
+.mod-grid, .apk-grid, .script-grid {
+  -webkit-overflow-scrolling: touch; 
+}
+
+/* ========================================= */
+
+/* =========================================
+   🔮 ESTILOS DE AUTENTICACIÓN Y CONFIGURACIÓN
+   ========================================= */
+.auth-screen {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(8, 8, 12, 0.9);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 10000 !important;
+}
+
+.auth-card {
+  background: rgba(20, 20, 30, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 35px 25px; border-radius: 24px;
+  width: 90%; max-width: 360px; text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Adaptación automática a Liquid Glass Puro en Apple */
+body.ios-theme .auth-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(30px) brightness(1.2) !important;
+  -webkit-backdrop-filter: blur(30px) brightness(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+.auth-logo { width: 75px; height: 75px; margin-bottom: 15px; animation: flotarLog 3s ease-in-out infinite; }
+@keyframes flotarLog { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.auth-card h2 { color: var(--neon-blue); font-size: 20px; margin-bottom: 12px; font-weight: bold; }
+.auth-card p { color: #b5b5bd; font-size: 13px; line-height: 1.5; margin-bottom: 25px; }
+
+#btn-google-login {
+  width: 100%; padding: 12px; background: #ffffff; color: #1f1f23;
+  border: none; border-radius: 14px; font-weight: bold; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+#btn-google-login img { width: 22px; height: 22px; }
+#btn-google-login:active { transform: scale(0.95); }
+
+/* Edición del Perfil */
+.avatar-selection { margin-bottom: 25px; }
+#avatar-preview { width: 75px; height: 75px; border-radius: 50%; border: 2px solid var(--neon-blue); padding: 4px; margin-bottom: 15px; background: rgba(255,255,255,0.05); }
+.avatar-options { display: flex; justify-content: center; gap: 12px; }
+.avatar-options img { width: 42px; height: 42px; border-radius: 50%; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border: 2px solid transparent; }
+.avatar-options img:active { transform: scale(0.85); }
+
+#txt-nuevo-username {
+  width: 100%; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; text-align: center;
+  font-size: 15px; margin-bottom: 20px; outline: none; font-family: inherit;
+}
+#txt-nuevo-username:focus { border-color: var(--neon-purple); box-shadow: 0 0 12px rgba(180, 0, 255, 0.3); }
+
+#btn-guardar-perfil {
+  width: 100%; padding: 13px; background: var(--neon-green); color: #000000;
+  border: none; border-radius: 14px; font-weight: bold; font-size: 14px; cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 255, 65, 0.2); transition: transform 0.2s ease;
+}
+#btn-guardar-perfil:active { transform: scale(0.96); }

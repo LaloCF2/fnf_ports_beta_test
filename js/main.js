@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, get, set, update, remove, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 // 👇 AHORA USAMOS REDIRECT PARA EVITAR LA PANTALLA NEGRA 👇
-import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
@@ -24,6 +24,16 @@ const MI_UID_ADMIN = "user_a655u37rr";
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 let usuarioActualFirebase = null;
+
+// 🔥 RECOLECTOR DE RESULTADOS DE GOOGLE (Evita que se quede atascado)
+getRedirectResult(auth).then((result) => {
+  if (result) {
+    console.log("¡Regreso exitoso desde Google!");
+  }
+}).catch((error) => {
+  console.error("Error al regresar de Google:", error);
+  alert("Hubo un problema de seguridad. Por favor abre la página en Chrome o Safari.");
+});
 
 // Escuchamos si entra alguien
 onAuthStateChanged(auth, async (user) => {
@@ -59,8 +69,21 @@ onAuthStateChanged(auth, async (user) => {
 // 🚀 FUNCIONES DE ACCESO
 window.iniciarSesionConGoogle = function() {
   const btn = document.getElementById('btn-google-login');
-  btn.innerHTML = "⏳ Cargando...";
-  signInWithRedirect(auth, googleProvider); // 👈 Cero pantallas negras, viaje directo
+
+  // 🔥 DETECTOR DE NAVEGADORES FANTASMA
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
+
+  if (esNavegadorInterno) {
+      alert("⚠️ Estás usando el navegador interno de una app.\n\nPara iniciar sesión, toca los 3 puntitos de arriba (o abajo) y selecciona 'Abrir en el navegador' (Chrome o Safari).");
+      btn.innerHTML = "❌ Abre en Chrome/Safari";
+      return;
+  }
+
+  // Si está en un navegador normal, lo llevamos a Google
+  btn.innerHTML = "⏳ Conectando con Google...";
+  btn.style.background = "#ffea00"; 
+  signInWithRedirect(auth, googleProvider);
 };
 
 window.entrarComoInvitado = function() {

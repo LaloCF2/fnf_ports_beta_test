@@ -43,42 +43,30 @@
 <body>
   <div id="auth-overlay" class="auth-screen" style="display: none;">
   <div class="auth-card">
-    <img src="https://avatars.githubusercontent.com/u/198297929?v=4&size=64" alt="Logo App" class="auth-logo">
+    <img src="assets/icons/logo192.png" alt="Logo App" class="auth-logo">
     <h2>FNF Mobile Communities</h2>
-    <p data-es="Inicia sesión de forma segura con tu cuenta de Google para acceder a los mejores mods, chats y soporte técnico." 
-       data-en="Sign in securely with your Google account to access the best mods, chats, and technical support.">
-       Inicia sesión de forma segura con tu cuenta de Google para acceder a los mejores mods, chats y soporte técnico.
+    <p data-es="Inicia sesión para acceder a los mejores mods, chats y soporte técnico." 
+       data-en="Sign in to access the best mods, chats, and technical support.">
+       Inicia sesión para acceder a los mejores mods, chats y soporte técnico.
     </p>
+    
     <button id="btn-google-login" onclick="iniciarSesionConGoogle()">
-      <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google Icon">
+      <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google">
       <span data-es="Entrar con Google" data-en="Sign in with Google">Entrar con Google</span>
+    </button>
+
+    <button onclick="entrarComoInvitado()" style="margin-top: 15px; width: 100%; padding: 12px; background: transparent; color: #b5b5bd; border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; cursor: pointer; transition: 0.2s;">
+      <span data-es="Iniciar sesión después" data-en="Sign in later">Iniciar sesión después</span>
     </button>
   </div>
 </div>
 
-<div id="profile-setup-overlay" class="auth-screen" style="display: none;">
-  <div class="auth-card">
-    <h2 data-es="Configura tu Identidad" data-en="Set Up Your Identity">Configura tu Identidad</h2>
-    <p data-es="¡Atención! Esta es tu única oportunidad para elegir tu nombre de usuario y avatar." 
-       data-en="Warning! This is your only chance to choose your username and avatar.">
-       ¡Atención! Esta es tu única oportunidad para elegir tu nombre de usuario y avatar.
-    </p>
+<div id="profile-popup" class="popup">
+  <div class="popup-content" style="text-align: center; padding: 25px;">
+    <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')">✖</span>
+    <h2 class="glow" data-es="Mi Perfil" data-en="My Profile" style="margin-bottom: 20px;">Mi Perfil</h2>
     
-    <div class="avatar-selection">
-      <img id="avatar-preview" src="https://cdn-icons-png.flaticon.com/128/4140/4140037.png" alt="Avatar Preview">
-      <div class="avatar-options">
-        <img src="https://cdn-icons-png.flaticon.com/128/4140/4140037.png" onclick="seleccionarAvatar(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/128/4139/4139981.png" onclick="seleccionarAvatar(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png" onclick="seleccionarAvatar(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/128/236/236832.png" onclick="seleccionarAvatar(this.src)">
-      </div>
-    </div>
-
-    <input type="text" id="txt-nuevo-username" placeholder="Tu nombre de usuario / Your username" maxlength="16">
-    
-    <button id="btn-guardar-perfil" onclick="guardarPerfilNuevo()">
-      <span data-es="✨ Guardar Perfil y Entrar" data-en="✨ Save Profile & Enter">✨ Guardar Perfil y Entrar</span>
-    </button>
+    <div id="perfil-dinamico-contenido"></div>
   </div>
 </div>
 
@@ -224,6 +212,18 @@
       </p>
       
       <button class="btn" onclick="document.getElementById('maintenance-popup').classList.remove('show')" style="background-color: #333; color: white; width: 100%;">Entendido</button>
+    </div>
+  </div>
+
+  <div id="profile-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 20px;">
+      <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')">✖</span>
+      <h2 class="glow" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</h2>
+      <img id="profile-avatar-preview" src="https://via.placeholder.com/80/555/fff?text=?" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--neon-blue); object-fit: cover;">
+      <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;" data-es="Actualiza tus datos y tu Avatar usando un enlace de internet." data-en="Update your data and Avatar using an internet URL.">Actualiza tus datos y tu Avatar usando un enlace de internet.</p>
+      <input type="text" id="editProfileName" class="reg-input" placeholder="Tu Apodo">
+      <input type="url" id="editProfileAvatar" class="reg-input" placeholder="URL de nueva imagen (Opcional)">
+      <button class="btn" onclick="saveProfileChanges()" style="width: 100%" data-es="Guardar Cambios" data-en="Save Changes">Guardar Cambios</button>
     </div>
   </div>
 

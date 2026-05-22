@@ -19,7 +19,7 @@ const APP_VERSION = "v5.2.0";
 const MI_UID_ADMIN = "user_a655u37rr";
 
 // ==========================================
-// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN REDIRECT)
+// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN MAESTRA REDIRECT)
 // ==========================================
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -35,66 +35,85 @@ getRedirectResult(auth).then((result) => {
   alert("Hubo un problema de seguridad. Por favor abre la página en Chrome o Safari.");
 });
 
-// Escuchamos si entra alguien
+// 👂 Escuchamos si entra alguien
 onAuthStateChanged(auth, async (user) => {
   const overlayAuth = document.getElementById('auth-overlay');
 
   if (user) {
     // ¡Logueado exitosamente!
     usuarioActualFirebase = user;
-    overlayAuth.style.display = 'none';
+    if(overlayAuth) overlayAuth.style.display = 'none';
 
-    // Guardar perfil básico si es la primera vez
+    // 1. Respaldos por si Google no manda foto o nombre
+    const nombreSeguro = user.displayName || "Usuario FNF";
+    const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+
+    // 2. Revisar la Base de Datos
     const userRef = ref(db, 'usuarios/' + user.uid);
     const snap = await get(userRef);
+    
+    // Si es la primera vez que entra, lo guardamos
     if (!snap.exists()) {
       await set(userRef, {
-        nombre: user.displayName,
-        foto: user.photoURL,
+        nombre: nombreSeguro,
+        foto: fotoSegura,
         correo: user.email,
-        usernameModificado: false, // Aún no cambia su nombre
+        usernameModificado: false, 
         fechaRegistro: new Date().toISOString()
       });
     }
+
+    // 3. 🎯 Guardar en memoria local (Para los likes, chats y Telegram)
+    const datosBD = snap.exists() ? snap.val() : { nombre: nombreSeguro, foto: fotoSegura };
+    localStorage.setItem('fnf_user_profile', JSON.stringify({
+      nombre: datosBD.nombre,
+      foto: datosBD.foto,
+      key: user.uid
+    }));
+
   } else {
     // Si no está logueado, vemos si eligió "Invitado"
     if (localStorage.getItem('fnf_guest_mode') === 'true') {
-      overlayAuth.style.display = 'none';
+      if(overlayAuth) overlayAuth.style.display = 'none';
     } else {
-      overlayAuth.style.display = 'flex';
+      if(overlayAuth) overlayAuth.style.display = 'flex';
     }
   }
 });
 
-// 🚀 FUNCIONES DE ACCESO
+// 🚀 FUNCIONES DE ACCESO EXCLUSIVAS
 window.iniciarSesionConGoogle = function() {
   const btn = document.getElementById('btn-google-login');
 
-  // 🔥 DETECTOR DE NAVEGADORES FANTASMA
+  // 🔥 DETECTOR DE NAVEGADORES FANTASMA (Telegram, Facebook, Instagram)
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
 
   if (esNavegadorInterno) {
       alert("⚠️ Estás usando el navegador interno de una app.\n\nPara iniciar sesión, toca los 3 puntitos de arriba (o abajo) y selecciona 'Abrir en el navegador' (Chrome o Safari).");
-      btn.innerHTML = "❌ Abre en Chrome/Safari";
+      if(btn) btn.innerHTML = "❌ Abre en Chrome/Safari";
       return;
   }
 
-  // Si está en un navegador normal, lo llevamos a Google
-  btn.innerHTML = "⏳ Conectando con Google...";
-  btn.style.background = "#ffea00"; 
+  // Si está en un navegador normal, lo llevamos a Google de forma segura con Redirect
+  if(btn) {
+    btn.innerHTML = "⏳ Conectando con Google...";
+    btn.style.background = "#ffea00"; 
+  }
   signInWithRedirect(auth, googleProvider);
 };
 
 window.entrarComoInvitado = function() {
   localStorage.setItem('fnf_guest_mode', 'true');
-  document.getElementById('auth-overlay').style.display = 'none';
+  const overlayAuth = document.getElementById('auth-overlay');
+  if(overlayAuth) overlayAuth.style.display = 'none';
 };
 
 window.cerrarSesion = function() {
   signOut(auth).then(() => {
     localStorage.removeItem('fnf_guest_mode');
-    location.reload(); // Recargamos para limpiar todo
+    localStorage.removeItem('fnf_user_profile'); // Limpiamos la memoria local también
+    location.reload(); // Recargamos para limpiar la pantalla
   });
 };
 
@@ -125,8 +144,11 @@ window.abrirPerfil = async function() {
   const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
   const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
 
+  // Ponemos una foto por defecto por si hubo error con Google
+  const imagenPerfil = datos.foto || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+
   contenedor.innerHTML = `
-    <img src="${datos.foto}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 10px;">
+    <img src="${imagenPerfil}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 10px;">
     <h3 style="color: white; margin-bottom: 5px;">${datos.nombre}</h3>
     <p style="color: #888; font-size: 11px; margin-bottom: 2px;">ID: ${usuarioActualFirebase.uid}</p>
     <p style="color: #888; font-size: 11px; margin-bottom: 20px;">${datos.correo}</p>
@@ -147,99 +169,20 @@ window.guardarNuevoApodo = async function() {
   if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
   
   if(confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")){
+    
+    // 1. Guardamos en Firebase con el candado
     await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
       nombre: nuevoNombre,
-      usernameModificado: true // 👈 Pone el candado de por vida
+      usernameModificado: true // 👈 Candado de por vida
     });
+
+    // 2. Actualizamos la memoria local con el nuevo nombre
+    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
+    perfilActual.nombre = nuevoNombre;
+    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
+
     alert("¡Apodo actualizado exitosamente!");
     abrirPerfil(); // Recargamos la ventanita
-  }
-};
-
-// ==========================================
-// 🚀 FUNCIONES DE INTERACCIÓN DE USUARIO
-// ==========================================
-
-// 1. Lanzar la ventana emergente oficial de Google
-window.iniciarSesionConGoogle = function() {
-  signInWithPopup(auth, googleProvider)
-    .then((result) => {
-      console.log("Logueado con Google de manera exitosa!");
-    })
-    .catch((error) => {
-      console.error("Error al autenticar con Google:", error);
-      alert("No se pudo conectar con Google. Reintenta.");
-    });
-};
-
-// 2. Cambiar la visualización del avatar en el selector
-window.seleccionarAvatar = function(srcUrl) {
-  avatarSeleccionadoUrl = srcUrl;
-  document.getElementById('avatar-preview').src = srcUrl;
-};
-
-// 3. Guardar la configuración única en la base de datos
-window.guardarPerfilNuevo = async function() {
-  const inputName = document.getElementById('txt-nuevo-username');
-  const nombreLimpio = inputName.value.trim();
-
-  // 🌐 Detectamos en qué idioma está la página ahorita mismo
-  const idiomaActual = localStorage.getItem('idioma_guardado') || 'es'; // Cambia 'idioma_guardado' si tu variable se llama diferente
-
-  // Alerta bilingüe para el nombre corto
-  if (nombreLimpio === "" || nombreLimpio.length < 3) {
-    alert(idiomaActual === 'en' ? "Please enter a valid username (Min 3 letters)." : "Por favor introduce un nombre de usuario válido (Mínimo 3 letras).");
-    return;
-  }
-
-  if (!usuarioActualFirebase) return;
-
-  const btnGuardar = document.getElementById('btn-guardar-perfil');
-  const btnSpan = btnGuardar.querySelector('span'); // Buscamos el <span> que metimos en el HTML
-
-  // Cambiamos el texto respetando el HTML del span
-  if (btnSpan) {
-    btnSpan.innerText = idiomaActual === 'en' ? "⏳ Creating Account..." : "⏳ Creando Cuenta...";
-  } else {
-    btnGuardar.innerText = idiomaActual === 'en' ? "⏳ Creating Account..." : "⏳ Creando Cuenta...";
-  }
-  btnGuardar.disabled = true;
-
-  const nuevoPerfilBD = {
-    nombre: nombreLimpio,
-    foto: avatarSeleccionadoUrl,
-    correo: usuarioActualFirebase.email,
-    usernameModificado: true, // Candado para asegurar que solo lo modifiquen una vez
-    fechaRegistro: new Date().toISOString()
-  };
-
-  try {
-    // Subimos de manera permanente el perfil amarrado al UID de Google
-    await set(ref(db, 'usuarios/' + usuarioActualFirebase.uid), nuevoPerfilBD);
-    
-    // Guardamos localmente para asegurar el correcto funcionamiento del chat y tickets
-    localStorage.setItem('fnf_user_profile', JSON.stringify({
-      nombre: nombreLimpio,
-      foto: avatarSeleccionadoUrl,
-      key: usuarioActualFirebase.uid
-    }));
-
-    // Cerramos el panel de configuración
-    document.getElementById('profile-setup-overlay').style.display = 'none';
-    console.log("¡Perfil guardado de por vida!");
-  } catch (error) {
-    console.error("Error al guardar el perfil:", error);
-    
-    // Alerta bilingüe de error
-    alert(idiomaActual === 'en' ? "Database error. Try again." : "Hubo un error con la base de datos. Intenta de nuevo.");
-    
-    // Regresamos el botón a la normalidad en el idioma correcto
-    if (btnSpan) {
-      btnSpan.innerText = idiomaActual === 'en' ? "✨ Save Profile & Enter" : "✨ Guardar Perfil y Entrar";
-    } else {
-      btnGuardar.innerText = idiomaActual === 'en' ? "✨ Save Profile & Enter" : "✨ Guardar Perfil y Entrar";
-    }
-    btnGuardar.disabled = false;
   }
 };
 

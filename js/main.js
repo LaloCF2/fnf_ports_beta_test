@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update, runTransaction, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, get, set, update, remove, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+// 👇 AHORA USAMOS REDIRECT PARA EVITAR LA PANTALLA NEGRA 👇
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
@@ -17,57 +18,120 @@ const db = getDatabase(app);
 const APP_VERSION = "v5.2.0";
 const MI_UID_ADMIN = "user_a655u37rr";
 
-// Inicializamos el guardián de Firebase Auth
+// ==========================================
+// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN REDIRECT)
+// ==========================================
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
-
 let usuarioActualFirebase = null;
-let avatarSeleccionadoUrl = "https://cdn-icons-png.flaticon.com/128/4140/4140037.png"; // Avatar por defecto
 
-// ==========================================
-// 🛡️ MONITOREO DE SESIÓN EN TIEMPO REAL (AUTO-LOGUEO)
-// ==========================================
+// Escuchamos si entra alguien
 onAuthStateChanged(auth, async (user) => {
   const overlayAuth = document.getElementById('auth-overlay');
-  const overlayPerfil = document.getElementById('profile-setup-overlay');
 
   if (user) {
-    // ¡El usuario está logueado con Google!
+    // ¡Logueado exitosamente!
     usuarioActualFirebase = user;
-    overlayAuth.style.display = 'none'; // Escondemos la pantalla de login
+    overlayAuth.style.display = 'none';
 
-    // Revisamos si ya tiene registro guardado en tu base de datos
+    // Guardar perfil básico si es la primera vez
     const userRef = ref(db, 'usuarios/' + user.uid);
-    try {
-      const snapshot = await get(userRef);
-      const datosPerfil = snapshot.val();
-
-      if (datosPerfil && datosPerfil.usernameModificado === true) {
-        // Caso A: Ya configuró su perfil alguna vez. Sincronizamos e ingresa.
-        const perfilActualizado = {
-          nombre: datosPerfil.nombre,
-          foto: datosPerfil.foto,
-          key: user.uid // Mantenemos tu estructura original para compatibilidad
-        };
-        localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActualizado));
-        overlayPerfil.style.display = 'none'; // Acceso total concedido
-        console.log("Acceso automático concedido a:", datosPerfil.nombre);
-      } else {
-        // Caso B: Cuenta nueva de Google o perfil incompleto. Obligatorio configurar.
-        overlayPerfil.style.display = 'flex';
-        // Pre-llenamos el campo con su nombre de Google por si le gusta
-        document.getElementById('txt-nuevo-username').value = user.displayName || "";
-      }
-    } catch (error) {
-      console.error("Error consultando el perfil del usuario:", error);
+    const snap = await get(userRef);
+    if (!snap.exists()) {
+      await set(userRef, {
+        nombre: user.displayName,
+        foto: user.photoURL,
+        correo: user.email,
+        usernameModificado: false, // Aún no cambia su nombre
+        fechaRegistro: new Date().toISOString()
+      });
     }
   } else {
-    // No hay ninguna sesión activa de Google. Mostramos bloqueo de login.
-    localStorage.removeItem('fnf_user_profile');
-    overlayAuth.style.display = 'flex';
-    overlayPerfil.style.display = 'none';
+    // Si no está logueado, vemos si eligió "Invitado"
+    if (localStorage.getItem('fnf_guest_mode') === 'true') {
+      overlayAuth.style.display = 'none';
+    } else {
+      overlayAuth.style.display = 'flex';
+    }
   }
 });
+
+// 🚀 FUNCIONES DE ACCESO
+window.iniciarSesionConGoogle = function() {
+  const btn = document.getElementById('btn-google-login');
+  btn.innerHTML = "⏳ Cargando...";
+  signInWithRedirect(auth, googleProvider); // 👈 Cero pantallas negras, viaje directo
+};
+
+window.entrarComoInvitado = function() {
+  localStorage.setItem('fnf_guest_mode', 'true');
+  document.getElementById('auth-overlay').style.display = 'none';
+};
+
+window.cerrarSesion = function() {
+  signOut(auth).then(() => {
+    localStorage.removeItem('fnf_guest_mode');
+    location.reload(); // Recargamos para limpiar todo
+  });
+};
+
+// 👤 VENTANA DE PERFIL DINÁMICA
+window.abrirPerfil = async function() {
+  const contenedor = document.getElementById('perfil-dinamico-contenido');
+  document.getElementById('profile-popup').classList.add('show');
+
+  // CASO 1: ES UN INVITADO
+  if (!usuarioActualFirebase) {
+    contenedor.innerHTML = `
+      <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
+      <p style="color: #ccc; margin-bottom: 20px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
+      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold;">
+        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" style="width: 18px; vertical-align: middle; margin-right: 5px;">
+        Conectar con Google
+      </button>
+    `;
+    return;
+  }
+
+  // CASO 2: ES USUARIO GOOGLE
+  const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
+  const datos = snap.val() || {};
+  
+  // Si ya lo modificó, el input se bloquea
+  const bloqueado = datos.usernameModificado ? "disabled" : "";
+  const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
+  const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
+
+  contenedor.innerHTML = `
+    <img src="${datos.foto}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 10px;">
+    <h3 style="color: white; margin-bottom: 5px;">${datos.nombre}</h3>
+    <p style="color: #888; font-size: 11px; margin-bottom: 2px;">ID: ${usuarioActualFirebase.uid}</p>
+    <p style="color: #888; font-size: 11px; margin-bottom: 20px;">${datos.correo}</p>
+    
+    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: left;">
+      <label style="color: var(--neon-blue); font-size: 12px; font-weight: bold;">Cambiar Apodo (Una sola vez)</label>
+      <input type="text" id="input-nuevo-apodo" value="${datos.nombre}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 8px;">
+      <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 10px; background: var(--neon-green); color: black; ${btnDeshabilitado}">${textoBoton}</button>
+    </div>
+
+    <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white;">🚪 Cerrar Sesión</button>
+  `;
+};
+
+// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
+window.guardarNuevoApodo = async function() {
+  const nuevoNombre = document.getElementById('input-nuevo-apodo').value.trim();
+  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
+  
+  if(confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")){
+    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
+      nombre: nuevoNombre,
+      usernameModificado: true // 👈 Pone el candado de por vida
+    });
+    alert("¡Apodo actualizado exitosamente!");
+    abrirPerfil(); // Recargamos la ventanita
+  }
+};
 
 // ==========================================
 // 🚀 FUNCIONES DE INTERACCIÓN DE USUARIO
@@ -155,6 +219,18 @@ window.guardarPerfilNuevo = async function() {
     btnGuardar.disabled = false;
   }
 };
+
+//=======================================
+window.exigirRegistro = function() {
+  if (!usuarioActualFirebase) {
+    alert("🔒 Debes iniciar sesión con Google para usar esta función.");
+    document.getElementById('auth-overlay').style.display = 'flex'; // Le vuelve a sacar la ventana
+    return true; // Retorna true si lo detuvo
+  }
+  return false; // Retorna false si todo está en orden
+};
+
+//=======================================
 
 let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
@@ -326,6 +402,7 @@ let currentModCommentsId = null;
 let modCommentsListener = null;
 
 window.openModComments = (id, title) => {
+  if(exigirRegistro()) return;
   currentModCommentsId = id;
   document.getElementById("mc-title").innerText = "Comentarios: " + title;
   
@@ -665,6 +742,7 @@ function stringToColor(str) {
 
 window.handleLike = async (id, el) => {
   if (await checkBanStatus()) return;
+  if(exigirRegistro()) return;
   const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
   if(!profile) return checkUserStatus();
   const userKey = profile.key;
@@ -747,6 +825,7 @@ let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
 
 window.openScriptInfo = (id) => {
+  if(exigirRegistro()) return;
   const d = SCRIPTS_DATA[id];
   scriptImagesArray = d.images;
   currentScriptImgIndex = 0;
@@ -1082,6 +1161,7 @@ const APK_DATA = {
 };
 
 window.openModInfo = (id) => { 
+  if(exigirRegistro()) return;
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
@@ -1106,6 +1186,7 @@ window.openModInfo = (id) => {
 window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
 
 window.openApkInfo = (id) => { 
+  if(exigirRegistro()) return;
   const d = APK_DATA[id]; 
   document.getElementById("apk-img").src = d.img; 
   document.getElementById("apk-title").innerText = d.title; 
@@ -1909,6 +1990,7 @@ let linkParaCompartir = "";
 let textoParaCompartir = "";
 
 window.abrirMenuCompartir = (id, nombreMod) => {
+  if(exigirRegistro()) return;
   const baseUrl = window.location.origin + window.location.pathname;
   linkParaCompartir = `${baseUrl}?share=${id}`;
   textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;

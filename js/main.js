@@ -1,2631 +1,2980 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, get, set, update, remove, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<!doctype html>
+<html lang="es">
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
-  authDomain: "fnf-mobile-lalocf.firebaseapp.com",
-  databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
-  projectId: "fnf-mobile-lalocf",
-  storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
-  messagingSenderId: "407243542354",
-  appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
-};
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>FNF' - Mobile</title>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const APP_VERSION = "v6.2.0";
-const MI_UID_ADMIN = "user_a655u37rr";
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
+  <link rel="apple-touch-icon" href="assets/icons/logo192.png">
+  <link rel="icon" type="image/png" href="assets/icons/logo192.png">
+  <link rel="shortcut icon" href="assets/icons/logo192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00eaff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// ==========================================
-// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN POPUP DEFINITIVA)
-// ==========================================
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
-let usuarioActualFirebase = null;
+  <link rel="stylesheet" href="css/style.css">
 
-onAuthStateChanged(auth, async (user) => {
-  const overlayAuth = document.getElementById('auth-overlay');
+  <link id="theme-style" rel="stylesheet" href="">
 
-  if (user) {
-    usuarioActualFirebase = user;
-    if (overlayAuth) overlayAuth.style.display = 'none';
+  <script>
+    const savedTheme = localStorage.getItem('activeTheme') || 'default';
+    if (savedTheme === 'retro') {
+      document.write('<link rel="stylesheet" href="css/style2.css">');
+    } else if (savedTheme === 'snokido') {
+      document.write('<link rel="stylesheet" href="css/style3.css">');
+    }
 
-    const nombreSeguro = user.displayName || "Usuario FNF";
-    const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+    const es_iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    const userRef = ref(db, 'usuarios/' + user.uid);
-    const snap = await get(userRef);
-
-    if (!snap.exists()) {
-      await set(userRef, {
-        nombre: nombreSeguro,
-        foto: fotoSegura,
-        correo: user.email,
-        usernameModificado: false,
-        fechaRegistro: new Date().toISOString()
+    if (es_iOS) {
+      document.write('<link rel="stylesheet" href="css/style_liquidglass.css">');
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add('ios-theme');
       });
     }
+  </script>
+</head>
 
-    const datosBD = snap.exists() ? snap.val() : { nombre: nombreSeguro, foto: fotoSegura };
-    localStorage.setItem('fnf_user_profile', JSON.stringify({
-      nombre: datosBD.nombre,
-      foto: datosBD.foto,
-      key: user.uid
-    }));
+<body>
 
-  } else {
-    if (localStorage.getItem('fnf_guest_mode') === 'true') {
-      if (overlayAuth) overlayAuth.style.display = 'none';
-    } else {
-      if (overlayAuth) overlayAuth.style.display = 'flex';
-    }
-  }
-});
+  <body>
+    <div id="auth-overlay" class="auth-screen" style="display: none;">
+      <div class="auth-card">
+        <img src="assets/images/logo/LaloCF.webp" alt="Logo App" class="auth-logo">
+        <h2>FNF' Ports Mobile</h2>
+        <p data-es="Inicia sesión para acceder a las mejores bases, mods, scripts y soporte tecnico."
+          data-en="Sign in to access the best engines, mods, scripts, and technical support.">
+          Inicia sesión para acceder a las mejores bases, mods, scripts y soporte tecnico.
+        </p>
 
-window.iniciarSesionConGoogle = async function () {
-  const btn = document.getElementById('btn-google-login');
+        <button id="btn-google-login" onclick="iniciarSesionConGoogle()">
+          <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google">
+          <span data-es="Entrar con Google" data-en="Sign in with Google">Iniciar sesión con Google</span>
+        </button>
 
-  const ua = navigator.userAgent || navigator.vendor || window.opera;
-  const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
+        <button onclick="entrarComoInvitado()"
+          style="margin-top: 15px; width: 100%; padding: 12px; background: transparent; color: #b5b5bd; border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; cursor: pointer; transition: 0.2s;">
+          <span data-es="Iniciar sesión después" data-en="Sign in later">Iniciar sesión después</span>
+        </button>
+      </div>
+    </div>
 
-  if (esNavegadorInterno) {
-    alert("⚠️ Estás usando el navegador interno de una app.\n\nPara iniciar sesión, toca los 3 puntitos de arriba (o abajo) y selecciona 'Abrir en el navegador' (Chrome o Safari).");
-    if (btn) btn.innerHTML = "❌ Abre en Chrome/Safari";
-    return;
-  }
+    <div id="profile-popup" class="popup">
+      <div class="popup-content"
+        style="text-align: center; padding: 25px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 340px; margin: auto;">
+        <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')"
+          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 20px; color: white;" data-es="Mi Perfil" data-en="My Profile">Mi Perfil
+        </h2>
 
-  if (btn) {
-    btn.innerHTML = "⏳ Abriendo Google...";
-    btn.style.background = "#ffea00";
-    btn.style.color = "#000";
-  }
+        <div id="perfil-dinamico-contenido"></div>
+      </div>
+    </div>
 
-  try {
-    await signInWithPopup(auth, googleProvider);
-  } catch (error) {
-    console.error("Error al iniciar sesión:", error);
-    if (btn) {
-      btn.innerHTML = "❌ Falló, intenta de nuevo";
-      btn.style.background = "#ff003c";
-      btn.style.color = "#fff";
-    }
+    <!-- MIS FAVORITOS POPUP -->
+    <div id="favorites-popup" class="popup">
+      <div class="popup-content popup-scroll-body"
+        style="text-align: center; padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 340px; margin: auto; max-height: 80vh; overflow-y: auto;">
+        <span class="popup-close" onclick="document.getElementById('favorites-popup').classList.remove('show')"
+          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 20px; color: white;">⭐ Mis Favoritos</h2>
+        <div id="favorites-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>
+        </div>
+      </div>
+    </div>
 
-    if (error.code === 'auth/popup-closed-by-user') {
-      console.log("Inicio de sesión cancelado por el usuario.");
-    } else {
-      alert("🚨 Error: " + error.message);
-    }
-  }
-};
+    <!-- SOLICITUDES POPUP -->
+    <div id="requests-popup" class="popup">
+      <div class="popup-content popup-scroll-body"
+        style="padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 360px; margin: auto; max-height: 85vh; overflow-y: auto;">
+        <span class="popup-close" onclick="document.getElementById('requests-popup').classList.remove('show')"
+          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 10px; color: white; text-align: center;">📝 Pedir un Mod</h2>
+        <p style="color:#ccc; font-size:12px; text-align:center; margin-bottom: 15px;">¿Qué port te gustaría ver en la
+          página? ¡Vota o añade uno nuevo!</p>
 
-window.entrarComoInvitado = function () {
-  localStorage.setItem('fnf_guest_mode', 'true');
-  const overlayAuth = document.getElementById('auth-overlay');
-  if (overlayAuth) overlayAuth.style.display = 'none';
-};
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+          <input type="text" id="req-mod-name" placeholder="Nombre del Mod..." class="reg-input"
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+          <input type="url" id="req-mod-link" placeholder="Enlace (Opcional GameBanana...)" class="reg-input"
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+          <button id="btn-enviar-solicitud" onclick="enviarSolicitudMod()" class="btn"
+            style="width:100%; padding:10px; background:var(--neon-blue); color:black; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">Enviar Solicitud</button>
+        </div>
 
-window.cerrarSesion = function () {
-  signOut(auth).then(() => {
-    localStorage.removeItem('fnf_guest_mode');
-    localStorage.removeItem('fnf_user_profile');
-    location.reload();
-  });
-};
+        <h3 style="color:white; font-size:15px; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
+          Comunidad (Más votados)</h3>
+        <div id="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <p style="color:#aaa; font-size:13px; text-align:center;">Cargando solicitudes...</p>
+        </div>
+      </div>
+    </div>
 
-// ==========================================
-// 👤 VENTANA DE PERFIL DINÁMICA (VERSIÓN INDESTRUCTIBLE)
-// ==========================================
-window.abrirPerfil = async function () {
-  const contenedor = document.getElementById('perfil-dinamico-contenido');
+    <div id="pro-menu-overlay" onclick="toggleProMenu()"></div>
 
-  if (!contenedor) return;
+    <div id="particles-container"></div>
+    <nav class="bottom-nav">
+      <div id="ios-pill" class="ios-glass-pill"></div>
 
-  // Desplegamos la ventana flotante
-  document.getElementById('profile-popup').classList.add('show');
+      <div class="nav-item active" onclick="selectSection('home', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/8367/8367640.png" alt="Inicio"></span>
+        <span class="nav-text" data-es="Inicio" data-en="Home">Inicio</span>
+      </div>
+      <div class="nav-item" onclick="selectSection('apks', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/5158/5158939.png" alt="Bases"></span>
+        <span class="nav-text" data-es="Bases" data-en="Engines">Bases</span>
+      </div>
+      <div class="nav-item" onclick="selectSection('mods', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/8176/8176146.png" alt="MODs"></span>
+        <span class="nav-text" data-es="MODs" data-en="MODs">MODs</span>
+      </div>
+      <div class="nav-item" onclick="selectSection('scripts', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/5567/5567743.png" alt="Scripts"></span>
+        <span class="nav-text" data-es="Scripts" data-en="Scripts">Scripts</span>
+      </div>
+      <div class="nav-item" onclick="selectSection('help', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/7978/7978351.png" alt="Ayuda"></span>
+        <span class="nav-text" data-es="Ayuda" data-en="Help">Ayuda</span>
+      </div>
+      <div class="nav-item"
+        onclick="document.getElementById('requests-popup').classList.add('show'); if(window.loadModRequests) loadModRequests();">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/8367/8367272.png" alt="Pedidos"
+            style="filter: hue-rotate(180deg);"></span>
+        <span class="nav-text" data-es="Pedidos" data-en="Requests">Pedidos</span>
+      </div>
+      <div class="nav-item" onclick="selectSection('contact', this)">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/16955/16955208.png" alt="Redes"></span>
+        <span class="nav-text" data-es="Redes" data-en="Socials">Redes</span>
+      </div>
+    </nav>
 
-  // CASO 1: EL USUARIO ES UN INVITADO
-  if (!usuarioActualFirebase) {
-    contenedor.innerHTML = `
-      <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
-      <p style="color: #ccc; margin-bottom: 20px; font-size: 13px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
-      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold; padding: 12px; border-radius: 12px; border: none; cursor: pointer;">
-        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" style="width: 18px; vertical-align: middle; margin-right: 5px;">
-        Conectar con Google
+    <div id="toast-container" class="toast-container"></div>
+
+    <div class="lang-btn" onclick="toggleLanguage()" id="langBtn"
+      style="position:fixed; top:15px; left:15px; z-index:9999; background:var(--neon-blue, #00eaff); color:black; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px var(--neon-blue);">
+      🇬🇧 EN</div>
+    <div class="profile-btn" onclick="abrirPerfil()" id="profileBtn"
+      style="position:fixed; top:15px; left:95px; z-index:9999; background:var(--neon-pink, #ff00ff); color:white; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px #ff00ff;">
+      👤 <span data-es="Perfil" data-en="Profile">Perfil</span></div>
+
+    <div id="settingsBtn" class="settings-btn" onclick="document.getElementById('settings-popup').classList.add('show')"
+      style="display: flex; align-items: center; justify-content: center;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1040/1040221.png" alt="Ajustes"
+        style="width: 24px; height: 24px; object-fit: contain;">
+    </div>
+
+    <div class="admin-float-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')"
+      style="display: flex; align-items: center; justify-content: center;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1077/1077147.png" alt="Admin"
+        style="width: 24px; height: 24px; object-fit: contain;">
+    </div>
+    <div class="theme-btn" onclick="toggleTheme()" style="display: flex; align-items: center; justify-content: center;">
+      <img src="https://cdn-icons-png.flaticon.com/128/12180/12180668.png" alt="Tema Claro/Oscuro"
+        style="width: 24px; height: 24px; object-fit: contain;">
+    </div>
+
+    <div class="notif-container">
+      <button class="notif-bell-btn" onclick="toggleNotificaciones()">
+        <img src="https://cdn-icons-png.flaticon.com/128/8509/8509651.png" alt="Notificaciones">
+        <span id="badge-contador" class="notif-badge" style="display: none;">0</span>
       </button>
-    `;
-    return;
-  }
+    </div>
 
-  // Animación de carga mientras lee la base de datos
-  contenedor.innerHTML = `<p style="color: #aaa; font-size: 14px;">⏳ Cargando datos de perfil...</p>`;
+    <div id="panel-notificaciones" class="notif-panel hidden">
+      <div class="notif-header">
+        <h3>Notificaciones</h3>
+        <button class="close-notif" onclick="toggleNotificaciones()">✕</button>
+      </div>
+      <div id="admin-notif-area" class="admin-area" style="display: none;">
+        <textarea id="txt-nueva-notif" placeholder="Aviso para los usuarios..."></textarea>
+        <button class="btn-enviar-notif" onclick="enviarNotificacion()">Enviar Aviso</button>
+      </div>
+      <div id="lista-notificaciones" class="notif-list"></div>
+    </div>
+    </div>
 
-  try {
-    // CASO 2: EL USUARIO INICIÓ SESIÓN CON GOOGLE
-    const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
-    const datos = snap.val() || {};
+    <div id="settings-popup" class="popup">
+      <div class="popup-content popup-scroll-body"
+        style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; box-sizing: border-box;">
+        <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
+        <h2 class="glow" data-es="Ajustes FNF'" data-en="FNF' Settings">Ajustes FNF'</h2>
 
-    // 🎯 RESPALDO MAESTRO: Si la base de datos está vacía, jalamos la foto y nombre crudos de Google
-    const nombreUsuario = datos.nombre || usuarioActualFirebase.displayName || "Usuario FNF";
-    const fotoUsuario = datos.foto || usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
-    const correoUsuario = datos.correo || usuarioActualFirebase.email || "Sin correo";
+        <div class="color-picker-wrapper" style="box-sizing: border-box; width: 100%;">
+          <input type="color" id="themeColor" value="#00eaff">
+          <span data-es="Color del Tema" data-en="Theme Color" style="font-weight: bold; color: var(--neon-blue);">Color
+            del Tema</span>
+        </div>
 
-    // Reglas de 15 días
-    const ultimaFecha = datos.ultimaFechaCambio || 0;
-    const ahora = Date.now();
-    const diasPasados = Math.floor((ahora - ultimaFecha) / (1000 * 60 * 60 * 24));
+        <div
+          style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: left; box-sizing: border-box; width: 100%;">
+          <span style="font-weight: bold; color: #fff; display: block; margin-bottom: 10px;" data-es="Skin de la Página"
+            data-en="Page Skin">Skin de la Página</span>
 
-    let bloqueado = "";
-    let textoBoton = "✨ Guardar Perfil";
+          <select id="themeSelector"
+            style="width: 100%; padding: 10px; background: #000; color: var(--neon-blue); border: 1px solid var(--neon-blue); outline: none; font-size: 14px; cursor: pointer;">
+            <option value="default">Tema Moderno (Glassmorphism)</option>
+            <option value="retro">Tema Retro (Arcade)</option>
+            <option value="snokido">Tema Snokido</option>
+          </select>
+        </div>
 
-    // Si tenía el candado antiguo (usernameModificado: true) pero no tiene fecha, lo dejamos cambiar de nuevo
-    // Si tiene fecha y no han pasado 15 días, lo bloqueamos
-    if (diasPasados < 15 && ultimaFecha !== 0) {
-      const diasFaltantes = 15 - diasPasados;
-      bloqueado = "disabled";
-      textoBoton = `✨ Guardar Avatar (Nombre bloqueado ${diasFaltantes} días)`;
-    }
+        <label
+          style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: rgba(0,234,255,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--neon-blue); cursor: pointer; box-sizing: border-box; width: 100%;">
+          <span style="font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue);"
+            data-es="🌈 Modo RGB (Chroma)" data-en="RGB Mode (Chroma)">Modo RGB (Chroma)</span>
+          <input type="checkbox" id="chromaToggle" style="transform: scale(1.3);">
+        </label>
 
-    // Inyectamos la información
-    contenedor.innerHTML = `
-      <img src="${fotoUsuario}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 12px; object-fit: cover;">
-      <h3 style="color: white; margin: 0 0 5px 0; font-size: 18px;">${nombreUsuario}</h3>
-      <p style="color: #666; font-size: 10px; margin: 0 0 2px 0; word-break: break-all;">ID: ${usuarioActualFirebase.uid}</p>
-      <p style="color: #aa99ff; font-size: 12px; margin: 0 0 20px 0;">${correoUsuario}</p>
-      
-      <div style="background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
-        
-        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Tu Apodo (Cambiable cada 15 días)</label>
-        <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
-        
-        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">URL de Avatar / Logo (Opcional)</label>
-        <input type="url" id="input-nuevo-avatar" placeholder="https://..." value="${datos.foto || ''}" class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
+        <div
+          style="margin-top: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; box-sizing: border-box; width: 100%;">
+          <h3 style="margin-top:0; font-size: 14px; color: var(--neon-blue); text-align: center;"
+            data-es="⚡ Visuales y Rendimiento" data-en="⚡ Visuals & Performance">⚡ Visuales y Rendimiento</h3>
 
-        <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 15px; background: var(--neon-green); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">${textoBoton}</button>
+          <label
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+            <span data-es="Partículas Animadas" data-en="Animated Particles">Partículas Animadas</span>
+            <input type="checkbox" id="particlesToggle" style="transform: scale(1.3);">
+          </label>
+
+          <label
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+            <span data-es="Modo Gama Baja" data-en="Low-End Mode">Modo Gama Baja</span>
+            <input type="checkbox" id="lowEndToggle" style="transform: scale(1.3);">
+          </label>
+
+          <div style="border-top: 1px dashed #555; padding-top: 15px; margin-top: 5px; width: 100%;">
+            <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;"
+              data-es="Intensidad del Cristal (Blur)" data-en="Glass Intensity (Blur)">Intensidad del Cristal
+              (Blur)</span>
+            <input type="range" id="blurSlider" min="0" max="30" value="15"
+              style="width: 100%; cursor: pointer; box-sizing: border-box;">
+          </div>
+
+          <div style="margin-top: 15px; width: 100%;">
+            <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;"
+              data-es="Grosor de Píldora iOS" data-en="iOS Pill Thickness">Grosor de Píldora iOS</span>
+            <input type="range" id="pillSizeSlider" min="0" max="15" value="5"
+              style="width: 100%; cursor: pointer; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div class="font-picker-wrapper"
+          style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #333; box-sizing: border-box; width: 100%;">
+          <span style="display:block; margin-bottom: 8px; font-weight: bold; color: #fff;"
+            data-es="Fuente Personalizada (.ttf)" data-en="Custom Font (.ttf)">Fuente Personalizada (.ttf)</span>
+          <input type="file" id="customFontUpload" accept=".ttf"
+            style="width: 100%; color: #fff; font-size: 12px; box-sizing: border-box;">
+        </div>
+
+        <div
+          style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; box-sizing: border-box; width: 100%;">
+          <button class="btn" style="width:100%; background: #444; box-sizing: border-box;" onclick="resetSettings()"
+            data-es="Restablecer Por Defecto" data-en="Reset to Default">Restablecer Por Defecto</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="maintenance-popup" class="popup">
+      <div class="popup-content"
+        style="border: 2px solid #ff003c; box-shadow: 0 0 20px rgba(255, 0, 60, 0.5); text-align: center; max-width: 300px;">
+        <h2 style="color: #ff003c; text-shadow: 0 0 10px #ff003c; font-size: 24px; margin-bottom: 10px;">🚧
+          MANTENIMIENTO 🚧</h2>
+
+        <h3 id="maintenance-mod-name" style="color: var(--neon-yellow); margin-bottom: 15px; font-size: 18px;">Nombre
+          del Mod</h3>
+
+        <p style="color: #ddd; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+          El enlace de descarga de este MOD ha sido reportado por la comunidad debido a una caída.
+        </p>
+        <p style="color: var(--neon-green); font-size: 13px; font-weight: bold; margin-bottom: 20px;">
+          El Administrador ya ha sido notificado y está trabajando en repararlo. ¡Vuelve pronto!
+        </p>
+
+        <button class="btn" onclick="document.getElementById('maintenance-popup').classList.remove('show')"
+          style="background-color: #333; color: white; width: 100%;">Entendido</button>
+      </div>
+    </div>
+
+
+
+    <div id="ban-popup" class="popup">
+      <div class="popup-content" style="padding: 20px;">
+        <h2 class="glow" style="text-align: center;">🔨 Control de Baneo</h2>
+        <p id="ban-target-info" style="font-size: 14px; margin-bottom: 15px; color: var(--neon-pink);"></p>
+        <input type="text" id="banReason" class="reg-input" placeholder="Motivo del baneo">
+        <input type="number" id="banDuration" class="reg-input" placeholder="Horas (ej: 24)" value="24">
+        <button class="btn" id="confirmBanBtn" style="width: 100%; background: red;">Banear Usuario</button>
+        <button class="btn" onclick="document.getElementById('ban-popup').classList.remove('show')"
+          style="width: 100%; background: #444; margin-top: 10px;">Cancelar</button>
+      </div>
+    </div>
+
+    <div id="admin-popup" class="popup">
+      <div class="popup-content" style="text-align: center; padding: 20px;">
+        <h2 class="glow">Acceso Superusuario</h2>
+        <p>Introduce el código de seguridad:</p>
+        <input type="password" id="adminCode" class="reg-input" placeholder="Código">
+        <button class="btn" onclick="verifyAdmin()" style="width: 100%">Entrar</button>
+        <p onclick="document.getElementById('admin-popup').classList.remove('show')"
+          style="cursor:pointer; color:gray; font-size:12px; margin-top:10px;">Cancelar</p>
+      </div>
+    </div>
+
+    <div id="admin-tools-popup" class="popup">
+      <div class="popup-content" style="padding: 20px; text-align: center;">
+        <span class="popup-close"
+          onclick="document.getElementById('admin-tools-popup').classList.remove('show')">✖</span>
+        <h2 class="glow">Panel de Control Global</h2>
+        <textarea id="globalNotifText" class="reg-input" placeholder="Ej: Enviar una Notificación" rows="3"
+          style="resize:none;"></textarea>
+        <button class="btn" onclick="sendGlobalNotification()"
+          style="width: 30%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <img src="https://cdn-icons-png.flaticon.com/128/1827/1827370.png" style="align-items: center;" alt="Campana"
+            class="btn-icon">
+          Enviar Notificación
+        </button>
+
+        <hr style="border: 1px solid #333; margin: 15px 0;">
+        <h3 style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Opciones de Desarrollador:</h3>
+        <button class="btn" id="btnForceIOS" onclick="toggleForceIOS()"
+          style="width: 100%; background: #222; border: 1px solid #00eaff; color: #00eaff;">🍏 Forzar Interfaz
+          iOS</button>
+      </div>
+    </div>
+
+    <div id="update-popup" class="popup">
+      <div class="popup-content glass-update-card" style="padding: 0; width: 90%; max-width: 400px;">
+
+        <div class="update-header-art">
+          <div class="update-icon-circle"
+            style="background: rgb(42, 42, 42); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 20px rgba(255,255,255,0.3);">
+            <img src="https://cdn-icons-png.flaticon.com/128/14466/14466980.png" alt="Actualización"
+              style="width: 65px;">
+          </div>
+          <div class="popup-close" onclick="closeUpdatePopup()"
+            style="position: absolute; top: 15px; right: 15px; color: white; cursor: pointer;">✖</div>
+        </div>
+        <div class="update-body">
+          <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;"
+            data-es="¡Novedades v6.1.0!" data-en="What's New v6.0.0!">¡Novedades v6.1.0!</h2>
+          <p style="text-align: center; color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">Los cambios más recientes
+            en FNF Mobile:</p>
+          <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Se añadio un nuevo mod <b>EliasFunki Revive!</b>"
+                data-en="Added new <b>EliasFunki Revive!</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo mod: <b>EliasFunki Revive! </b></span>
+            </li>
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/891/891448.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Se añadio un nuevo apartado en la pagina de Inicio"
+                data-en="A new section was added to the Home page" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo apartado en la pagina de Inicio</span>
+            </li>
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/4149/4149678.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Corrección de errores y mejoras" data-en="Bug fixes and improvements"
+                style="font-size: 13.5px; line-height: 1.3;">Corrección de errores y mejoras</span>
+            </li>
+
+          </ul>
+          <button class="btn-update-action" onclick="closeUpdatePopup()" data-es="¡Entendido!" data-en="Got it!"
+            style="margin-top: 15px;">¡Entendido!</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="install-popup" class="popup">
+      <div class="popup-content" style="text-align: center; padding: 25px; max-width: 350px;">
+        <h2 class="glow" style="margin-top:0; font-size:22px;" data-es="📱 Instalar App" data-en="📱 Install App">📱
+          Instalar App</h2>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()" data-es="Luego"
+            data-en="Later">Luego</button>
+          <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Sí, instalar" data-en="Install">Sí,
+            instalar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="register-popup" class="popup">
+      <div class="popup-content" style="text-align: center; padding: 20px;">
+        <h2 class="glow" data-es="Registro de Usuario" data-en="User Registration">Registro de Usuario</h2>
+        <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo">
+        <input type="url" id="regLink" class="reg-input" placeholder="Link de tu canal de YouTube (Opcional)">
+        <input type="url" id="regAvatar" class="reg-input" placeholder="URL Foto (Opcional)">
+        <button class="btn" onclick="saveRegistration()" style="width: 100%" data-es="Aceptar"
+          data-en="Accept">Aceptar</button>
+      </div>
+    </div>
+
+    <header id="snokido-header" class="master-header" style="display: none;">
+      <div class="top-bar">
+        <div class="logo-text">FNF'</div>
+
+        <div class="top-bar-actions">
+          <div class="action-icon" onclick="toggleTheme()" title="Cambiar Tema">☼</div>
+          <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')"
+            title="Buscar">🔍</div>
+          <div class="action-icon" onclick="abrirPerfil()" title="Perfil">👤</div>
+        </div>
       </div>
 
-      <button onclick="document.getElementById('profile-popup').classList.remove('show'); abrirFavoritos();" class="btn" style="width: 100%; margin-bottom: 15px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">⭐ Mis Favoritos</button>
-
-      <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">🚪 Cerrar Sesión</button>
-    `;
-  } catch (error) {
-    console.error("Error al cargar el perfil:", error);
-    // 🚨 EL SALVAVIDAS: Si la base de datos se rompe, mostramos esto en lugar de dejarlo en blanco
-    contenedor.innerHTML = `
-      <img src="${usuarioActualFirebase.photoURL || 'https://cdn-icons-png.flaticon.com/128/149/149071.png'}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid #ff003c; margin-bottom: 12px; object-fit: cover;">
-      <h3 style="color: white; margin: 0 0 5px 0;">${usuarioActualFirebase.displayName || 'Usuario'}</h3>
-      <p style="color: #ff003c; font-size: 12px; margin-bottom: 20px;">⚠️ Hubo un pequeño retraso de seguridad al conectar con Firebase. Cierra esta ventana y ábrela de nuevo.</p>
-      <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer;">🚪 Cerrar Sesión</button>
-    `;
-  }
-};
-
-// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE Y AVATAR
-window.guardarNuevoApodo = async function () {
-  const nuevoNombreInput = document.getElementById('input-nuevo-apodo');
-  const nuevoAvatarInput = document.getElementById('input-nuevo-avatar');
-
-  if (!nuevoNombreInput) return;
-
-  const nuevoNombre = nuevoNombreInput.value.trim();
-  const nuevoAvatar = nuevoAvatarInput.value.trim();
-
-  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
-
-  let mensajeConfirmacion = "¿Guardar cambios en tu perfil?";
-  if (!nuevoNombreInput.disabled) {
-    mensajeConfirmacion = "¿Seguro que quieres este apodo? Se bloqueará por 15 días.";
-  }
-
-  if (confirm(mensajeConfirmacion)) {
-
-    // Si el input no está bloqueado, guardamos la nueva fecha
-    let updateData = {};
-    if (nuevoAvatar) updateData.foto = nuevoAvatar;
-
-    if (!nuevoNombreInput.disabled) {
-      updateData.nombre = nuevoNombre;
-      updateData.ultimaFechaCambio = Date.now();
-      updateData.usernameModificado = false; // Quitamos el candado viejo si lo tenía
-    }
-
-    // Guardamos en Firebase
-    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), updateData);
-
-    // Actualizamos la memoria local
-    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
-    if (!nuevoNombreInput.disabled) perfilActual.nombre = nuevoNombre;
-    if (nuevoAvatar) perfilActual.foto = nuevoAvatar;
-    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
-
-    alert("¡Perfil actualizado exitosamente!");
-    abrirPerfil(); // Recargamos la ventanita
-  }
-};
-
-//=======================================
-window.exigirRegistro = function () {
-  if (!usuarioActualFirebase) {
-    alert("🔒 Debes iniciar sesión con Google para usar esta función.");
-    document.getElementById('auth-overlay').style.display = 'flex';
-    return true;
-  }
-  return false;
-};
-
-//=======================================
-
-let isSuperUser = false;
-const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-if (userProfile && userProfile.key === MI_UID_ADMIN) {
-  isSuperUser = true;
-  document.body.classList.add('is-admin');
-}
-
-const urlParams = new URLSearchParams(window.location.search);
-const secretUid = urlParams.get('set_admin');
-
-if (secretUid) {
-  const newProfile = {
-    key: secretUid,
-    name: "Admin LaloCF",
-    verified: true
-  };
-  localStorage.setItem('fnf_user_profile', JSON.stringify(newProfile));
-
-  window.history.replaceState({}, document.title, window.location.pathname);
-
-  alert("🛠️ ¡Privilegios de Administrador Activados en este dispositivo a travez de un enlace compartido!");
-  window.location.reload();
-}
-
-let verifiedUsers = {};
-let downloadCounts = {};
-
-onValue(ref(db, 'downloads'), (snap) => {
-  downloadCounts = snap.val() || {};
-  Object.keys(downloadCounts).forEach(id => {
-    const el = document.getElementById('dl-' + id);
-    if (el) el.innerText = downloadCounts[id];
-  });
-});
-
-onValue(ref(db, 'verified_users'), (snap) => {
-  verifiedUsers = snap.val() || {};
-});
-
-window.trackDownload = (id) => {
-  runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
-};
-
-// -------------------------------------------
-
-window.toggleGreenLed = async (id, event) => {
-  event.stopPropagation();
-  if (!isSuperUser) return;
-  const ledRef = ref(db, `updates_led/${id}`);
-  const snap = await get(ledRef);
-  if (snap.exists()) {
-    await set(ledRef, null);
-  } else {
-    await set(ledRef, true);
-  }
-};
-
-onValue(ref(db, 'updates_led'), (snap) => {
-  const leds = snap.val() || {};
-  document.querySelectorAll('.led-green').forEach(el => el.style.display = 'none');
-  Object.keys(leds).forEach(id => {
-    const el = document.getElementById(`led-green-${id}`);
-    if (el) el.style.display = 'inline-block';
-    const btn = document.getElementById(`btn-led-${id}`);
-    if (btn) btn.innerText = '⭕ Quitar LED';
-  });
-  document.querySelectorAll('.admin-led-btn').forEach(btn => {
-    const id = btn.id.replace('btn-led-', '');
-    if (!leds[id]) btn.innerText = '🟢 Act. LED';
-  });
-});
-
-onValue(ref(db, 'last_comment_time'), (snap) => {
-  const times = snap.val() || {};
-  document.querySelectorAll('.led-yellow').forEach(el => el.style.display = 'none');
-  Object.keys(times).forEach(id => {
-    const lastComment = times[id];
-    const lastSeen = localStorage.getItem(`seen_comments_${id}`) || 0;
-    if (lastComment > lastSeen) {
-      const el = document.getElementById(`led-yellow-${id}`);
-      if (el) el.style.display = 'inline-block';
-    }
-  });
-});
-
-window.toggleModPin = async (modId, event) => {
-  event.stopPropagation();
-  if (!isSuperUser) return;
-  const pinRef = ref(db, `pinned_mods/${modId}`);
-  const snap = await get(pinRef);
-  if (snap.exists()) {
-    await set(pinRef, null);
-  } else {
-    await set(pinRef, true);
-  }
-};
-
-onValue(ref(db, 'pinned_mods'), (snap) => {
-  const pinned = snap.val() || {};
-  const container = document.getElementById('modsContainer');
-  const cards = Array.from(container.querySelectorAll('.mod-card:not(.coming-soon-card)'));
-
-  cards.forEach(card => {
-    const modId = card.id.replace('card-', '');
-    const btn = card.querySelector('.admin-pin-btn');
-    if (pinned[modId]) {
-      card.classList.add('pinned-mod');
-      if (btn) btn.innerText = '❌ Desfijar';
-    } else {
-      card.classList.remove('pinned-mod');
-      if (btn) btn.innerText = '📌 Fijar';
-    }
-  });
-
-  cards.sort((a, b) => {
-    const aId = a.id.replace('card-', '');
-    const bId = b.id.replace('card-', '');
-    const aPinned = pinned[aId] ? 1 : 0;
-    const bPinned = pinned[bId] ? 1 : 0;
-    return bPinned - aPinned;
-  });
-
-  cards.forEach(card => container.appendChild(card));
-});
-
-window.sendGlobalNotification = async () => {
-  const text = document.getElementById('globalNotifText').value.trim();
-  if (!text) return alert("Escribe un mensaje primero.");
-
-  await set(ref(db, 'notifications/latest'), {
-    message: text,
-    timestamp: Date.now(),
-    id: Math.random().toString(36).substr(2, 9)
-  });
-
-  document.getElementById('globalNotifText').value = '';
-  document.getElementById('admin-tools-popup').classList.remove('show');
-};
-
-window.showToast = (msg) => {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<span style="font-size:20px;">🔔</span> <span>${msg}</span>`;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => toast.remove(), 500);
-  }, 6000);
-};
-
-onValue(ref(db, 'notifications/latest'), (snap) => {
-  const data = snap.val();
-  if (!data) return;
-
-  const lastSeen = localStorage.getItem('last_notif_id');
-  const isRecent = (Date.now() - data.timestamp) < (24 * 60 * 60 * 1000);
-
-  if (lastSeen !== data.id && isRecent) {
-    window.showToast(data.message);
-    localStorage.setItem('last_notif_id', data.id);
-  }
-});
-
-let currentModCommentsId = null;
-let modCommentsListener = null;
-
-window.openModComments = (id, title) => {
-  if (exigirRegistro()) return;
-  currentModCommentsId = id;
-  document.getElementById("mc-title").innerText = "Comentarios: " + title;
-
-  localStorage.setItem(`seen_comments_${id}`, Date.now());
-  const yellowLed = document.getElementById(`led-yellow-${id}`);
-  if (yellowLed) yellowLed.style.display = 'none';
-
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  const display = document.getElementById('mc-displayMyName');
-  const nombreUsuario = user.nombre || user.name || "Usuario";
-  const fotoUsuario = user.foto || user.avatar || "";
-
-  display.innerText = "Comentando como: " + nombreUsuario;
-  if (nombreUsuario.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-
-  const avatar = document.getElementById('mc-myAvatar');
-  if (fotoUsuario) {
-    avatar.innerHTML = `<img src="${fotoUsuario}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    avatar.style.background = 'transparent';
-  } else {
-    avatar.innerHTML = nombreUsuario.charAt(0).toUpperCase();
-    avatar.style.background = stringToColor(nombreUsuario);
-  }
-
-  document.getElementById("mod-comments-popup").classList.add("show");
-
-  if (modCommentsListener) modCommentsListener();
-
-  const commentsRef = ref(db, `mod_comments/${id}`);
-  modCommentsListener = onValue(commentsRef, (snapshot) => {
-    const list = document.getElementById('mc-commentList');
-    list.innerHTML = '';
-    const data = snapshot.val();
-    const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-    if (data) {
-      let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-
-      commentsArray.sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        return b.id.localeCompare(a.id);
-      });
-
-      commentsArray.forEach(c => {
-        const userName = c.user || "Usuario";
-        const isLalo = userName.toLowerCase() === 'lalocf';
-        const isVerified = verifiedUsers[c.ownerKey] || isLalo;
-        const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-        const activeClass = myLikedComments[c.id] ? 'active' : '';
-
-        const pinClass = c.isPinned ? 'pinned' : '';
-        const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
-        const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
-
-        let adminBtns = '';
-        if (isSuperUser) {
-          adminBtns = `
-             <span style="color:gold; cursor:pointer" onclick="togglePinModComment('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
-             <span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>
-           `;
-        } else if (myProfile && c.ownerKey === myProfile.key) {
-          adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>`;
-        }
-
-        const avatarContent = c.avatar
-          ? `<img src="${c.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
-          : userName.charAt(0).toUpperCase();
-
-        const div = document.createElement('div');
-        div.className = `yt-comment-container ${pinClass}`;
-        div.innerHTML = `
-          <div class="yt-avatar" style="background:${c.avatar ? 'transparent' : stringToColor(c.user)}">${avatarContent}</div>
-          <div class="yt-content">
-            ${pinBadge}
-            <div class="yt-header">
-              <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${userName}')">
-                <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${userName}</a>${verifyBadge}
-              </span>
-              <span class="yt-date">${c.date}</span>
-            </div>
-            <div class="yt-text">${c.text}</div>
-            <div class="yt-actions">
-              <span class="yt-action-btn ${activeClass}" id="btn-mclike-${c.id}" onclick="likeModComment('${c.id}')">👍 <span id="mcl-count-${c.id}">${c.likes || 0}</span></span> 
-              <span class="yt-action-btn" onclick="replyModComment('${userName}')">Responder</span>
-              ${adminBtns}
-            </div>
-          </div>`;
-        list.appendChild(div);
-      });
-    } else {
-      list.innerHTML = '<p style="text-align:center; color:#aaa; font-size:13px;">Sé el primero en comentar aquí.</p>';
-    }
-  });
-};
-
-window.closeModComments = () => {
-  document.getElementById("mod-comments-popup").classList.remove("show");
-  if (modCommentsListener) {
-    modCommentsListener();
-    modCommentsListener = null;
-  }
-};
-
-window.addModComment = async () => {
-  if (await checkBanStatus()) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const text = document.getElementById('mc-commentText').value.trim();
-  if (!profile) return checkUserStatus();
-  if (!text) return alert("Escribe algo...");
-
-  push(ref(db, `mod_comments/${currentModCommentsId}`), {
-    ownerKey: profile.key,
-    user: profile.nombre || profile.name || "Usuario",
-    link: profile.link || "#",
-    avatar: profile.foto || profile.avatar || "",
-    text,
-    date: new Date().toLocaleString(),
-    likes: 0,
-    isPinned: false
-  });
-
-  set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
-  document.getElementById('mc-commentText').value = '';
-};
-
-window.likeModComment = async (commentId) => {
-  if (await checkBanStatus()) return;
-
-  if (!usuarioActualFirebase) {
-    alert("🔒 Debes iniciar sesión con Google para dar Like a los comentarios.");
-    document.getElementById('auth-overlay').style.display = 'flex';
-    return;
-  }
-
-  const userKey = usuarioActualFirebase.uid;
-
-  const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-  const likeRef = ref(db, `mod_comments/${currentModCommentsId}/${commentId}/userLikes/${userKey}`);
-  const snap = await get(likeRef);
-
-  if (snap.exists()) {
-    await set(likeRef, null);
-    runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 1) - 1);
-    delete myLikedComments[commentId];
-  } else {
-    await set(likeRef, true);
-    runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 0) + 1);
-    myLikedComments[commentId] = true;
-  }
-  localStorage.setItem('my_liked_mod_comments', JSON.stringify(myLikedComments));
-};
-
-window.deleteModComment = (id) => {
-  if (!usuarioActualFirebase) return alert("❌ Como Administrador, primero debes INICIAR SESIÓN con Google para tener permisos de base de datos y poder borrar.");
-  if (confirm("¿Borrar comentario?")) remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
-};
-window.togglePinModComment = (cId, currentState) => update(ref(db, `mod_comments/${currentModCommentsId}/${cId}`), { isPinned: !currentState });
-window.replyModComment = (name) => { const txt = document.getElementById('mc-commentText'); txt.value = `@${name} `; txt.focus(); };
-
-document.getElementById('mc-commentText').addEventListener('input', function () { document.getElementById('mc-charCounter').innerText = this.value.length; });
-
-window.toggleVerify = (userKey) => { if (confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
-
-onValue(ref(db, ".info/connected"), (snap) => {
-  if (snap.val() === true) {
-    document.getElementById("statusDot").classList.add("online");
-    document.getElementById("statusText").innerText = "Servidor: Activo";
-    document.getElementById("statusText").style.color = "#00ff41";
-  } else {
-    document.getElementById("statusDot").classList.remove("online");
-    document.getElementById("statusText").innerText = "Servidor: Desconectado";
-    document.getElementById("statusText").style.color = "#aaa";
-  }
-});
-
-window.toggleTheme = () => document.body.classList.toggle("light");
-
-window.selectSection = (id, el) => {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-
-  const searchUI = document.getElementById("searchContainer");
-  const filterUI = document.getElementById("filterContainer");
-
-  if (id === 'apks') {
-    searchUI.style.display = 'block';
-    filterUI.style.display = 'none';
-  } else if (id === 'mods') {
-    searchUI.style.display = 'block';
-    filterUI.style.display = 'flex';
-  } else if (id === 'scripts') {
-    searchUI.style.display = 'block';
-    filterUI.style.display = 'none';
-  } else {
-    searchUI.style.display = 'none';
-    filterUI.style.display = 'none';
-  }
-
-  if (el) {
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-    el.classList.add("active");
-  }
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-let currentFilter = 'all';
-window.setFilter = (filter, btn) => {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  filterContent();
-};
-
-// ==========================================
-
-let tiempoEsperaBusqueda;
-
-window.filterContent = () => {
-  clearTimeout(tiempoEsperaBusqueda);
-
-  tiempoEsperaBusqueda = setTimeout(() => {
-
-    const search = document.getElementById('globalSearch').value.toLowerCase();
-    const items = document.querySelectorAll('.mod-card');
-    const apks = document.querySelectorAll('.apk-card');
-
-    items.forEach(item => {
-      if (item.classList.contains('coming-soon-card')) return;
-      const title = item.querySelector('h3').innerText.toLowerCase();
-      const itemGama = item.getAttribute('data-gama') || 'mid';
-      const tags = (item.getAttribute('data-tags') || '').toLowerCase();
-      const matchesSearch = title.includes(search) || tags.includes(search);
-      const matchesFilter = typeof currentFilter !== 'undefined' ? (currentFilter === 'all' || itemGama === currentFilter) : true;
-      item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
-    });
-
-    apks.forEach(apk => {
-      const title = apk.querySelector('h3').innerText.toLowerCase();
-      apk.style.display = title.includes(search) ? "block" : "none";
-    });
-
-  }, 300);
-};
-
-async function checkBanStatus() {
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!profile) return false;
-  const snap = await get(ref(db, `banned_users/${profile.key}`));
-  if (snap.exists()) {
-    const banData = snap.val();
-    if (Date.now() < banData.expiresAt) {
-      const timeLeft = Math.ceil((banData.expiresAt - Date.now()) / 3600000);
-      alert(`⛔ ACCESO DENEGADO\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
-      return true;
-    } else {
-      await set(ref(db, `banned_users/${profile.key}`), null);
-      return false;
-    }
-  }
-  return false;
-}
-
-window.openBanPanel = (userKey, userName) => {
-  if (!isSuperUser) return;
-  document.getElementById('ban-target-info').innerText = `Gestionando a: ${userName}`;
-  document.getElementById('ban-popup').classList.add('show');
-  document.getElementById('confirmBanBtn').onclick = async () => {
-    const reason = document.getElementById('banReason').value || "Normas";
-    const hours = parseInt(document.getElementById('banDuration').value) || 24;
-    await set(ref(db, `banned_users/${userKey}`), { userName, reason, expiresAt: Date.now() + (hours * 3600000) });
-    alert("Usuario baneado.");
-    document.getElementById('ban-popup').classList.remove('show');
-  };
-};
-
-function checkUserStatus() {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!user) { document.getElementById('register-popup').classList.add('show'); }
-  else { updateCommentInterface(user); syncLikeButtons(); }
-}
-
-function updateCommentInterface(user) {
-  const display = document.getElementById('mc-displayMyName');
-  if (display) {
-    const nombreUsuario = user.nombre || user.name || "Usuario";
-    const fotoUsuario = user.foto || user.avatar || "";
-
-    display.innerText = "Comentando como: " + nombreUsuario;
-    if (nombreUsuario.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-
-    const avatar = document.getElementById('mc-myAvatar');
-    if (fotoUsuario) {
-      avatar.innerHTML = `<img src="${fotoUsuario}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-      avatar.style.background = 'transparent';
-    } else {
-      avatar.innerText = nombreUsuario.charAt(0).toUpperCase();
-      avatar.style.background = stringToColor(nombreUsuario);
-    }
-  }
-}
-
-window.saveRegistration = () => {
-  const name = document.getElementById('regName').value.trim();
-  const link = document.getElementById('regLink').value.trim() || "#";
-  const avatar = document.getElementById('regAvatar').value.trim() || "";
-  if (name.length < 3) return alert("El nombre es corto, intenta agregarle mas caracteres.");
-
-  const oldProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const key = oldProfile ? oldProfile.key : 'user_' + Math.random().toString(36).substr(2, 9);
-
-  const profile = { name, link, avatar, key };
-  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-  document.getElementById('register-popup').classList.remove('show');
-  location.reload();
-};
-
-let holdTimer;
-const fnfTitle = document.getElementById('fnf-title');
-const _0xd1a4 = "bGFsb2NmbW9kczE=";
-
-fnfTitle.addEventListener('mousedown', startHold);
-fnfTitle.addEventListener('mouseup', endHold);
-fnfTitle.addEventListener('touchstart', startHold);
-fnfTitle.addEventListener('touchend', endHold);
-
-function startHold() { holdTimer = setTimeout(() => { document.getElementById('admin-popup').classList.add('show'); }, 5000); }
-function endHold() { clearTimeout(holdTimer); }
-
-window.verifyAdmin = () => {
-  const input = document.getElementById('adminCode').value;
-  if (btoa(input) === _0xd1a4) {
-    localStorage.setItem('superUser', 'true');
-    alert("Modo Superusuario Activado.");
-    location.reload();
-  } else { alert("Código incorrecto."); }
-};
-
-function stringToColor(str) {
-  let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-  return `hsl(${hash % 360}, 65%, 50%)`;
-}
-
-window.handleLike = async (id, el) => {
-
-  if (await checkBanStatus()) return;
-
-  if (exigirRegistro()) return;
-
-  const userKey = usuarioActualFirebase.uid;
-
-  const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-  const itemLikeRef = ref(db, `likes_registry/${id}/${userKey}`);
-  const snap = await get(itemLikeRef);
-
-  if (snap.exists()) {
-    await set(itemLikeRef, null);
-    runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
-    delete myLikedItems[id];
-    el.classList.remove('active');
-  } else {
-    await set(itemLikeRef, true);
-    runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
-    myLikedItems[id] = true;
-    el.classList.add('active');
-  }
-
-  localStorage.setItem('my_liked_items', JSON.stringify(myLikedItems));
-};
-
-function syncLikeButtons() {
-  const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-  Object.keys(myLikedItems).forEach(id => {
-    const btn = document.getElementById('like-' + id);
-    if (btn) btn.classList.add('active');
-  });
-}
-
-const SCRIPTS_DATA = {
-  script1: {
-    title: "MobileFPSOverlay",
-    desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS./n/nCuenta con actulizaciones constantes, mantengase al tanto para mantener la versión mas reciente.",
-    version: "v1.2.0",
-    images: [
-      "assets/images/scripts/MFO/mfo.webp",
-      "assets/images/scripts/MFO/mfo2.webp",
-      "assets/images/scripts/MFO/mfo3.webp",
-      "assets/images/scripts/MFO/mfo4.webp",
-      "assets/images/scripts/MFO/mfo5.webp",
-      "assets/images/scripts/MFO/mfo6.webp"
-    ],
-    downloads: [
-      { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/MobileFPSOverlay" },
-      { name: "Descarga Script Directo (Drive)", link: "https://drive.google.com/file/d/1l2FaGqINbPzOp6-SgiFGwwUr1v8IjTKZ/view?usp=drive_link" }
-    ]
-  },
-  script2: {
-    title: "Controller Engine",
-    desc: "Este script agrega un mando virtual a tu juego psych engine dandole una apariencia igual al de Gombo Cat.\nTotalmente funcional para Pc, Android y iOS.",
-    version: "v1.0",
-    images: [
-      "assets/images/scripts/mc1.webp"
-    ],
-    downloads: [
-      { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
-    ]
-  },
-  script3: {
-    title: "Menu Pause",
-    desc: "Este script agrega un menú de pausa funcional a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
-    version: "v1.0",
-    images: [
-      "assets/images/scripts/mp1.webp",
-      "assets/images/scripts/mp2.webp"
-    ],
-    downloads: [
-      { name: "Descarga original (GameBanana)", link: "https://gamebanana.com/mods/464393" },
-      { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
-    ]
-  },
-  script4: {
-    title: "FPS Counter",
-    desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
-    version: "v1.0",
-    images: [
-      "assets/images/scripts/sc1.webp"
-    ],
-    downloads: [
-      { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
-    ]
-  },
-};
-
-let scriptImagesArray = [];
-let currentScriptImgIndex = 0;
-
-//==================================
-
-// ==========================================
-// 📄 LECTOR AUTOMÁTICO DE NOVEDADES (MODAL iOS)
-// ==========================================
-window.cargarNovedadesTXT = function (id, tipo) {
-  const modal = document.getElementById('modal-novedades-ios');
-  const cajaTexto = document.getElementById('texto-novedades-ios');
-
-  cajaTexto.innerHTML = `<div style="text-align: center; padding: 20px 0;"><span style="font-size: 24px;">⏳</span><br><br>Cargando información...</div>`;
-  modal.classList.add('show');
-
-  const rutaTXT = tipo === 'script' ? `assets/scripts/update/${id}.txt` : `assets/bases/update/${id}.txt`;
-
-  fetch(rutaTXT)
-    .then(response => {
-      if (!response.ok) throw new Error("Archivo no encontrado");
-      return response.text();
-    })
-    .then(textoLimpio => {
-      cajaTexto.innerText = textoLimpio;
-    })
-    .catch(error => {
-      console.error(error);
-      const idioma = localStorage.getItem('idioma_guardado') || 'es';
-      const msjError = idioma === 'en' ? "No update logs found." : "No hay novedades registradas para esta versión aún.";
-
-      cajaTexto.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 10px 0;">${msjError}</div>`;
-    });
-};
-
-window.cerrarModalNovedades = function () {
-  document.getElementById('modal-novedades-ios').classList.remove('show');
-};
-
-//===================================
-
-window.openScriptInfo = (id) => {
-  if (exigirRegistro()) return;
-  const d = SCRIPTS_DATA[id];
-  scriptImagesArray = d.images;
-  currentScriptImgIndex = 0;
-
-  document.getElementById("script-img").src = scriptImagesArray[currentScriptImgIndex];
-  document.getElementById("script-title").innerText = d.title;
-  document.getElementById("script-desc").innerText = d.desc;
-  document.getElementById("script-version").innerText = d.version;
-
-  let h = "";
-  d.downloads.forEach(dl => {
-    h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`;
-  });
-  h += `<button class="btn" style="display:block; margin-top:15px; background:var(--neon-red); width:100%; box-sizing:border-box;" onclick="reportError('${id}')">⚠️ Reportar Link Caído</button>`;
-  if (isSuperUser) { h += `<button class="btn" style="display:block; margin-top:5px; background:#444; width:100%; box-sizing:border-box;" onclick="clearReports('${id}')">🛠️ Limpiar Reportes</button>`; }
-  document.getElementById("script-downloads").innerHTML = h;
-
-  const btns = document.querySelectorAll(".carousel-btn");
-  if (scriptImagesArray.length <= 1) {
-    btns.forEach(b => b.style.display = 'none');
-  } else {
-    btns.forEach(b => b.style.display = 'block');
-  }
-
-  document.getElementById("script-popup").classList.add("show");
-};
-
-
-
-window.closeScriptInfo = () => document.getElementById("script-popup").classList.remove("show");
-
-window.nextScriptImage = () => {
-  currentScriptImgIndex = (currentScriptImgIndex + 1) % scriptImagesArray.length;
-  document.getElementById("script-img").src = scriptImagesArray[currentScriptImgIndex];
-};
-
-window.prevScriptImage = () => {
-  currentScriptImgIndex = (currentScriptImgIndex - 1 + scriptImagesArray.length) % scriptImagesArray.length;
-  document.getElementById("script-img").src = scriptImagesArray[currentScriptImgIndex];
-};
-
-const MOD_DATA = {
-  mod98_2: {
-    img: "assets/images/mods/Elias.webp",
-    title: "EliasFunkin Revival",
-    desc: "Friday Night Funkin' FNF' EliasFunkin Revival Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Compatible: Solo Psych Engine v1.0.4",
-    downloads: [
-      { name: "Descarga Opt (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/KK/EliasFunkinPortOpt.zip" },
-      { name: "Descarga Opt (Drive)", link: "https://drive.google.com/file/d/16yJyuzQ6TzbH7Kq3UCq23X3rXq9GWSxt/view?usp=drive_link" },
-      { name: "Descarga Opt (MediaFire)", link: "https://www.mediafire.com/file/9uc5iepr3t93ed1/EliasFunkinPortOpt.zip/file" },
-      { name: "Descarga No Opt (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/KK/EliasFunkinPort.zip" },
-      { name: "Descarga No Opt (Drive)", link: "https://drive.google.com/file/d/1IJ2_IuiBksKLgSym3Cn6Vf2qvt9wJ0Mz/view?usp=drive_link" },
-      { name: "Descarga No Opt (MediaFire)", link: "https://www.mediafire.com/file/uomjcg2ytof4m7l/EliasFunkinPort.zip/file" }
-    ]
-  },
-  mod98_3: {
-    img: "assets/images/mods/GG.webp",
-    title: "GameOverse",
-    desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4 etc",
-    downloads: [
-      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/GG/GameOverse.zip" },
-      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1LgUOiahqiKEUscjX0NWUpsYeFMOLeEAy/view?usp=drivesdk" },
-      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/8a3ld8jo5g16ezz/GameOverse.zip/file" }
-    ]
-  },
-  mod98_4: {
-    img: "assets/images/mods/pibby.webp",
-    title: "Pibby Rescript",
-    desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4",
-    downloads: [
-      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Pibby/Pibby.Rescript.Opt.zip" },
-      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1tCaOh5lCvMVHZND3HAP4FDQHcawBl_CI/view?usp=drive_link" },
-      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/hmoynph507squdt/Pibby_Rescript_Opt.zip/file" }
-    ]
-  },
-  mod98_5: {
-    img: "assets/images/mods/fruit.webp",
-    title: "FruitNinja V1.5",
-    desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" },
-      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1y239op0zuYMUJiaSK5oDrUQnhKr9E1mG/view?usp=drive_link" }
-    ]
-  },
-  mod98_6: {
-    img: "assets/images/mods/II.webp",
-    title: "TKOII FanChart",
-    desc: "Friday Night Funkin' FNF' TKOII FanChart Port Opt Psych Engine Optimizado Para (Pc/Android).",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga Opt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1-yHWdTsXn4trZeuO2MhJAV1ZnVrlhPfG&export=download" },
-      { name: "Descarga ReOpt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1V0wOiJws3Z0xgnMJ2PiHfa3zd4w3OklO&export=download" }
-    ]
-  },
-  mod98_7: {
-    img: "assets/images/mods/FromTheTop.webp",
-    title: "From The Top!",
-    desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
-    version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
-    downloads: [
-      { name: "Descarga ZIP (Drive)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/fft/From.the.Top.Port.zip" },
-      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/b2hbahd0brbo52a/From_The_Top%2521_Port.zip/file" },
-      { name: "Descarga Psych Engine Opt", link: "https://lalocf2.github.io/fnf_ports/?share=apk1" }
-    ]
-  },
-  mod98_8: {
-    img: "assets/images/webp/logopsychengine.webp",
-    title: "Naomi FanCharts",
-    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 79.87MB",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
-    ]
-  },
-  mod98_9: {
-    img: "assets/images/mods/bot.webp",
-    title: "Vs BotFriend",
-    desc: "Friday Night Funkin' FNF' Vs Botfriend Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 72.87MB",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/463070" },
-      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/BtF/V.S.Botfriend.zip" }
-    ]
-  },
-  mod99_0: {
-    img: "assets/images/mods/star2026.webp",
-    title: "Stargazer (2026) FanChart",
-    desc: "Friday Night Funkin' FNF' Stargazer (2026) FanChart Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nEste solo esta optimizado y para que fuera compatible con iOS.\n\nPeso del archivo: 18.88MB",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/657873" },
-      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Stargazer2026/Stargazer.2026.FanChart-PE.1.0.4.zip" }
-    ]
-  },
-  mod99_1: {
-    img: "assets/images/mods/wii.webp",
-    title: "VS Matt V3",
-    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
-      { name: "Descarga Directa ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Wii/MattV3.Port.zip" },
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1GxlBf_tDX8qFJttqmb_DJH9s3xr4TeFZ/view?usp=drivesdk" },
-      { name: "Descarga ZIP (MediaFire)", link: "https://www.mediafire.com/file/dva94kid8frmrew/MattV3_%2528Port%2529.zip/file" }
-    ]
-  },
-  mod99_2: {
-    img: "assets/images/mods/play.webp",
-    title: "Child's Play Pico Mix",
-    desc: "Friday Night Funkin' FNF' Child's Play Pico Mix & Wip Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive) Mejorado y Opt por LaloCF", link: "https://drive.google.com/file/d/1qyMKXjaGwH4PG3DPVqphTrMskvU-sX_4/view?usp=drivesdk" },
-      { name: "Descarga (Tik Tok) Wip", link: "https://vt.tiktok.com/ZSawhN2LN/" },
-      { name: "Descarga Original", link: "https://gamebanana.com/mods/546317" }
-    ]
-  },
-  mod99_3: {
-    img: "assets/images/mods/fate.webp",
-    title: "TaintedFate",
-    desc: "Friday Night Funkin' FNF' TaintedFate Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive)", link: "https://drive.usercontent.google.com/download?id=12kYlM1XbLGa_3o9uIjYtFfUMGE7PLe4E&export=download&authuser=0" },
-      { name: "Descarga Original", link: "https://gamebanana.com/mods/504445" }
-    ]
-  },
-  mod99_4: {
-    img: "assets/images/mods/logojeffy.jpeg",
-    title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
-    desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
-    version: "Psych v1.0.4",
-    downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
-  },
-  mod99_5: {
-    img: "assets/images/mods/logonusky.jpeg",
-    title: "VS Nusky",
-    desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
-    ]
-  },
-  mod99_6: {
-    img: "assets/images/mods/chritmas.jpeg",
-    title: "Cocoa Noimix",
-    desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
-      { name: "Descarga Directa iOS (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=11AUlGXUvPrxszI5xnjssMS5OvZDFp64_&export=download" },
-      { name: "Descarga Directa Opt (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1EO-TOh4KByE0gSf24DXx2pG10WR8wdhU&export=download" }
-    ]
-  },
-  mod99_7: {
-    img: "assets/images/mods/metal.png",
-    title: "Vs Metal Pipe V2",
-    desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630" },
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download" }
-    ]
-  },
-  mod99_8: {
-    img: "assets/images/mods/Girl.png",
-    title: "Rolling Girl",
-    desc: "Friday Night Funkin' FNF' Rolling Girl Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/42313?lang=es" },
-      { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1n_e-lmvGFeIybTIDkdHXnduEIeXziD8I&export=download" }
-    ]
-  },
-  mod99_9: {
-    img: "assets/images/mods/tales.webp",
-    title: "Herobrine Reborn Tales",
-    desc: "Friday Night Funkin' FNF' Herobrine Reborn Tales Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1bPmKg62b6r5xiEOI5ZVFNHZqU0Mp0PLY/view" }
-    ]
-  },
-  mod100: {
-    img: "assets/images/mods/odd.webp",
-    title: "Vs. TheOdd1sOut ONESHOT",
-    desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Psych v1.0.4",
-    downloads: [
-      { name: "Descarga Directa ES (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1rBL-hdK-_jeq-bByvK2xUfDu23D4QVEY&export=download" },
-      { name: "Descarga Directa EU (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=12gPg9wTnUa_JUSVj1IgUE7ETJieHNPIl&export=download" },
-      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/498584" }
-    ]
-  }
-};
-
-const APK_DATA = {
-  apk1: {
-    img: "assets/images/webp/logopsychengine.webp",
-    title: "Psych Engine",
-    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
-    version: "v1.0.4",
-    downloads: [
-      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases" },
-      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/309789" },
-      { name: "Descarga Directa Android Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
-      { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
-      { name: "Descarga Directa iOS Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" },
-      { name: "Descarga Directa Windows64 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
-      { name: "Descarga Directa Windows32 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip" }
-    ]
-  },
-  apk2: {
-    img: "assets/images/webp/logopsychonline.webp",
-    title: "Psych Online",
-    desc: "Mod de Psych Engine con funciones en línea.",
-    version: "v0.14.6 (PC)\nv0.13.2 BugFix (Mobile)",
-    downloads: [
-      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases" },
-      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/479714" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/windowsBuild.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/linuxBuild.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/macBuild.zip" },
-    ]
-  },
-  apk3: {
-    img: "assets/images/webp/logocodename.webp",
-    title: "CodeName Engine",
-    desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
-    version: "v1.0.1",
-    downloads: [
-      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases" },
-      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/598553" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip" }
-    ]
-  },
-  apk4: {
-    img: "assets/images/webp/logoplusengine.webp",
-    title: "Plus Engine",
-    desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2.6 HOTFIX\nv1.2.7 (Pc/Android)",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Android-x64-v7a.zip" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" },
-      { name: "Descarga Directa Windows 32 (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
-      { name: "Descarga Directa Windows 64 Actualizado (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Windows-x64.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
-      { name: "Descarga Directa Mac ARM (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip" },
-      { name: "Descarga Directa Mac Intel (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip" }
-    ]
-  },
-  apk5: {
-    img: "assets/images/webp/logop-slice.webp",
-    title: "P-Slice Engine",
-    desc: "El motor P-Slice es un cruce entre Psych Engine y la versión más reciente de Friday Night Funkin.\n\nSu objetivo es incorporar nuevos elementos visuales y características de las versiones más nuevas de FNF y realizar cambios en las existentes para que se sientan más cercanas a las de V-Slice.",
-    version: "v3.4.2",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip" }
-    ]
-  },
-  apk6: {
-    img: "assets/images/webp/logonova.webp",
-    title: "NovaFleare Engine",
-    desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
-    version: "v1.2.0 Versión Estable",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
-      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/android.zip" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/ios.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/linux.zip" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/windows.zip" },
-      { name: "Descarga Directa Mac14 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/macOS-14.zip" },
-      { name: "Descarga Directa Mac15 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/macOS-15.zip" }
-    ]
-  },
-  apk7: {
-    img: "assets/images/webp/logoEK.webp",
-    title: "PsychEngine ExtraKeys",
-    desc: "¡Bienvenido a la organización más genial del mundo!\n\n Alojamiento de Psych Engine con claves adicionales , Psych EK , claves adicionales de Psych Engine , claves adicionales o PE: ¡EK !",
-    version: "v0.4.6",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-windowsBuild-56acc57.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-linuxBuild-56acc57.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip" }
-    ]
-  },
-  apk8: {
-    img: "assets/images/webp/logose.webp",
-    title: "Shadow Engine",
-    desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
-    version: "v0.9.0",
-    downloads: [
-      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases" },
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-Android.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-iOS.ipa" },
-      { name: "Descarga Directa Windows ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-arm64.zip" },
-      { name: "Descarga Directa Windows i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-i686.zip" },
-      { name: "Descarga Directa Windows x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-x86_64.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-macOS-Universal.tar" },
-      { name: "Descarga Directa Linux ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-linux-arm64.tar" },
-      { name: "Descarga Directa Linux ARMV7 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-linux-armv7.tar" },
-      { name: "Descarga Directa Linux i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-linux-i686.tar" },
-      { name: "Descarga Directa Linux x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-linux-x86_64.tar" }
-    ]
-  }
-};
-
-window.openModInfo = (id) => {
-  if (exigirRegistro()) return;
-  if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
-    const modName = document.querySelector('#card-' + id + ' h3').textContent;
-    document.getElementById('maintenance-mod-name').innerText = modName;
-
-    document.getElementById('maintenance-popup').classList.add('show');
-    return;
-  }
-  const d = MOD_DATA[id];
-  document.getElementById("popup-img").src = d.img;
-  document.getElementById("popup-title").innerText = d.title;
-  document.getElementById("popup-desc").innerText = d.desc;
-  document.getElementById("popup-version").innerText = d.version;
-  let h = "";
-  d.downloads.forEach(dl => {
-    h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`;
-  });
-  h += `<button class="btn" style="display:block; margin-top:15px; background:var(--neon-red); width:100%; box-sizing:border-box;" onclick="reportError('${id}')">⚠️ Reportar Link Caído</button>`;
-  if (isSuperUser) { h += `<button class="btn" style="display:block; margin-top:5px; background:#444; width:100%; box-sizing:border-box;" onclick="clearReports('${id}')">🛠️ Limpiar Reportes</button>`; }
-  document.getElementById("popup-downloads").innerHTML = h;
-  document.getElementById("mod-popup").classList.add("show");
-};
-window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
-
-window.openApkInfo = (id) => {
-  if (exigirRegistro()) return;
-  const d = APK_DATA[id];
-  document.getElementById("apk-img").src = d.img;
-  document.getElementById("apk-title").innerText = d.title;
-  document.getElementById("apk-desc").innerText = d.desc;
-  document.getElementById("apk-version").innerText = d.version;
-  let h = "";
-  d.downloads.forEach(dl => {
-    h += `<a class="btn" style="display:block; margin-top:10px" href="${dl.link}" target="_blank" onclick="trackDownload('${id}')">${dl.name}</a>`;
-  });
-  h += `<button class="btn" style="display:block; margin-top:15px; background:var(--neon-red); width:100%; box-sizing:border-box;" onclick="reportError('${id}')">⚠️ Reportar Link Caído</button>`;
-  if (isSuperUser) { h += `<button class="btn" style="display:block; margin-top:5px; background:#444; width:100%; box-sizing:border-box;" onclick="clearReports('${id}')">🛠️ Limpiar Reportes</button>`; }
-  document.getElementById("apk-downloads").innerHTML = h;
-  document.getElementById("apk-popup").classList.add("show");
-};
-window.closeApkInfo = () => document.getElementById("apk-popup").classList.remove("show");
-
-onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if (document.getElementById('count-' + k)) document.getElementById('count-' + k).innerText = d[k]; }); });
-
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-window.closeUpdatePopup = () => {
-  document.getElementById('update-popup').classList.remove('show');
-  localStorage.setItem('lastVersionSeen', APP_VERSION);
-
-  if (deferredPrompt) {
-    document.getElementById('install-popup').classList.add('show');
-  } else {
-    checkUserStatus();
-  }
-};
-
-window.installApp = async () => {
-  document.getElementById('install-popup').classList.remove('show');
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  }
-  checkUserStatus();
-};
-
-window.dismissInstall = () => {
-  document.getElementById('install-popup').classList.remove('show');
-  checkUserStatus();
-};
-
-window.onload = () => {
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
-  else checkUserStatus();
-};
-
-let currentLang = localStorage.getItem('fnf_lang') || 'es';
-
-window.toggleLanguage = () => {
-  currentLang = currentLang === 'es' ? 'en' : 'es';
-  localStorage.setItem('fnf_lang', currentLang);
-  applyLanguage();
-};
-
-function applyLanguage() {
-  const elements = document.querySelectorAll('[data-es][data-en]');
-  elements.forEach(el => {
-    el.classList.add('lang-fade');
-    setTimeout(() => {
-      el.innerHTML = el.getAttribute(`data-${currentLang}`);
-      el.classList.remove('lang-fade');
-    }, 150);
-  });
-  const btn = document.getElementById('langBtn');
-  if (btn) btn.innerHTML = currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
-}
-
-const initV4 = setInterval(() => {
-  if (document.getElementById('langBtn')) {
-    clearInterval(initV4);
-    applyLanguage();
-
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (profile) {
-      const nameInput = document.getElementById('editProfileName');
-      const avatarInput = document.getElementById('editProfileAvatar');
-      const preview = document.getElementById('profile-avatar-preview');
-
-      if (nameInput && profile.name) nameInput.value = profile.name;
-      if (avatarInput && profile.avatar) {
-        avatarInput.value = profile.avatar;
-        if (preview) preview.src = profile.avatar;
-      }
-    }
-
-    const avatarInput = document.getElementById('editProfileAvatar');
-    if (avatarInput) {
-      avatarInput.addEventListener('input', (e) => {
-        const url = e.target.value.trim();
-        const preview = document.getElementById('profile-avatar-preview');
-        if (preview) {
-          preview.src = url ? url : "https://via.placeholder.com/80/555/fff?text=?";
-        }
-      });
-    }
-  }
-}, 500);
-
-window.saveProfileChanges = () => {
-  let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
-
-  const name = document.getElementById('editProfileName').value.trim();
-  const avatar = document.getElementById('editProfileAvatar').value.trim();
-
-  if (name.length < 3) return alert(currentLang === 'es' ? "El nombre es corto, intenta agregarle mas caracteres." : "The name is too short, try adding more characters.");
-
-  profile.name = name;
-  profile.avatar = avatar;
-  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-
-  document.getElementById('profile-popup').classList.remove('show');
-
-  if (typeof window.showToast === 'function') {
-    window.showToast(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  } else {
-    alert(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  }
-};
-
-window.currentItemRatingId = null;
-
-setTimeout(() => {
-  if (window.openModInfo) {
-    const origOpenModInfo = window.openModInfo;
-    window.openModInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'mod');
-      origOpenModInfo(id);
-    };
-  }
-  if (window.openApkInfo) {
-    const origOpenApkInfo = window.openApkInfo;
-    window.openApkInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'apk');
-      origOpenApkInfo(id);
-    };
-  }
-  if (window.openScriptInfo) {
-    const origOpenScriptInfo = window.openScriptInfo;
-    window.openScriptInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'script');
-      origOpenScriptInfo(id);
-    };
-  }
-}, 1000);
-
-// ==========================================
-
-let globalRatings = {};
-window.currentItemRatingId = null;
-window.currentItemType = null;
-
-onValue(ref(db, 'ratings'), (snap) => {
-  globalRatings = snap.val() || {};
-
-  if (window.currentItemRatingId && window.currentItemType) {
-    window.loadItemRating(window.currentItemRatingId, window.currentItemType);
-  }
-});
-
-setTimeout(() => {
-  if (window.openModInfo) {
-    const origModInfo = window.openModInfo;
-    window.openModInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'mod';
-      origModInfo(id);
-      window.loadItemRating(id, 'mod');
-    };
-  }
-  if (window.openApkInfo) {
-    const origApkInfo = window.openApkInfo;
-    window.openApkInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'apk';
-      origApkInfo(id);
-      window.loadItemRating(id, 'apk');
-    };
-  }
-  if (window.openScriptInfo) {
-    const origScriptInfo = window.openScriptInfo;
-    window.openScriptInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'script';
-      origScriptInfo(id);
-      window.loadItemRating(id, 'script');
-    };
-  }
-
-  window.updateAppTheme = updateAppTheme;
-
-  // ==========================================
-  // ⭐ SISTEMA DE FAVORITOS (MI BIBLIOTECA)
-  // ==========================================
-  
-  // Inyectar botón de favoritos en todas las tarjetas de mods/apks automáticamente
-  document.querySelectorAll('.apk-card').forEach(card => {
-    const chatBtn = card.querySelector('.btn-chat');
-    if (chatBtn) {
-       const match = chatBtn.getAttribute('onclick') && chatBtn.getAttribute('onclick').match(/'([^']+)'/);
-       if (match) {
-          const modId = match[1];
-          const favBtn = document.createElement('button');
-          favBtn.className = 'btn btn-fav';
-          
-          const favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
-          const isFav = favs[modId];
-          
-          favBtn.innerHTML = isFav ? '❤️' : '🤍';
-          favBtn.style.cssText = `display:flex; align-items:center; justify-content:center; padding: 10px; font-size: 16px; margin-left: 5px; background: ${isFav ? 'rgba(255, 0, 100, 0.2)' : 'rgba(255,255,255,0.1)'}; border: 1px solid ${isFav ? '#ff0064' : 'rgba(255,255,255,0.2)'};`;
-          
-          favBtn.onclick = (e) => {
-            e.stopPropagation();
-            window.toggleFavorite(modId, favBtn, card);
-          };
-          
-          chatBtn.parentNode.appendChild(favBtn);
-       }
-    }
-  });
-
-  window.toggleFavorite = (modId, btn, card) => {
-    let favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
-    if (favs[modId]) {
-      delete favs[modId];
-      btn.innerHTML = '🤍';
-      btn.style.background = 'rgba(255,255,255,0.1)';
-      btn.style.borderColor = 'rgba(255,255,255,0.2)';
-    } else {
-      // Guardar nombre y thumb para la lista
-      const title = card.querySelector('h3') ? card.querySelector('h3').innerText : 'Mod FNF';
-      const img = card.querySelector('img') ? card.querySelector('img').src : '';
-      favs[modId] = { title, img, timestamp: Date.now() };
-      btn.innerHTML = '❤️';
-      btn.style.background = 'rgba(255, 0, 100, 0.2)';
-      btn.style.borderColor = '#ff0064';
-    }
-    localStorage.setItem('fnf_favorites', JSON.stringify(favs));
-  };
-
-  window.abrirFavoritos = () => {
-    document.getElementById('favorites-popup').classList.add('show');
-    const container = document.getElementById('favorites-list');
-    const favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
-    
-    container.innerHTML = '';
-    const keys = Object.keys(favs);
-    
-    if (keys.length === 0) {
-      container.innerHTML = '<p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>';
-      return;
-    }
-    
-    keys.sort((a,b) => favs[b].timestamp - favs[a].timestamp).forEach(id => {
-      const data = favs[id];
-      const div = document.createElement('div');
-      div.style.cssText = 'display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; gap:10px; text-align:left; border: 1px solid rgba(255,255,255,0.1);';
-      div.innerHTML = `
-        <img src="${data.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
-        <div style="flex: 1;">
-          <h4 style="margin:0; color:white; font-size:14px;">${data.title}</h4>
+      <nav class="sub-bar">
+        <div class="sub-bar-wrapper">
+          <div class="home-nav-item" onclick="selectSection('home', this)">🏠</div>
+          <button class="filter-btn" onclick="selectSection('apks', this)">Bases</button>
+          <button class="filter-btn" onclick="selectSection('mods', this)">Mods</button>
+          <button class="filter-btn" onclick="selectSection('help', this)">Ayuda</button>
+          <button class="filter-btn" onclick="selectSection('scripts', this)">Scripts</button>
         </div>
-        <button onclick="openModComments('${id}', '${data.title.replace(/'/g, "\\'")}')" style="background:var(--neon-blue); color:black; padding:8px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">💬</button>
-      `;
-      container.appendChild(div);
-    });
-  };
+      </nav>
+    </header>
 
-  // ==========================================
-  // 📝 SISTEMA DE SOLICITUDES DE PORTS
-  // ==========================================
-  
-  let modRequestsListener = null;
+    <div class="container">
+      <header
+        style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; position:relative; margin-top: 30px;">
+        <div style="text-align:center">
 
-  window.loadModRequests = () => {
-    const reqRef = ref(db, 'mod_requests');
-    if (!modRequestsListener) {
-      modRequestsListener = onValue(reqRef, (snapshot) => {
-        const container = document.getElementById('requests-list');
-        container.innerHTML = '';
-        const data = snapshot.val();
-        
-        if (!data) {
-          container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center;">No hay solicitudes aún. ¡Sé el primero!</p>';
+          <h1 class="glow" id="fnf-title" onclick="activarAdminOculto()"
+            style="user-select: none; touch-action: manipulation; cursor: pointer; margin: 0; font-size: 26px;">
+            Friday Night Funkin'
+          </h1>
+
+          <div class="server-status" style="margin-top: 10px;">
+            <div id="statusDot" class="status-dot"></div>
+            <span id="statusText">Conectando...</span>
+          </div>
+
+        </div>
+      </header>
+
+      <div id="searchContainer" class="search-wrapper" style="display:none;">
+        <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar..." onkeyup="filterContent()">
+      </div>
+
+      <div id="filterContainer" class="filter-bar" style="display:none;">
+        <div class="filter-btn active" onclick="setFilter('all', this)" data-es="Todos" data-en="All">Todos</div>
+        <div class="filter-btn" onclick="setFilter('low', this)">🟢 <span data-es="Gama Baja" data-en="Low End">Gama
+            Baja</span></div>
+        <div class="filter-btn" onclick="setFilter('mid', this)">🟡 <span data-es="Gama Media" data-en="Mid End">Gama
+            Media</span></div>
+        <div class="filter-btn" onclick="setFilter('high', this)">🔴 <span data-es="Gama Alta" data-en="High End">Gama
+            Alta</span></div>
+      </div>
+
+      <section id="home" class="section active">
+        <div class="hero-banner">
+          <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;"
+            data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Mobile!</h1>
+          <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;"
+            data-es="El mejor lugar para descargar tus mods optimizados."
+            data-en="The best place to download optimized mods.">El mejor lugar para descargar tus mods optimizados.</p>
+          <button class="btn" style="font-size: 16px; padding: 12px 30px;"
+            onclick="document.querySelectorAll('.nav-item')[2].click()" data-es="Explorar MODs 🚀"
+            data-en="Explore MODs 🚀">Explorar MODs 🚀</button>
+        </div>
+
+        <div class="info-card">
+          <h2 class="glow" style="font-size: 22px; margin-top: 0;" data-es="✨ ¿De qué trata esta página?"
+            data-en="✨ What is this page about?">✨ ¿De qué trata esta página?</h2>
+          <p style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px;"
+            data-es="En esta página me dedico a subir la mayoría de <b>MODs, Bases y Scripts para móviles</b>. Mi objetivo es traerles mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones."
+            data-en="On this page, I upload most of the <b>MODs, Engines, and Scripts</b> for mobile devices. My goal is to bring you better optimizations, detailed information, and a comfortable, hassle-free experience.">
+            En esta página me dedico a subir la mayoría de <b>MODs, Motores y Scripts para móviles</b>. Mi objetivo es
+            traerles mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.</p>
+
+          <ul class="info-list">
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Cohete"
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+              <span data-es="<b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos."
+                data-en="<b>Direct Downloads:</b> Clean links, without annoying shorteners."
+                style="line-height: 1.4;"><b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos.</span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/541/541070.png" alt="Celular"
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+              <span
+                data-es="<b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas gamas."
+                data-en="<b>Total Optimization:</b> Adapted versions to run smoothly on all mobile devices."
+                style="line-height: 1.4;"><b>Optimización Total:</b> Versiones adaptadas para que corran bien en
+                celulares de todas gamas.</span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/17205/17205086.png" alt="Scripts"
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+              <span
+                data-es="<b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a tus propios juegos y personalizarlo a tu gusto."
+                data-en="<b>Special Scripts:</b> Now you can download custom code to add to your own games and personalize it to your liking."
+                style="line-height: 1.4;"><b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a
+                tus propios juegos y personalizarlo a tu gusto.</span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/3097/3097841.png" alt="Comunidad"
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+              <span data-es="<b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión."
+                data-en="<b>Active Community:</b> Chat, leave likes, and share your opinion."
+                style="line-height: 1.4;"><b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión.</span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1265/1265905.png" alt="Campana"
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+              <span data-es="<b>Actualizaciones Constantes:</b> Si tienes dudas o ideas puedes contactarme. ¡Animo!"
+                data-en="<b>Constant Updates:</b> If you have questions or ideas, you can contact me. Keep it up!"
+                style="line-height: 1.4;"><b>Actualizaciones Constantes:</b> Si tienes dudas o ideas puedes contactarme.
+                ¡Animo!</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="info-card"
+          style="margin-top: 20px; border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.15);">
+          <h2 class="glow"
+            style="font-size: 20px; margin-top: 0; color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink);"
+            data-es="Spritesheet Generator FNF" data-en="Spritesheet Generator FNF">Spritesheet Generator FNF</h2>
+          <p style="color: #ddd; font-size: 14.5px; line-height: 1.5; margin-bottom: 20px;"
+            data-es="¡Ahora ya está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!"
+            data-en="A new page is now available to make and edit <b>spritesheets</b> directly on mobile!">¡Ahora ya
+            está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!</p>
+          <button class="btn"
+            style="width: 100%; font-size: 15px; padding: 12px; background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-pink); color: #fff; text-shadow: 0 0 5px var(--neon-pink); font-weight: bold; transition: all 0.3s ease;"
+            onclick="window.open('https://lalocf2.github.io/spritesheet-generator-fnf/', '_blank')"
+            data-es="Ir a la Página 🚀" data-en="Go to Page 🚀">Ir a la Página 🚀</button>
+        </div>
+
+      </section>
+
+      <section id="apks" class="section">
+        <h2 class="glow" data-es="Descargas" data-en="Downloads">Descargas</h2>
+        <div class="apks-grid" id="apksContainer">
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk1" onclick="toggleGreenLed('apk1', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk1">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk1">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk1', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk1', 'Psych Engine')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logopsych.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk1" style="display:none;"></span>Psych Engine</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk1')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk1', 'Psych Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk2" onclick="toggleGreenLed('apk2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk2">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk2">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk2', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk2', 'Psych Online')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logoonline.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk2" style="display:none;"></span>Psych Online</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk2')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk2', 'Psych Online')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk3" onclick="toggleGreenLed('apk3', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk3">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk3">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk3', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk3', 'CodeName Engine')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logocode.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk3" style="display:none;"></span>CodeName Engine</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk3')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk3', 'CodeName Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk4" onclick="toggleGreenLed('apk4', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk4">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk4">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk4', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk4', 'Plus Engine')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logopsych.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk4" style="display:none;"></span>Plus Engine</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk4')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk4', 'Plus Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk5" onclick="toggleGreenLed('apk5', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk5">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk5">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk5', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk5', 'P-Slice Engine')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logop.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk5" style="display:none;"></span>P-Slice Engine</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk5')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk5', 'P-Slice Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk6" onclick="toggleGreenLed('apk6', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk6">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk6">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk6', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk6', 'Nova Fleare')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logof.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk6" style="display:none;"></span>Nova Fleare</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk6')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk6', 'NovaFleare Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk7" onclick="toggleGreenLed('apk7', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk7" onclick="handleLike('apk7', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk7">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk7">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk7', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk7', 'PsychEngine EK')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logoek.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk7" style="display:none;"></span>PsychEngine EK</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk7')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk7', 'PsychEngine EK')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="apk-card">
+            <button class="admin-led-btn" id="btn-led-apk8" onclick="toggleGreenLed('apk8', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <div class="like-container" id="like-apk8" onclick="handleLike('apk8', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-apk8">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-apk8">0</span>
+            </div>
+
+            <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+              <button onclick="cargarNovedadesTXT('apk8', 'base')"
+                style="width: 35%; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+                📋 Novedades
+              </button>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('apk8', 'Shadow Engine')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <img src="assets/images/webp/logose.webp">
+            <h3><span class="led-dot led-green" id="led-green-apk8" style="display:none;"></span>Shadow Engine</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openApkInfo('apk8')" data-es="Más Info" data-en="More Info">Más Info</button>
+              <button class="btn btn-chat" onclick="openModComments('apk8', 'Shadow Engine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mods" class="section">
+        <h2 class="glow" data-es="MODs Disponibles" data-en="Available MODs">MODs Disponibles</h2>
+        <div class="mods-grid" id="modsContainer">
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2-3GB RAM"
+            data-size="31.16 MB Opt<br>100.02 MB No Opt" id="card-mod98_2">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_2" onclick="toggleGreenLed('mod98_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_2" onclick="handleLike('mod98_2', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_2">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_2">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_2', 'GameOverse')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_2" style="display:none;"></span>EliasFunkin Revival
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_2')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_2', 'EliasFunkin Revival')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="6.66 MB"
+            id="card-mod98_3">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_3', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_3" onclick="toggleGreenLed('mod98_3', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_3')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_3')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_3" onclick="handleLike('mod98_3', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_3">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_3">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_3', 'GameOverse')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_3" style="display:none;"></span>GameOverse</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_3')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_3', 'GameOverse')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="P-Slice" data-ram="2GB RAM" data-size="16.15 MB"
+            id="card-mod98_4">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_4', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_4" onclick="toggleGreenLed('mod98_4', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_4')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_4')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_4" onclick="handleLike('mod98_4', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_4">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_4">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_4', 'Pibby Rescript')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_4" style="display:none;"></span>Pibby Rescript</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_4')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_4', 'Pibby Rescript')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="56.30 MB"
+            data-tags="psych 2gb ram español" id="card-mod98_5">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_5', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_5" onclick="toggleGreenLed('mod98_5', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_5')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_5')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_5" onclick="handleLike('mod98_5', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_5">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_5">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_5', 'FruitNinja V1.5')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_5" style="display:none;"></span>FruitNinja V1.5</h3>
+            <div class="mod-tags-container"
+              style="display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap;">
+              <span
+                style="background: rgba(0, 234, 255, 0.1); color: var(--neon-blue); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-blue);">⚙️
+                Psych</span>
+              <span
+                style="background: rgba(255, 0, 255, 0.1); color: var(--neon-pink); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-pink);">💾
+                2GB RAM</span>
+              <span
+                style="background: rgba(0, 255, 65, 0.1); color: #00ff41; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #00ff41;">🇪🇸
+                Español</span>
+            </div>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_5')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_5', 'FruitNinja V1.5')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="3GB RAM" data-size="7.86 MB"
+            data-tags="v-slice 3gb ram ingles" id="card-mod98_6">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_6', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_6" onclick="toggleGreenLed('mod98_6', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_6')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_6')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_6" onclick="handleLike('mod98_6', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_6">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_6">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_6', 'TKOII FanChart')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_6" style="display:none;"></span>TKOII FanChart</h3>
+            <div class="mod-tags-container"
+              style="display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap;">
+              <span
+                style="background: rgba(255, 0, 0, 0.1); color: #ff003c; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #ff003c;">⚙️
+                V-Slice</span>
+              <span
+                style="background: rgba(255, 153, 0, 0.1); color: #ff9900; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #ff9900;">💾
+                3GB RAM</span>
+              <span
+                style="background: rgba(150, 150, 150, 0.1); color: #ccc; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #ccc;">🇺🇸
+                Inglés</span>
+            </div>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_6')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_6', 'TKOII FanChart')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="4GB RAM" data-size="303.00 MB"
+            id="card-mod98_7">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_7', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_7" onclick="toggleGreenLed('mod98_7', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_7')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_7')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_7" onclick="handleLike('mod98_7', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_7">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_7">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_7', 'From The Top!')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_7" style="display:none;"></span>From The Top!</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_7')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_7', 'From The Top!')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="79.87 MB"
+            id="card-mod98_8">
+            <span class="gama-badge gama-low">Media-Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_8', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_8" onclick="toggleGreenLed('mod98_8', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_8')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_8')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_8" onclick="handleLike('mod98_8', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_8">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_8">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_8', 'Naomi FanChart')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_8" style="display:none;"></span>Naomi FanChart</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_8')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_8', 'Naomi FanChart')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="72.87 MB"
+            id="card-mod98_9">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_9', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_9" onclick="toggleGreenLed('mod98_9', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_9')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_9')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_9" onclick="handleLike('mod98_9', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_9">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_9">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_9', 'Vs BotFriend')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_9" style="display:none;"></span>Vs BotFriend</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_9')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_9', 'Vs BotFriend')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="18.88 MB"
+            id="card-mod99_0">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_0', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_0" onclick="toggleGreenLed('mod99_0', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_0')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_0')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_0" onclick="handleLike('mod99_0', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_0">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_0">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_0', 'Stargazer (2026)')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_0" style="display:none;"></span>Stargazer (2026)
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_0')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_0', 'Stargazer')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="mid" data-engine="Psych Engine" data-ram="3-4GB RAM" data-size="763.23 MB"
+            id="card-mod99_1">
+            <span class="gama-badge gama-mid">Media</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_1" onclick="toggleGreenLed('mod99_1', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_1')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_1')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_1" onclick="handleLike('mod99_1', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_1">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_1">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_1', 'Vs Matt V3')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;"></span>Vs Matt V3</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_1')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_1', 'Vs Matt V3')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="16.16 MB"
+            id="card-mod99_2">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_2" onclick="toggleGreenLed('mod99_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_2">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_2">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_2', 'Child\'s Play Pico')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_2" style="display:none;"></span>Child's Play Pico
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_2')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_2', 'Childs Play')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="26.6 MB"
+            id="card-mod99_3">
+            <span class="gama-badge gama-low">Media-Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_3', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_3" onclick="toggleGreenLed('mod99_3', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_3')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_3')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_3">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_3">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_3', 'TaintedFate')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_3" style="display:none;"></span>TaintedFate</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_3')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_3', 'TaintedFate')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="? MB"
+            id="card-mod99_4">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_4', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_4" onclick="toggleGreenLed('mod99_4', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_4')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_4')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_4">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_4">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_4', 'VS Jeffy V3')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_4" style="display:none;"></span>VS Jeffy V3</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_4')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_4', 'VS Jeffy')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="29.95 MB"
+            id="card-mod99_6">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_6', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_6" onclick="toggleGreenLed('mod99_6', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_6')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_6')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_6" onclick="handleLike('mod99_6', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_6">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_6">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_6', 'Cocoa Noimix')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_6" style="display:none;"></span>Cocoa Noimix</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_6')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_6', 'Cocoa Noimix')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="26.13 MB"
+            id="card-mod99_7">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_7', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_7" onclick="toggleGreenLed('mod99_7', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_7')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_7')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_7" onclick="handleLike('mod99_7', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_7">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_7">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_7', 'Vs Metal Pipe V2')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_7" style="display:none;"></span>Vs Metal Pipe V2
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_7')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_7', 'Metal Pipe')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="1GB RAM" data-size="11.38 MB"
+            id="card-mod99_8">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_8', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_8" onclick="toggleGreenLed('mod99_8', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_8')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_8')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_8" onclick="handleLike('mod99_8', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_8">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_8">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_8', 'Rolling Girl')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_8" style="display:none;"></span>Rolling Girl</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_8')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_8', 'Rolling Girl')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="mid" data-engine="Psych Engine" data-ram="3-4GB RAM" data-size="711.12 MB"
+            id="card-mod99_9">
+            <span class="gama-badge gama-mid">Media</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod99_9', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod99_9" onclick="toggleGreenLed('mod99_9', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod99_9')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod99_9')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod99_9" onclick="handleLike('mod99_9', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod99_9">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod99_9">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod99_9', 'Herobrine Tales')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod99_9" style="display:none;"></span>Herobrine Tales</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod99_9')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod99_9', 'Herobrine')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="? MB"
+            id="card-mod100">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod100', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod100" onclick="toggleGreenLed('mod100', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod100')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod100')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod100" onclick="handleLike('mod100', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod100">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod100">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod100', 'Vs. TheOdd1sOut')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod100" style="display:none;"></span>Vs. TheOdd1sOut</h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod100')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod100', 'TheOdd1sOut')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="scripts" class="section">
+        <h2 class="glow" data-es="Scripts y Utilidades" data-en="Scripts & Utilities">Scripts y Utilidades</h2>
+        <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;"
+          data-es="Agrega código personalizado a tus propios mods y motores."
+          data-en="Add custom code to your own mods and engines.">Agrega código personalizado a tus propios mods y
+          motores.</p>
+
+        <div class="apk-card" id="card-script1">
+          <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+          </button>
+          <div class="like-container" id="like-script1" onclick="handleLike('script1', this)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <span class="like-icon" style="display: flex; align-items: center;"><img
+                src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+            <span class="like-count" id="count-script1">0</span>
+          </div>
+          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+              id="dl-script1">0</span>
+          </div>
+
+          <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+            <button onclick="cargarNovedadesTXT('script1', 'script')"
+              style="width: 35%; max-width: 120px; min-width: 100px; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+              📋 Novedades
+            </button>
+          </div>
+
+          <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+            <button onclick="abrirMenuCompartir('script1', 'MobileFPSOverlay')"
+              style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+              <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+            </button>
+          </div>
+
+          <h3><span class="led-dot led-green" id="led-green-script1" style="display:none;"></span>MobileFPSOverlay</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script1')" data-es="Más Info" data-en="More Info">Más
+              Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script1', 'MobileFPSOverlay')"
+              style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+            </button>
+          </div>
+        </div>
+
+        <div class="apk-card" id="card-script2">
+          <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+          </button>
+          <div class="like-container" id="like-script2" onclick="handleLike('script2', this)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <span class="like-icon" style="display: flex; align-items: center;"><img
+                src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+            <span class="like-count" id="count-script2">0</span>
+          </div>
+          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+              id="dl-script2">0</span>
+          </div>
+
+          <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+            <button onclick="cargarNovedadesTXT('script2', 'script')"
+              style="width: 35%; max-width: 120px; min-width: 100px; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+              📋 Novedades
+            </button>
+          </div>
+
+          <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+            <button onclick="abrirMenuCompartir('script2', 'FPS Counter')"
+              style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+              <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+            </button>
+          </div>
+
+          <h3><span class="led-dot led-green" id="led-green-script2" style="display:none;"></span>Controller Engine</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script2')" data-es="Más Info" data-en="More Info">Más
+              Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script2', 'Controller Engine')"
+              style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+            </button>
+          </div>
+        </div>
+
+        <div class="apk-card script-card" id="card-script1" data-id="script3" style="position: relative;">
+          <span class="badge-recomendado" style="display: none;">🔥 TOP</span>
+
+          <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script3', event)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+          </button>
+
+          <div class="like-container" id="like-script1" onclick="handleLike('script3', this)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <span class="like-icon" style="display: flex; align-items: center;"><img
+                src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+            <span class="like-count" id="count-script1">0</span>
+          </div>
+
+          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+              id="dl-script1">0</span>
+          </div>
+
+          <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+            <button onclick="cargarNovedadesTXT('script3', 'script')"
+              style="width: 35%; max-width: 120px; min-width: 100px; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+              📋 Novedades
+            </button>
+          </div>
+
+          <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+            <button onclick="abrirMenuCompartir('script3', 'Menu Pause')"
+              style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+              <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+            </button>
+          </div>
+
+          <h3><span class="led-dot led-green" id="led-green-script3" style="display:none;"></span>Menu Pause</h3>
+
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script3')" data-es="Más Info" data-en="More Info">Más
+              Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script3', 'Menu Pause')"
+              style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+            </button>
+          </div>
+        </div>
+
+        <div class="apk-card" id="card-script2">
+          <button class="admin-led-btn" id="btn-led-script4" onclick="toggleGreenLed('script4', event)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+          </button>
+          <div class="like-container" id="like-script2" onclick="handleLike('script4', this)"
+            style="display: flex; align-items: center; gap: 4px;">
+            <span class="like-icon" style="display: flex; align-items: center;"><img
+                src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+            <span class="like-count" id="count-script2">0</span>
+          </div>
+          <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+              style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+              id="dl-script4">0</span>
+          </div>
+
+          <div style="text-align: right; margin-top: -2px; margin-bottom: 5px;">
+            <button onclick="cargarNovedadesTXT('script4', 'script')"
+              style="width: 35%; max-width: 120px; min-width: 100px; padding: 6px 10px; background: rgba(144, 19, 254, 0.2); color: #d088ff; border: 1px solid rgba(144, 19, 254, 0.5); border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: 0.2s;">
+              📋 Novedades
+            </button>
+          </div>
+
+          <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+            <button onclick="abrirMenuCompartir('script4', 'FPS Counter')"
+              style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+              <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+            </button>
+          </div>
+
+          <h3><span class="led-dot led-green" id="led-green-script4" style="display:none;"></span>FPS Counter</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script4')" data-es="Más Info" data-en="More Info">Más
+              Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script4', 'FPS Counter')"
+              style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+            </button>
+          </div>
+        </div>
+
+    </div>
+    </section>
+
+    <section id="help" class="section">
+      <h2 class="glow" data-es="Tutoriales y Ayuda" data-en="Tutorials & Help">Tutoriales y Ayuda</h2>
+
+      <div class="help-container">
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-es="📱 ¿Cómo instalar un MOD en Psych Engine Mobile?"
+              data-en="📱 How to install a MOD in Psych Engine Mobile?">📱 ¿Cómo instalar un MOD en Psych Engine
+              Mobile?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+
+          <div class="faq-content">
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+
+              <p style="color: #ddd; margin-bottom: 10px;"
+                data-es="1. Lo primero seria tener el motor o la base del juego, que lo siguiente seria que el juego ya haya sido abierto para descomprimir el juego."
+                data-en="1. First, you need to have the game engine or base. Then, open the game to extract its files.">
+                <b>Paso 1:</b> Lo primero seria tener el motor o la base del juego, que lo siguiente seria que el juego
+                ya haya sido abierto para descomprimir el juego.
+              </p>
+
+              <img src="assets/images/help/mod/1.webp" alt=""
+                style="width: 100%; max-width: 300px; border-radius: 8px; margin: 10px auto; display: block; border: 1px solid #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.3);">
+
+              <p style="color: #ddd; margin-bottom: 8px; margin-top: 20px;"
+                data-es="2. Tienes que tener instalado un gestor ya sea zArchiver, Gestor de Archivos+, Files etc. Es necesario para poder ubicar la carpeta del juego, si aun no tienes instalado uno, puedes descargar estas de la Google Play Store:"
+                data-en="2. You need to have a file manager installed, such as zArchiver, File Manager+, Files, etc. It is necessary to locate the game folder. If you don't have one installed, you can download it from the Google Play Store:">
+                <b>Paso 2:</b> Tienes que tener instalado un gestor ya sea zArchiver, Gestor de Archivos+, Files etc. Es
+                necesario para poder ubicar la carpeta del juego, si aun no tienes instalado uno, puedes descargar estas
+                de la Google Play Store:
+              </p>
+
+              <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                <a href="https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver" target="_blank"
+                  style="display: flex; align-items: center; gap: 6px; background: #00ff41; color: #000; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                  <img src="https://www.svgrepo.com/show/505132/zarchiver.svg" alt="ZArchiver"
+                    style="width: 16px; height: 16px; object-fit: contain;"> ZArchiver
+                </a>
+
+                <a href="https://play.google.com/store/apps/details?id=com.alphainventor.filemanager" target="_blank"
+                  style="display: flex; align-items: center; gap: 6px; background: #ffeb33; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                  <img src="https://www.svgrepo.com/show/504324/files.svg" alt="Gestor"
+                    style="width: 16px; height: 16px; object-fit: contain;"> Gestor de Archivos+
+                </a>
+
+                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.files"
+                  target="_blank"
+                  style="display: flex; align-items: center; gap: 6px; background: #00b8ff; color: #000; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                  <img src="https://www.svgrepo.com/show/504326/files-by-google.svg" alt="Files"
+                    style="width: 16px; height: 16px; object-fit: contain;"> Files
+                </a>
+              </div>
+
+              <p style="color: #ddd; margin-bottom: 10px; margin-top: 20px;"
+                data-es="3. Abre tu gestor, una vez abierto tendras que activar una opcion para mostrar los archivos ocultos de tu celular."
+                data-en="3. Open your file manager and enable the option to show hidden files."><b>Paso 3:</b> Abre tu
+                gestor, una vez abierto tendras que activar una opcion para mostrar los archivos ocultos de tu celular.
+              </p>
+
+              <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                <div onclick="abrirGaleria('zarchiver')"
+                  style="flex: 1; max-width: 120px; cursor: pointer; transition: 0.2s;">
+                  <img src="assets/images/help/za/za0.webp" alt="ZArchiver"
+                    style="width: 100%; border-radius: 8px; border: 2px solid #00ff41; object-fit: cover; aspect-ratio: 9/16;">
+                  <p style="color: #00ff41; font-size: 11px; margin-top: 5px; font-weight: bold;">ZArchiver</p>
+                </div>
+
+                <div onclick="abrirGaleria('gestor')"
+                  style="flex: 1; max-width: 120px; cursor: pointer; transition: 0.2s;">
+                  <img src="assets/images/help/gestor/gestor0.webp" alt="Gestor"
+                    style="width: 100%; border-radius: 8px; border: 2px solid #ffeb33; object-fit: cover; aspect-ratio: 9/16;">
+                  <p style="color: #ffeb33; font-size: 11px; margin-top: 5px; font-weight: bold;">Gestor+</p>
+                </div>
+
+                <div onclick="abrirGaleria('files')"
+                  style="flex: 1; max-width: 120px; cursor: pointer; transition: 0.2s;">
+                  <img src="assets/images/help/files/files0.webp" alt="Files"
+                    style="width: 100%; border-radius: 8px; border: 2px solid #00b8ff; object-fit: cover; aspect-ratio: 9/16;">
+                  <p style="color: #00b8ff; font-size: 11px; margin-top: 5px; font-weight: bold;">Files</p>
+                </div>
+              </div>
+
+              <p style="color: #ddd; margin-bottom: 10px; margin-top: 20px;"
+                data-es="4. Una vez hecho el paso anterior se tendra que entrar a la carpeta de .PsychEngine, donde posteriormente tendras que colocar tus mods en carpeta dentro de la carpeta llamada mods."
+                data-en="4. Once the previous step is completed, you will need to enter the .PsychEngine folder, where you will then place your mods in a folder within the folder named mods">
+                <b>Paso 4: </b>Una vez hecho el paso anterior se tendra que entrar a la carpeta de .PsychEngine, donde
+                posteriormente tendras que colocar tus mods en carpeta dentro de la carpeta llamada mods.
+              </p>
+
+              <div style="display: flex; justify-content: center; gap: 15px; margin: 15px 0;">
+                <img src="assets/images/help/mod/2.webp" alt="Paso 4a"
+                  style="width: 48%; max-width: 220px; border-radius: 8px; border: 1px solid #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.3); object-fit: cover;">
+                <img src="assets/images/help/mod/3.webp" alt="Paso 4b"
+                  style="width: 48%; max-width: 220px; border-radius: 8px; border: 1px solid #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.3); object-fit: cover;">
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" style="margin-top: 20px; text-align: center;">
+        <h3 class="glow" style="font-size: 18px; color: #00eaff;" data-es="Mas Tutoriales en Progreso"
+          data-en="More Tutorials in Progress">Mas Tutoriales en Progreso</h3>
+      </div>
+
+      <div id="mi-lightbox"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <span onclick="cerrarGaleria()"
+          style="position: absolute; top: 20px; right: 25px; font-size: 40px; color: #fff; cursor: pointer; font-weight: bold; text-shadow: 0 0 10px #ff00ff;">&times;</span>
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; padding: 0 10px; box-sizing: border-box;">
+          <button onclick="cambiarImagen(-1)"
+            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; color: white; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 50%; outline: none;">&#10094;</button>
+          <img id="imagen-gigante" src=""
+            style="max-width: 70%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(255,255,255,0.2); object-fit: contain;">
+          <button onclick="cambiarImagen(1)"
+            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; color: white; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 50%; outline: none;">&#10095;</button>
+        </div>
+        <div id="contador-imagenes"
+          style="color: #aaa; margin-top: 15px; font-size: 14px; font-weight: bold; letter-spacing: 2px;"></div>
+      </div>
+
+      <script>
+        const basesDeDatosImagenes = {
+          'zarchiver': [
+            'assets/images/help/za/za1.webp', 'assets/images/help/za/za2.webp', 'assets/images/help/za/za3.webp', 'assets/images/help/za/za4.webp', 'assets/images/help/za/za5.webp'
+          ],
+          'gestor': [
+            'assets/images/help/gestor/gestor1.webp', 'assets/images/help/gestor/gestor2.webp', 'assets/images/help/gestor/gestor3.webp', 'assets/images/help/gestor/gestor4.webp'
+          ],
+          'files': [
+            'assets/images/help/files/files1.webp', 'assets/images/help/files/files2.webp', 'assets/images/help/files/files3.webp', 'assets/images/help/files/files4.webp', 'assets/images/help/files/files5.webp', 'assets/images/help/files/files6.webp', 'assets/images/help/files/files7.webp'
+          ]
+        };
+
+        let galeriaActual = '';
+        let indiceImagen = 0;
+
+        function abrirGaleria(app) {
+          galeriaActual = app;
+          indiceImagen = 0;
+          document.getElementById('mi-lightbox').style.display = 'flex';
+          actualizarPantalla();
+        }
+
+        function cerrarGaleria() {
+          document.getElementById('mi-lightbox').style.display = 'none';
+        }
+
+        function cambiarImagen(direccion) {
+          const imagenes = basesDeDatosImagenes[galeriaActual];
+          indiceImagen += direccion;
+          if (indiceImagen >= imagenes.length) indiceImagen = 0;
+          if (indiceImagen < 0) indiceImagen = imagenes.length - 1;
+          actualizarPantalla();
+        }
+
+        function actualizarPantalla() {
+          const imagenes = basesDeDatosImagenes[galeriaActual];
+          document.getElementById('imagen-gigante').src = imagenes[indiceImagen];
+          document.getElementById('contador-imagenes').innerText = (indiceImagen + 1) + " DE " + imagenes.length;
+        }
+      </script>
+
+    </section>
+
+    <section id="contact" class="section">
+      <h2 class="glow" data-es="Redes Sociales" data-en="Social Media">Redes Sociales</h2>
+      <div class="social-grid">
+        <a class="social-item" href="https://youtube.com/@lalocf_1" target="_blank"><img
+            src="assets/icons/youtube.jpeg"><span class="btn" style="width: 100%;">YouTube</span></a>
+        <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img
+            src="assets/icons/telegram.jpeg"><span class="btn" style="width: 100%;">Telegram</span></a>
+        <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img
+            src="assets/icons/instagram.jpeg"><span class="btn" style="width: 100%;">Instagram</span></a>
+        <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img
+            src="assets/icons/tiktok.jpeg"><span class="btn" style="width: 100%;">TikTok</span></a>
+        <a class="social-item" href="mailto:ec331325@gmail.com?subject=Soporte%20Técnico%20FNF" target="_blank"><img
+            src="assets/icons/gmail.webp"><span class="btn" style="width: 100%;">Gmail</span></a>
+      </div>
+
+      </a>
+      </div>
+
+      <div class="ticket-soporte-box"
+        style="margin-top: 20px; padding: 15px; border-radius: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="margin-bottom: 10px; font-size: 16px; color: var(--neon-blue);">Mensaje Rápido</h3>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Escríbeme tu duda.</p>
+
+        <textarea id="txt-mensaje-telegram" placeholder="Hola, tengo un problema con..."
+          style="width: 100%; height: 80px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px; font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+
+        <button id="btn-enviar-telegram" onclick="enviarMensajeAlBot()"
+          style="width: 100%; padding: 10px; border-radius: 10px; background: var(--neon-blue); color: black; font-weight: bold; border: none; cursor: pointer;">
+          🚀 Enviar Mensaje
+        </button>
+      </div>
+      </div>
+
+    </section>
+
+    <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
+      © <span id="year"></span> LaloCF | V6.2.0 <br>
+      <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
+      </div>
+    </footer>
+    </div>
+
+    <div id="apk-popup" class="popup">
+      <div class="popup-content">
+        <span class="popup-close" onclick="closeApkInfo()">✖</span>
+        <div class="popup-scroll-body">
+          <img id="apk-img">
+          <h2 id="apk-title"></h2>
+          <p id="apk-desc"></p>
+          <h3 id="apk-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+          <div id="rating-container-apk"
+            style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+            <span onclick="window.rateAppItem('apk', 1)">★</span><span
+              onclick="window.rateAppItem('apk', 2)">★</span><span onclick="window.rateAppItem('apk', 3)">★</span><span
+              onclick="window.rateAppItem('apk', 4)">★</span><span onclick="window.rateAppItem('apk', 5)">★</span>
+            <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="apk-rating-text"
+                data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+          </div>
+          <div id="apk-downloads"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mod-popup" class="popup">
+      <div class="popup-content">
+        <span class="popup-close" onclick="closeModInfo()">✖</span>
+        <div class="popup-scroll-body">
+          <img id="popup-img">
+          <h2 id="popup-title"></h2>
+          <p id="popup-desc"></p>
+          <h3 id="popup-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+          <div id="rating-container-mod"
+            style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+            <span onclick="window.rateAppItem('mod', 1)">★</span><span
+              onclick="window.rateAppItem('mod', 2)">★</span><span onclick="window.rateAppItem('mod', 3)">★</span><span
+              onclick="window.rateAppItem('mod', 4)">★</span><span onclick="window.rateAppItem('mod', 5)">★</span>
+            <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="mod-rating-text"
+                data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+          </div>
+          <div id="popup-downloads"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="script-popup" class="popup">
+      <div class="popup-content">
+        <span class="popup-close" onclick="closeScriptInfo()">✖</span>
+        <div class="popup-scroll-body">
+          <div class="carousel-container">
+            <button class="carousel-btn carousel-prev" onclick="prevScriptImage()">&#10094;</button>
+            <img id="script-img" class="carousel-image" src="">
+            <button class="carousel-btn carousel-next" onclick="nextScriptImage()">&#10095;</button>
+          </div>
+          <h2 id="script-title"></h2>
+          <p id="script-desc"></p>
+          <h3 id="script-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+          <div id="rating-container-script"
+            style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+            <span onclick="window.rateAppItem('script', 1)">★</span><span
+              onclick="window.rateAppItem('script', 2)">★</span><span
+              onclick="window.rateAppItem('script', 3)">★</span><span
+              onclick="window.rateAppItem('script', 4)">★</span><span onclick="window.rateAppItem('script', 5)">★</span>
+            <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="script-rating-text"
+                data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+          </div>
+          <div id="script-downloads"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mod-comments-popup" class="popup">
+      <div class="popup-content" style="max-width: 600px;">
+        <span class="popup-close" onclick="closeModComments()">✖</span>
+        <div class="popup-scroll-body">
+          <h2 id="mc-title" class="glow" style="font-size: 20px; text-align: center; margin-top: 0;">Comentarios</h2>
+          <div
+            style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--neon-blue);">
+            <div style="display:flex; gap:12px;">
+              <div id="mc-myAvatar" class="yt-avatar" style="background:#555">?</div>
+              <div style="flex:1">
+                <div id="mc-displayMyName"
+                  style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;"
+                  data-es=\"Usuario: Cargando...\" data-en=\"User: Loading...\">Usuario: Cargando...</div>
+                <textarea id="mc-commentText" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100"
+                  style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+                <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span
+                    id="mc-charCounter">0</span> / 100</div>
+                <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
+                  <button class="btn" style="background:#444"
+                    onclick="document.getElementById('mc-commentText').value=''" data-es="Cancelar"
+                    data-en="Cancel">Cancelar</button>
+                  <button class="btn" onclick="addModComment()" data-es="Comentar" data-en="Post">Comentar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="mc-commentList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js" defer></script>
+    <script src="js/init.js"></script>
+
+    <script>
+      const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
+      document.documentElement.style.setProperty('--neon-blue', savedColor);
+
+      const applyCustomFont = (base64Font) => {
+        const newStyle = document.createElement('style');
+        newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
+        document.head.appendChild(newStyle);
+      };
+      const savedFont = localStorage.getItem('customUserFont');
+      if (savedFont) applyCustomFont(savedFont);
+
+      if (localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
+
+      const savedPillInset = localStorage.getItem('pillInset') || '5';
+      document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
+
+      document.addEventListener('DOMContentLoaded', () => {
+        window.currentLang = localStorage.getItem('fnf_lang') || 'es';
+
+        window.triggerVibrate = (ms = 15) => {
+          if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) {
+            navigator.vibrate(ms);
+          }
+        };
+
+        document.body.addEventListener('click', (e) => {
+          if (e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) {
+            window.triggerVibrate(15);
+          }
+        });
+
+        window.toggleLanguage = () => {
+          window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
+          localStorage.setItem('fnf_lang', window.currentLang);
+          applyLanguage();
+        };
+
+        function applyLanguage() {
+          const elements = document.querySelectorAll('[data-es][data-en]');
+          elements.forEach(el => {
+            el.classList.add('lang-fade');
+            setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
+          });
+          const btn = document.getElementById('langBtn');
+          if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+        }
+        applyLanguage();
+
+        setTimeout(() => {
+          const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+          if (profile) {
+            if (document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
+            if (document.getElementById('editProfileAvatar') && profile.avatar) {
+              document.getElementById('editProfileAvatar').value = profile.avatar;
+              document.getElementById('profile-avatar-preview').src = profile.avatar;
+            }
+          }
+        }, 500);
+
+        const avInput = document.getElementById('editProfileAvatar');
+        if (avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
+
+        window.saveProfileChanges = () => {
+          let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+          const name = document.getElementById('editProfileName').value.trim();
+          if (name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
+          profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
+          localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+          document.getElementById('profile-popup').classList.remove('show');
+          alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+        };
+
+        const themeSelector = document.getElementById('themeSelector');
+        if (themeSelector) {
+          themeSelector.value = savedTheme;
+          themeSelector.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            localStorage.setItem('activeTheme', selected);
+            location.reload();
+          });
+        }
+
+        const colorInput = document.getElementById('themeColor');
+        if (colorInput) {
+          colorInput.value = savedColor;
+          colorInput.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--neon-blue', e.target.value);
+            localStorage.setItem('customThemeColor', e.target.value);
+          });
+        }
+
+        const lowEndToggle = document.getElementById('lowEndToggle');
+        if (lowEndToggle) {
+          lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
+          lowEndToggle.addEventListener('change', (e) => {
+            localStorage.setItem('lowEndMode', e.target.checked);
+            e.target.checked ? document.body.classList.add('low-end-mode') : document.body.classList.remove('low-end-mode');
+            window.triggerVibrate(30);
+          });
+        }
+
+        const hapticToggle = document.getElementById('hapticToggle');
+        if (hapticToggle) {
+          hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
+          hapticToggle.addEventListener('change', (e) => {
+            localStorage.setItem('hapticMode', e.target.checked);
+            if (e.target.checked) navigator.vibrate(50);
+          });
+        }
+
+        const pillSlider = document.getElementById('pillSizeSlider');
+        if (pillSlider) {
+          pillSlider.value = savedPillInset;
+          pillSlider.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
+            localStorage.setItem('pillInset', e.target.value);
+          });
+        }
+
+        const fontInput = document.getElementById('customFontUpload');
+        if (fontInput) {
+          fontInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.name.toLowerCase().endsWith('.ttf')) {
+              const reader = new FileReader();
+              reader.onload = function (evt) {
+                try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); }
+                catch (err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+
+        window.resetSettings = () => {
+          if (confirm("¿Restablecer diseño predeterminado?")) {
+            localStorage.removeItem('customThemeColor'); localStorage.removeItem('customUserFont');
+            localStorage.removeItem('lowEndMode'); localStorage.removeItem('hapticMode'); localStorage.removeItem('pillInset');
+            location.reload();
+          }
+        };
+
+        const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+        const isIOS = isTrueIOS || forceIOS;
+
+        window.toggleForceIOS = () => {
+          const current = localStorage.getItem('force_ios_ui') === 'true';
+          localStorage.setItem('force_ios_ui', !current);
+          location.reload();
+        };
+
+        const initAdminBtn = setInterval(() => {
+          const btn = document.getElementById('btnForceIOS');
+          if (btn) { btn.innerHTML = forceIOS ? 'Quitar Interfaz iOS' : 'Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+        }, 500);
+
+        setTimeout(() => {
+          const nav = document.querySelector('.bottom-nav');
+          const pill = document.getElementById('ios-pill');
+          const navItems = document.querySelectorAll('.nav-item');
+
+          if (isIOS && nav && pill) {
+            nav.classList.add('is-ios');
+            if (navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+
+            const snapPill = (index) => {
+              pill.classList.remove('is-dragging');
+              const target = navItems[index];
+              if (target) {
+                pill.style.width = `${target.offsetWidth}px`;
+                pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`;
+                window.triggerVibrate(25);
+              }
+            };
+
+            const originalSelectSection = window.selectSection;
+            window.selectSection = (sec, el) => {
+              if (originalSelectSection) originalSelectSection(sec, el);
+              const index = Array.from(navItems).indexOf(el);
+              if (index !== -1) snapPill(index);
+            };
+
+            let isDraggingPill = false;
+
+            const moveDrag = (e) => {
+              if (!e.touches && !isDraggingPill) return;
+              if (e.touches) e.preventDefault();
+              isDraggingPill = true;
+              pill.classList.add('is-dragging');
+
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const navRect = nav.getBoundingClientRect();
+              let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
+
+              const itemWidth = navRect.width / navItems.length;
+              let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
+              pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+
+              const hoveredIndex = Math.floor(xPos / itemWidth);
+              const targetItem = navItems[hoveredIndex];
+
+              if (targetItem && !targetItem.classList.contains('active')) {
+                const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                targetItem.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.triggerVibrate(15);
+              }
+            };
+
+            const endDrag = () => {
+              if (isDraggingPill) {
+                isDraggingPill = false;
+                const activeItem = document.querySelector('.nav-item.active');
+                const index = Array.from(navItems).indexOf(activeItem);
+                if (index !== -1) snapPill(index);
+              }
+            };
+
+            nav.addEventListener('touchmove', moveDrag, { passive: false });
+            nav.addEventListener('touchend', endDrag);
+            nav.addEventListener('mousedown', () => isDraggingPill = true);
+            nav.addEventListener('mousemove', moveDrag);
+            nav.addEventListener('mouseup', endDrag);
+            nav.addEventListener('mouseleave', endDrag);
+
+            window.addEventListener('resize', () => {
+              const activeItem = document.querySelector('.nav-item.active');
+              const index = Array.from(navItems).indexOf(activeItem);
+              if (index !== -1) snapPill(index);
+            });
+          }
+        }, 1000);
+      });
+    </script>
+
+    <div id="secret-unlocked-popup">
+      <h2 style="color: #ff00ea; text-shadow: 0 0 15px #ff00ea; font-size: 28px; margin-bottom: 10px;">¡BINGO! 🎉</h2>
+      <p style="color: white; font-size: 16px; margin-bottom: 20px;">
+        La descarga del Mod fue Desbloqueado. <br>
+        ¡Disfruta del Mod!.
+      </p>
+      <button onclick="document.getElementById('secret-unlocked-popup').classList.remove('show')"
+        style="background: #ff00ea; color: white; border: none; padding: 10px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 0 10px #ff00ea;">
+        ¡Ir a Descargarlo!
+      </button>
+    </div>
+
+    <div id="share-modal" class="popup">
+      <div class="popup-content"
+        style="border: 2px solid #fff; text-align: center; max-width: 300px; padding: 25px; position: relative;">
+
+        <span onclick="document.getElementById('share-modal').classList.remove('show')"
+          style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white;">&times;</span>
+
+        <h3 style="color: #00eaff; margin-bottom: 20px;">¡Comparte esto!</h3>
+
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+          <button class="social-btn btn-whatsapp" onclick="enviarWhatsApp()">
+            <img src="https://cdn-icons-png.flaticon.com/128/3670/3670051.png" style="width: 25px;">
+          </button>
+
+          <button class="social-btn btn-telegram" onclick="enviarTelegram()">
+            <img src="https://cdn-icons-png.flaticon.com/128/2111/2111646.png" style="width: 25px;">
+          </button>
+
+          <button class="social-btn btn-copiar" onclick="copiarEnlace()">
+            <img src="https://cdn-icons-png.flaticon.com/128/1621/1621635.png" style="width: 20px;">
+          </button>
+        </div>
+
+        <p id="mensaje-copiado" style="color: #00ff41; font-size: 12px; display: none; font-weight: bold;">¡Enlace
+          copiado al portapapeles!</p>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
+        authDomain: "fnf-mobile-lalocf.firebaseapp.com",
+        databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
+        projectId: "fnf-mobile-lalocf",
+        storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
+        messagingSenderId: "407243542354",
+        appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      let notificacionesBD = [];
+      let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
+
+      function comprobarSiEsAdmin() {
+        try {
+          if (window.isSuperUser) return true;
+          const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+          if (userProfile && (userProfile.key === "user_a655u37rr" || (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf'))) {
+            return true;
+          }
+        } catch (error) {
+        }
+        return false;
+      }
+
+      window.toggleNotificaciones = function () {
+        const panel = document.getElementById('panel-notificaciones');
+        const adminArea = document.getElementById('admin-notif-area');
+
+        panel.classList.toggle('hidden');
+
+        if (!panel.classList.contains('hidden')) {
+          window.marcarComoLeidas();
+
+          const esAdmin = comprobarSiEsAdmin();
+
+          if (esAdmin) {
+            adminArea.style.display = 'block';
+          } else {
+
+            adminArea.style.display = 'none';
+          }
+        }
+      }
+
+      window.actualizarCampana = function () {
+        const badge = document.getElementById('badge-contador');
+        let noLeidas = 0;
+
+        notificacionesBD.forEach(notif => {
+          if (!idNotificacionesLeidas.includes(notif.id)) {
+            noLeidas++;
+          }
+        });
+
+        if (noLeidas > 0) {
+          badge.style.display = 'block';
+          badge.innerText = noLeidas > 9 ? '9+' : noLeidas;
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      window.marcarComoLeidas = function () {
+        notificacionesBD.forEach(notif => {
+          if (!idNotificacionesLeidas.includes(notif.id)) {
+            idNotificacionesLeidas.push(notif.id);
+          }
+        });
+        localStorage.setItem('notifsLeidas', JSON.stringify(idNotificacionesLeidas));
+        window.actualizarCampana();
+      }
+
+      window.renderizarNotificaciones = function () {
+        const lista = document.getElementById('lista-notificaciones');
+        lista.innerHTML = '';
+
+        const esAdmin = comprobarSiEsAdmin();
+
+        if (notificacionesBD.length === 0) {
+          lista.innerHTML = '<p style="text-align:center; color:#888; font-size:13px; margin-top: 20px;">No hay notificaciones nuevas.</p>';
           return;
         }
 
-        const requests = Object.keys(data).map(k => ({id: k, ...data[k]}));
-        // Sort by votes, then by date
-        requests.sort((a,b) => (b.votes || 0) - (a.votes || 0));
+        const notifsOrdenadas = [...notificacionesBD].reverse();
 
-        requests.forEach(req => {
-          const statusColors = {
-            'Pendiente': '#ffaa00',
-            'Aprobado': '#8888ff',
-            'En Progreso': '#00eaff',
-            'Completado': '#00ff88'
-          };
-          const badgeColor = statusColors[req.status || 'Pendiente'] || '#ffaa00';
-          
-          let adminBtns = '';
-          if (isSuperUser) {
-            adminBtns = `
-              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap;">
-                <button onclick="updateRequestStatus('${req.id}', 'Aprobado')" style="flex:1; background:#8888ff; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Aprobar</button>
-                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#00eaff; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">En Progreso</button>
-                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff88; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Completado</button>
-                <button onclick="deleteRequest('${req.id}')" style="background:#ff003c; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">✖</button>
-              </div>
-            `;
+        notifsOrdenadas.forEach(notif => {
+          const div = document.createElement('div');
+          div.className = 'notif-item';
+
+          let htmlContent = `
+        <p class="notif-text">${notif.texto}</p>
+        <p class="notif-date">${notif.fecha}</p>
+      `;
+
+          if (esAdmin) {
+            htmlContent += `
+          <div class="admin-controls">
+            <button class="btn-editar" onclick="editarNotificacion('${notif.id}')">Editar</button>
+            <button class="btn-borrar" onclick="borrarNotificacion('${notif.id}')">Borrar</button>
+          </div>
+        `;
           }
 
-          const myVoted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-          const isVoted = myVoted[req.id];
-
-          const div = document.createElement('div');
-          div.style.cssText = 'background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); text-align:left;';
-          div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div style="flex:1; padding-right:10px;">
-                <span style="font-size:10px; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 5px; border-radius:10px; text-transform:uppercase; font-weight:bold;">${req.status || 'Pendiente'}</span>
-                <h4 style="margin:5px 0; color:white; font-size:15px;">${req.modName}</h4>
-                ${req.link ? `<a href="${req.link}" target="_blank" style="color:var(--neon-pink); font-size:11px; text-decoration:underline;">Ver Link Original</a>` : ''}
-                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: ${req.user || 'Anónimo'}</p>
-              </div>
-              <div style="text-align:center;">
-                <button onclick="voteRequest('${req.id}')" class="btn" style="background:${isVoted ? 'var(--neon-green)' : '#333'}; color:${isVoted ? 'black' : 'white'}; border:none; border-radius:8px; width:45px; height:40px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 4px 0 ${isVoted ? '#00cc00' : '#111'}; transform:${isVoted ? 'translateY(2px)' : 'none'}; transition:all 0.1s;">
-                  ▲
-                </button>
-                <div style="color:var(--neon-green); font-weight:bold; font-size:16px; margin-top:8px;">${req.votes || 0}</div>
-              </div>
-            </div>
-            ${adminBtns}
-          `;
-          container.appendChild(div);
+          div.innerHTML = htmlContent;
+          lista.appendChild(div);
         });
+
+        window.actualizarCampana();
+      }
+
+      window.enviarNotificacion = function () {
+        if (!comprobarSiEsAdmin()) return;
+
+        const txtArea = document.getElementById('txt-nueva-notif');
+        const texto = txtArea.value.trim();
+        if (texto === '') return;
+
+        const fechaActual = new Date().toLocaleString('es-MX', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        const idUnico = 'notif_' + Date.now();
+        set(ref(db, 'notificaciones/' + idUnico), {
+          id: idUnico, texto: texto, fecha: fechaActual
+        });
+        txtArea.value = '';
+      }
+
+      window.borrarNotificacion = function (id) {
+        if (!comprobarSiEsAdmin()) return;
+        if (confirm('¿Seguro que quieres borrar esta notificación?')) {
+          remove(ref(db, 'notificaciones/' + id));
+        }
+      }
+
+      window.editarNotificacion = function (id) {
+        if (!comprobarSiEsAdmin()) return;
+        const notifActual = notificacionesBD.find(n => n.id === id);
+        const nuevoTexto = prompt('Edita tu notificación:', notifActual.texto);
+        if (nuevoTexto !== null && nuevoTexto.trim() !== '') {
+          update(ref(db, 'notificaciones/' + id), { texto: nuevoTexto });
+        }
+      }
+
+      const notificacionesRef = ref(db, 'notificaciones');
+      onValue(notificacionesRef, (snapshot) => {
+        notificacionesBD = [];
+        snapshot.forEach((childSnapshot) => {
+          notificacionesBD.push(childSnapshot.val());
+        });
+        window.renderizarNotificaciones();
       });
-    }
-  };
+    </script>
 
-  window.enviarSolicitudMod = async () => {
-    if (exigirRegistro()) return;
-    if (!usuarioActualFirebase) return alert("Por seguridad, debes iniciar sesión con Google para pedir mods.");
-    
-    const name = document.getElementById('req-mod-name').value.trim();
-    const link = document.getElementById('req-mod-link').value.trim();
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    <div id="modal-novedades-ios" class="popup"
+      style="z-index: 99999; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
 
-    if (!name) return alert("Escribe el nombre del mod que quieres pedir.");
+      <div class="popup-content"
+        style="background: rgba(25, 25, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); width: 85%; max-width: 340px; padding: 20px; margin: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column;">
 
-    // LÍMITE DE 10 DÍAS
-    const userRef = ref(db, 'usuarios/' + usuarioActualFirebase.uid);
-    const userSnap = await get(userRef);
-    const userData = userSnap.val() || {};
-    const lastReqTime = userData.ultimaSolicitudPort || 0;
-    const daysPassed = (Date.now() - lastReqTime) / (1000 * 60 * 60 * 24);
-    
-    if (daysPassed < 10) {
-      const daysLeft = Math.ceil(10 - daysPassed);
-      return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${daysLeft} días para tu próxima solicitud.`);
-    }
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
+          <h3 style="margin: 0; color: white; font-size: 16px; font-weight: 600;">📋 Novedades de Versión</h3>
+          <span onclick="cerrarModalNovedades()"
+            style="background: rgba(255,255,255,0.1); color: #a1a1aa; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s;">✖</span>
+        </div>
 
-    // LÍMITE DE 5 ACTIVAS
-    const reqRef = ref(db, 'mod_requests');
-    const reqSnap = await get(reqRef);
-    const reqData = reqSnap.val() || {};
-    
-    let activeCount = 0;
-    Object.values(reqData).forEach(req => {
-      if (req.status !== 'Completado') activeCount++;
-    });
-    
-    if (activeCount >= 5) {
-      return alert("🛑 La lista de peticiones está llena actualmente (Máximo 5 activas). Por favor espera a que el Administrador termine los puertos pendientes.");
-    }
+        <div id="texto-novedades-ios"
+          style="color: #e5e5ea; font-size: 13px; line-height: 1.5; white-space: pre-line; text-align: left; max-height: 40vh; overflow-y: auto; padding-right: 5px;">
+        </div>
 
-    push(ref(db, 'mod_requests'), {
-      modName: name,
-      link: link || '',
-      user: profile.nombre || "Usuario",
-      ownerKey: profile.key,
-      votes: 1,
-      status: 'Pendiente',
-      timestamp: Date.now()
-    }).then(async snap => {
-      // Guardar fecha de solicitud
-      await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), { ultimaSolicitudPort: Date.now() });
+      </div>
+    </div>
 
-      // Auto vote for your own request
-      let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-      voted[snap.key] = true;
-      localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
-      
-      document.getElementById('req-mod-name').value = '';
-      document.getElementById('req-mod-link').value = '';
-      alert("¡Solicitud enviada! Ahora los demás pueden votar por ella.");
-    });
-  };
+  </body>
 
-  window.voteRequest = (id) => {
-    if (exigirRegistro()) return;
-    let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-    if (voted[id]) {
-      // Unvote
-      delete voted[id];
-      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 1) - 1);
-    } else {
-      // Vote
-      voted[id] = true;
-      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 0) + 1);
-    }
-    localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
-  };
-
-  window.updateRequestStatus = (id, status) => {
-    if (!isSuperUser) return;
-    update(ref(db, `mod_requests/${id}`), { status });
-  };
-
-  window.deleteRequest = (id) => {
-    if (!isSuperUser) return;
-    if(confirm("¿Eliminar esta solicitud?")) remove(ref(db, `mod_requests/${id}`));
-  };
-
-}, 1500);
-
-window.rateAppItem = async (type, stars) => {
-  if (!window.currentItemRatingId) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!profile) {
-    alert(currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
-    return;
-  }
-
-  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-
-  if (myRates[window.currentItemRatingId]) {
-    alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
-    return;
-  }
-
-  myRates[window.currentItemRatingId] = stars;
-  localStorage.setItem('my_ratings', JSON.stringify(myRates));
-
-  await set(ref(db, `ratings/${window.currentItemRatingId}/${profile.key}`), stars);
-
-  window.updateStarsUI(type, stars);
-  const txt = document.getElementById(`${type}-rating-text`);
-  if (txt) txt.innerText = currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
-};
-
-window.loadItemRating = (id, type) => {
-  const container = document.getElementById(`rating-container-${type}`);
-  if (!container) return;
-
-  const txt = document.getElementById(`${type}-rating-text`);
-  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-
-  const modRatings = globalRatings[id] || {};
-  const votosArray = Object.values(modRatings);
-  const totalVotos = votosArray.length;
-  let promedio = 0;
-
-  if (totalVotos > 0) {
-    const suma = votosArray.reduce((acc, val) => acc + val, 0);
-    promedio = (suma / totalVotos).toFixed(1);
-  }
-
-  const spans = container.querySelectorAll('span');
-
-  if (myRates[id]) {
-    window.updateStarsUI(type, myRates[id]);
-    if (txt) {
-      const baseText = currentLang === 'es' ? "Tu calificación" : "Your rating";
-      txt.innerText = totalVotos > 0 ? `${baseText} • Promedio: ${promedio} ⭐ (${totalVotos})` : baseText;
-    }
-  } else {
-    spans.forEach(s => { s.style.color = '#555'; s.style.textShadow = 'none'; });
-    if (txt) {
-      const baseText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
-      txt.innerText = totalVotos > 0 ? `Promedio: ${promedio} ⭐ (${totalVotos}) • ${baseText}` : baseText;
-    }
-  }
-};
-
-window.updateStarsUI = (type, stars) => {
-  const container = document.getElementById(`rating-container-${type}`);
-  if (!container) return;
-  const spans = container.querySelectorAll('span');
-  spans.forEach((s, index) => {
-    if (index < stars) {
-      s.style.color = 'gold';
-      s.style.textShadow = '0 0 10px gold';
-    } else {
-      s.style.color = '#555';
-      s.style.textShadow = 'none';
-    }
-  });
-};
-
-// ==========================================
-
-
-const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
-document.documentElement.style.setProperty('--neon-blue', savedColor);
-
-const savedPillInset = localStorage.getItem('pillInset') || '5';
-document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
-
-const savedBlur = localStorage.getItem('glassBlur') || '15';
-document.documentElement.style.setProperty('--glass-blur', savedBlur + 'px');
-
-if (localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
-
-const applyCustomFont = (base64Font) => {
-  const newStyle = document.createElement('style');
-  newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
-  document.head.appendChild(newStyle);
-};
-const savedFont = localStorage.getItem('customUserFont');
-if (savedFont) applyCustomFont(savedFont);
-
-let chromaInterval;
-const toggleChroma = (enable) => {
-  if (enable) {
-    let hue = 0;
-    clearInterval(chromaInterval);
-    chromaInterval = setInterval(() => {
-      hue = (hue + 2) % 360;
-      document.documentElement.style.setProperty('--neon-blue', `hsl(${hue}, 100%, 50%)`);
-    }, 50);
-  } else {
-    clearInterval(chromaInterval);
-    document.documentElement.style.setProperty('--neon-blue', localStorage.getItem('customThemeColor') || '#00eaff');
-  }
-};
-
-let particleInterval;
-const toggleParticles = (enable) => {
-  const container = document.getElementById('particles-container');
-  if (!container) return;
-  if (enable) {
-    container.style.display = 'block';
-    particleInterval = setInterval(() => {
-      const p = document.createElement('div');
-      p.className = 'fnf-particle';
-      p.innerText = Math.random() > 0.5 ? '🎵' : '✦';
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.fontSize = (Math.random() * 15 + 10) + 'px';
-      p.style.animationDuration = (Math.random() * 4 + 4) + 's';
-      container.appendChild(p);
-      setTimeout(() => p.remove(), 8000);
-    }, 400);
-  } else {
-    clearInterval(particleInterval);
-    container.style.display = 'none';
-    container.innerHTML = '';
-  }
-};
-
-const savedTheme = localStorage.getItem('activeTheme') || 'default';
-const themeLink = document.getElementById('theme-stylesheet');
-
-if (savedTheme === 'pro') {
-  themeLink.href = 'css/style2.css';
-}
-
-window.toggleProMenu = () => {
-  document.body.classList.toggle('pro-menu-open');
-  window.triggerVibrate(15);
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  window.currentLang = localStorage.getItem('fnf_lang') || 'es';
-
-  window.triggerVibrate = (ms = 15) => { if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) navigator.vibrate(ms); };
-  document.body.addEventListener('click', (e) => {
-    if (e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) window.triggerVibrate(15);
-  });
-
-  window.toggleLanguage = () => {
-    window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
-    localStorage.setItem('fnf_lang', window.currentLang);
-    applyLanguage();
-  };
-  function applyLanguage() {
-    document.querySelectorAll('[data-es][data-en]').forEach(el => {
-      el.classList.add('lang-fade');
-      setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
-    });
-    const btn = document.getElementById('langBtn');
-    if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
-  }
-  applyLanguage();
-
-  setTimeout(() => {
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (profile) {
-      if (document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
-      if (document.getElementById('editProfileAvatar') && profile.avatar) {
-        document.getElementById('editProfileAvatar').value = profile.avatar;
-        document.getElementById('profile-avatar-preview').src = profile.avatar;
-      }
-    }
-  }, 500);
-
-  const avInput = document.getElementById('editProfileAvatar');
-  if (avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
-
-  window.saveProfileChanges = () => {
-    let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
-    const name = document.getElementById('editProfileName').value.trim();
-    if (name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
-    profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
-    localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-    document.getElementById('profile-popup').classList.remove('show');
-    alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  };
-
-  const colorInput = document.getElementById('themeColor');
-  if (colorInput) {
-    colorInput.value = savedColor;
-    colorInput.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--neon-blue', e.target.value);
-      localStorage.setItem('customThemeColor', e.target.value);
-      if (document.getElementById('chromaToggle').checked) {
-        document.getElementById('chromaToggle').checked = false;
-        toggleChroma(false);
-        localStorage.setItem('chromaMode', 'false');
-      }
-    });
-  }
-
-  const chromaToggle = document.getElementById('chromaToggle');
-  if (chromaToggle) {
-    chromaToggle.checked = localStorage.getItem('chromaMode') === 'true';
-    if (chromaToggle.checked) toggleChroma(true);
-    chromaToggle.addEventListener('change', (e) => {
-      localStorage.setItem('chromaMode', e.target.checked);
-      toggleChroma(e.target.checked);
-    });
-  }
-
-  const particlesToggle = document.getElementById('particlesToggle');
-  if (particlesToggle) {
-    particlesToggle.checked = localStorage.getItem('particlesMode') === 'true';
-    if (particlesToggle.checked && localStorage.getItem('lowEndMode') !== 'true') toggleParticles(true);
-    particlesToggle.addEventListener('change', (e) => {
-      localStorage.setItem('particlesMode', e.target.checked);
-      toggleParticles(e.target.checked);
-    });
-  }
-
-  const blurSlider = document.getElementById('blurSlider');
-  if (blurSlider) {
-    blurSlider.value = savedBlur;
-    blurSlider.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--glass-blur', e.target.value + 'px');
-      localStorage.setItem('glassBlur', e.target.value);
-    });
-  }
-
-  const lowEndToggle = document.getElementById('lowEndToggle');
-  if (lowEndToggle) {
-    lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
-    lowEndToggle.addEventListener('change', (e) => {
-      localStorage.setItem('lowEndMode', e.target.checked);
-      if (e.target.checked) {
-        document.body.classList.add('low-end-mode');
-        toggleParticles(false); // Fuerza apagar partículas
-      } else {
-        document.body.classList.remove('low-end-mode');
-        if (document.getElementById('particlesToggle').checked) toggleParticles(true);
-      }
-      window.triggerVibrate(30);
-    });
-  }
-
-  const hapticToggle = document.getElementById('hapticToggle');
-  if (hapticToggle) {
-    hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
-    hapticToggle.addEventListener('change', (e) => {
-      localStorage.setItem('hapticMode', e.target.checked);
-      if (e.target.checked) navigator.vibrate(50);
-    });
-  }
-
-  const pillSlider = document.getElementById('pillSizeSlider');
-  if (pillSlider) {
-    pillSlider.value = savedPillInset;
-    pillSlider.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
-      localStorage.setItem('pillInset', e.target.value);
-    });
-  }
-
-  const fontInput = document.getElementById('customFontUpload');
-  if (fontInput) {
-    fontInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file && file.name.toLowerCase().endsWith('.ttf')) {
-        const reader = new FileReader();
-        reader.onload = function (evt) {
-          try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); }
-          catch (err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-
-  window.resetSettings = () => {
-    if (confirm("¿Restablecer diseño predeterminado?")) {
-      localStorage.clear();
-      location.reload();
-    }
-  };
-
-  const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
-  const isIOS = isTrueIOS || forceIOS;
-
-  window.toggleForceIOS = () => {
-    const current = localStorage.getItem('force_ios_ui') === 'true';
-    localStorage.setItem('force_ios_ui', !current);
-    location.reload();
-  };
-
-  const initAdminBtn = setInterval(() => {
-    const btn = document.getElementById('btnForceIOS');
-    if (btn) { btn.innerHTML = forceIOS ? 'Quitar Interfaz iOS' : 'Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
-  }, 500);
-
-  setTimeout(() => {
-    const nav = document.querySelector('.bottom-nav');
-    const pill = document.getElementById('ios-pill');
-    const navItems = document.querySelectorAll('.nav-item');
-
-    if (isIOS && nav && pill) {
-      nav.classList.add('is-ios');
-      if (navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
-
-      const snapPill = (index) => {
-        pill.classList.remove('is-dragging');
-        const target = navItems[index];
-        if (target) {
-          pill.style.width = `${target.offsetWidth}px`;
-          pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`;
-          window.triggerVibrate(25);
-        }
-      };
-
-      const originalSelectSection = window.selectSection;
-      window.selectSection = (sec, el) => {
-        if (originalSelectSection) originalSelectSection(sec, el);
-        const index = Array.from(navItems).indexOf(el);
-        if (index !== -1) snapPill(index);
-      };
-
-      let isDraggingPill = false;
-
-      const moveDrag = (e) => {
-        if (!e.touches && !isDraggingPill) return;
-        if (e.touches) e.preventDefault();
-        isDraggingPill = true;
-        pill.classList.add('is-dragging');
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const navRect = nav.getBoundingClientRect();
-        let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
-
-        const itemWidth = navRect.width / navItems.length;
-        let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
-        pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
-
-        const hoveredIndex = Math.floor(xPos / itemWidth);
-        const targetItem = navItems[hoveredIndex];
-
-        if (targetItem && !targetItem.classList.contains('active')) {
-          const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
-          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-          document.getElementById(sectionId).classList.add('active');
-          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-          targetItem.classList.add('active');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          window.triggerVibrate(15);
-        }
-      };
-
-      const endDrag = () => {
-        if (isDraggingPill) {
-          isDraggingPill = false;
-          const activeItem = document.querySelector('.nav-item.active');
-          const index = Array.from(navItems).indexOf(activeItem);
-          if (index !== -1) snapPill(index);
-        }
-      };
-
-      nav.addEventListener('touchmove', moveDrag, { passive: false });
-      nav.addEventListener('touchend', endDrag);
-      nav.addEventListener('mousedown', () => isDraggingPill = true);
-      nav.addEventListener('mousemove', moveDrag);
-      nav.addEventListener('mouseup', endDrag);
-      nav.addEventListener('mouseleave', endDrag);
-
-      window.addEventListener('resize', () => {
-        const activeItem = document.querySelector('.nav-item.active');
-        const index = Array.from(navItems).indexOf(activeItem);
-        if (index !== -1) snapPill(index);
-      });
-    }
-  }, 1000);
-});
-
-let newModsData = {};
-
-onValue(ref(db, 'new_mods_status'), (snap) => {
-  newModsData = snap.val() || {};
-
-  document.querySelectorAll('.mod-card').forEach(card => {
-    card.classList.remove('is-new-mod');
-  });
-
-  Object.keys(newModsData).forEach(cardId => {
-    if (newModsData[cardId] === true) {
-      const cardElement = document.getElementById(cardId);
-      if (cardElement) {
-        cardElement.classList.add('is-new-mod');
-      }
-    }
-  });
-});
-
-window.toggleNewMod = async (cardId) => {
-  if (!isSuperUser) {
-    alert("No tienes permisos de administrador.");
-    return;
-  }
-
-  const isCurrentlyNew = newModsData[cardId] === true;
-
-  if (confirm(isCurrentlyNew ? "¿Quitar la etiqueta de NUEVO a este mod?" : "¿Marcar este mod como NUEVO?")) {
-
-    await set(ref(db, `new_mods_status/${cardId}`), isCurrentlyNew ? null : true);
-
-  }
-};
-
-// ==========================================
-
-window.brokenLinksData = {};
-
-onValue(ref(db, 'broken_links'), (snap) => {
-  window.brokenLinksData = snap.val() || {};
-
-  document.querySelectorAll('.mod-card').forEach(card => {
-    const exactModId = card.id.replace('card-', '');
-    if (window.brokenLinksData[exactModId]) {
-      card.classList.add('is-broken-mod');
-    } else {
-      card.classList.remove('is-broken-mod');
-    }
-  });
-});
-
-window.reportError = async (modId) => {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  if (confirm('🚨 ¿ESTÁS SEGURO? Esto apagará la descarga para todos y alertará al administrador.')) {
-
-    await set(ref(db, `broken_links/${modId}`), {
-      reportedBy: user.name,
-      timestamp: Date.now()
-    });
-
-    alert('🛑 ¡MOD BLOQUEADO! El Administrador ha sido notificado.');
-
-    let modName = "Nombre Desconocido";
-    const modTitleElement = document.querySelector('#card-' + modId + ' h3');
-    if (modTitleElement) {
-      modName = modTitleElement.textContent.trim();
-    }
-
-    const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
-    const chatId = "5429172831";
-
-    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod a sido puesto en cuarentena automáticamente.\n\n🛠️ ¡Entra a repararlo!`;
-
-    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-    fetch(telegramUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: mensaje, parse_mode: "Markdown" })
-    }).catch(error => console.error("Error Telegram:", error));
-  }
-};
-
-window.fixBrokenLink = async (modId) => {
-  if (!isSuperUser) return;
-  if (confirm('🛠️ ¿Ya solucionaste el link de este mod?')) {
-    await set(ref(db, `broken_links/${modId}`), null);
-  }
-};
-
-// ==========================================
-
-onValue(ref(db, 'ratings'), (snap) => {
-  const ratingsData = snap.val() || {};
-  const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const miLlave = userProfile ? userProfile.key : null;
-
-  document.querySelectorAll('.mod-card').forEach(card => {
-    const exactModId = card.id.replace('card-', '');
-    const modRatings = ratingsData[exactModId] || {};
-
-    const votosArray = Object.values(modRatings);
-    const totalVotos = votosArray.length;
-    let promedio = 0;
-
-    if (totalVotos > 0) {
-      const suma = votosArray.reduce((acc, val) => acc + val, 0);
-      promedio = (suma / totalVotos).toFixed(1);
-    }
-
-    const textoPromedio = document.getElementById(`rating-text-${exactModId}`);
-    if (textoPromedio) {
-      textoPromedio.innerText = `${promedio} ⭐ (${totalVotos})`;
-    }
-
-    const starsContainer = document.getElementById(`stars-${exactModId}`);
-    if (starsContainer) {
-      const miVotoAnterior = miLlave ? modRatings[miLlave] : 0;
-      const spans = starsContainer.querySelectorAll('span');
-
-      spans.forEach(span => {
-        const valorEstrella = parseInt(span.getAttribute('data-val'));
-        if (miVotoAnterior >= valorEstrella) {
-          span.innerText = '★';
-          span.style.color = '#ffd700';
-          span.style.textShadow = '0 0 8px #ffd700';
-        } else {
-          span.innerText = '☆';
-          span.style.color = '#555';
-          span.style.textShadow = 'none';
-        }
-      });
-    }
-  });
-});
-
-window.rateMod = async (modId, calificacion) => {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  await set(ref(db, `ratings/${modId}/${user.key}`), calificacion);
-
-  if (window.triggerVibrate) window.triggerVibrate(15);
-};
-
-// ==========================================
-
-window.toggleFaq = function (button) {
-  button.classList.toggle('active');
-
-  const content = button.nextElementSibling;
-
-  if (content.classList.contains('open')) {
-    content.classList.remove('open');
-  } else {
-    content.classList.add('open');
-  }
-
-  if (window.triggerVibrate) window.triggerVibrate(10);
-};
-
-// ==========================================
-
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const modToUnlock = urlParams.get('unlock');
-
-  if (modToUnlock) {
-    let misSecretos = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
-    if (!misSecretos.includes(modToUnlock)) {
-      misSecretos.push(modToUnlock);
-      localStorage.setItem('unlocked_mods', JSON.stringify(misSecretos));
-
-      setTimeout(() => {
-        document.getElementById('secret-unlocked-popup').classList.add('show');
-        if (window.triggerVibrate) window.triggerVibrate([30, 50, 30]);
-      }, 1000);
-    }
-
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
-  const misSecretosGuardados = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
-
-  const esAdmin = localStorage.getItem('superUser') === 'true';
-
-  document.querySelectorAll('.secret-mod').forEach(card => {
-
-    const exactId = card.id.replace('card-', '');
-
-    if (misSecretosGuardados.includes(exactId) || esAdmin) {
-      card.classList.remove('hidden');
-    }
-  });
-});
-
-// ==========================================
-
-let linkParaCompartir = "";
-let textoParaCompartir = "";
-
-window.abrirMenuCompartir = (id, nombreMod) => {
-  if (exigirRegistro()) return;
-  const baseUrl = window.location.origin + window.location.pathname;
-  linkParaCompartir = `${baseUrl}?share=${id}`;
-  textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
-
-  document.getElementById('share-modal').classList.add('show');
-};
-
-window.enviarWhatsApp = () => {
-  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoParaCompartir + linkParaCompartir)}`;
-  window.open(url, '_blank');
-};
-
-window.enviarTelegram = () => {
-  const url = `https://t.me/share/url?url=${encodeURIComponent(linkParaCompartir)}&text=${encodeURIComponent(textoParaCompartir)}`;
-  window.open(url, '_blank');
-};
-
-window.copiarEnlace = () => {
-  navigator.clipboard.writeText(textoParaCompartir + linkParaCompartir).then(() => {
-    const msg = document.getElementById('mensaje-copiado');
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-  });
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const idCompartido = urlParams.get('share');
-
-  if (idCompartido) {
-
-
-    setTimeout(() => {
-
-      if (idCompartido.includes('mod') && window.openModInfo) {
-        window.openModInfo(idCompartido);
-      } else if (idCompartido.includes('apk') && window.openApkInfo) {
-        window.openApkInfo(idCompartido);
-      } else if (idCompartido.includes('script') && window.openScriptInfo) {
-        window.openScriptInfo(idCompartido);
-      }
-
-      const contenidoPopup = document.querySelector('#mod-info-popup .popup-content') || document.querySelector('.popup.show .popup-content');
-
-      if (contenidoPopup) {
-        contenidoPopup.classList.add('brillo-epico');
-
-        setTimeout(() => {
-          contenidoPopup.classList.remove('brillo-epico');
-        }, 6000);
-      }
-
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-    }, 1000);
-  }
-});
-
-// ==========================================
-// 🚀 OPTIMIZACIÓN GLOBAL (CORREGIDA)
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-  const todasLasImagenes = document.querySelectorAll('img');
-
-  todasLasImagenes.forEach(img => {
-    // Filtramos para que solo aplique a los catálogos
-    if (img.src.includes('assets/images/mods') || img.src.includes('webp')) {
-
-      // 1. Aseguramos que no se descarguen de golpe al abrir la página
-      img.setAttribute('loading', 'lazy');
-
-      const contenedor = img.parentElement;
-      if (contenedor) {
-        contenedor.style.position = 'relative';
-
-        // Evitamos crear rueditas duplicadas si el código se ejecuta dos veces
-        let ruedita = contenedor.querySelector('.ruedita-cargando');
-        if (!ruedita) {
-          ruedita = document.createElement('div');
-          ruedita.className = 'ruedita-cargando';
-          contenedor.insertBefore(ruedita, img);
-        }
-
-        // Función maestra para quitar la ruedita
-        const finalizarCarga = () => {
-          if (ruedita) ruedita.style.display = 'none';
-          img.classList.add('img-lazy-cargada');
-        };
-
-        // 2. EL TRUCO MÁGICO: ¿La imagen ya cargó desde la raíz/caché?
-        if (img.complete && img.naturalHeight !== 0) {
-          // Si ya está cargada, quitamos la ruedita inmediatamente
-          finalizarCarga();
-        } else {
-          // 3. Si depende del internet, esperamos a que cargue
-          img.onload = finalizarCarga;
-
-          // Por si alguna imagen se cae o da error de link, que no se quede la ruedita infinita
-          img.onerror = () => {
-            if (ruedita) ruedita.style.display = 'none';
-          };
-        }
-      }
-    }
-  });
-});
-
-// ==========================================
-//  MODO OFFLINE (SERVICE WORKER)
-// ==========================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registro => {
-        console.log('¡Modo Offline activado! Alcance:', registro.scope);
-      })
-      .catch(error => {
-        console.log('Falló el Service Worker:', error);
-      });
-  });
-}
-
-// ==========================================
-// OPTIMIZACIÓN EXTREMA DE SCROLL (PASSIVE LISTENERS)
-// ==========================================
-document.addEventListener('touchstart', function () { }, { passive: true });
-document.addEventListener('touchmove', function () { }, { passive: true });
-document.addEventListener('wheel', function () { }, { passive: true });
-
-// ==========================================
-// 🚀 CONEXIÓN DIRECTA CON BOT DE TELEGRAM (OPTIMIZADA)
-// ==========================================
-window.enviarMensajeAlBot = async function () {
-  const cajaTexto = document.getElementById('txt-mensaje-telegram');
-  const boton = document.getElementById('btn-enviar-telegram');
-  const mensaje = cajaTexto.value.trim();
-
-  // Validamos que no envíen mensajes vacíos
-  if (mensaje === "") {
-    alert("¡Escribe un mensaje primero!");
-    return;
-  }
-
-  // 1. OBTENER EL NOMBRE DEL USUARIO (Mejorado)
-  let nombreUsuario = "👤 Usuario Invitado";
-  try {
-    const perfil = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    // Hacemos que busque el nombre sin importar cómo lo hayas guardado en tu base
-    if (perfil) {
-      nombreUsuario = perfil.nombre || perfil.name || perfil.username || perfil.usuario || perfil.key || "👤 Usuario Registrado";
-    }
-  } catch (error) {
-    console.log("No se encontró un perfil guardado.");
-  }
-
-  // 2. CONFIGURACIÓN DE TU BOT
-  const TELEGRAM_BOT_TOKEN = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
-  const TELEGRAM_CHAT_ID = "5429172831";
-
-  // 3. ARMAMOS EL MENSAJE CON FORMATO LIMPIO Y ESPACIADO (TICKET PREMIUM)
-  const textoFormateado =
-    `🚨 *NUEVO TICKET DE SOPORTE* 🚨
-
-👤 *De:* ${nombreUsuario}
-━━━━━━━━━━━━━━━━━━━
-💬 *Mensaje:*
-${mensaje}
-━━━━━━━━━━━━━━━━━━━
-🌐 _Enviado desde lalocf.2.gitgub/fnf-ports/_`;
-
-  // 4. LO ENVIAMOS A TELEGRAM
-  const urlApi = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-  // Efecto visual de carga
-  boton.innerText = "⏳ Enviando...";
-  boton.style.background = "#ffea00";
-
-  try {
-    const respuesta = await fetch(urlApi, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: textoFormateado,
-        parse_mode: 'Markdown'
-      })
-    });
-
-    if (respuesta.ok) {
-      // Éxito
-      cajaTexto.value = "";
-      boton.innerText = "¡Enviado con éxito! ✨";
-      boton.style.background = "#00ff41";
-
-      setTimeout(() => {
-        boton.innerText = "🚀 Enviar Mensaje";
-        boton.style.background = "var(--neon-blue)";
-      }, 3000);
-    } else {
-      throw new Error("Error en la API");
-    }
-
-  } catch (error) {
-    // Error
-    boton.innerText = "❌ Error al enviar";
-    boton.style.background = "#ff003c";
-    setTimeout(() => {
-      boton.innerText = "🚀 Intentar de nuevo";
-      boton.style.background = "var(--neon-blue)";
-    }, 3000);
-  }
-};
-
-//===============================================//
-
-// ==========================================
-// 🚀 GENERADOR DINÁMICO DE ETIQUETAS (TAGS)
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-  const modCards = document.querySelectorAll('.mod-card');
-
-  modCards.forEach(card => {
-    const oldTags = card.querySelector('.mod-tags-container');
-    if (oldTags) oldTags.remove();
-
-    const gama = card.getAttribute('data-gama') || 'low';
-
-    // RAM
-    let ramValue = card.getAttribute('data-ram');
-    if (!ramValue) {
-      ramValue = '2GB RAM';
-      if (gama === 'mid') ramValue = '3GB RAM';
-      if (gama === 'mid-high' || gama === 'high') ramValue = '4GB RAM';
-    }
-
-    // Motor
-    let engineValue = card.getAttribute('data-engine');
-    if (!engineValue) {
-      engineValue = 'Psych Engine';
-    } else {
-      engineValue = engineValue.replace('⚙️', '').trim();
-    }
-
-    // Peso
-    let sizeValue = card.getAttribute('data-size');
-    if (!sizeValue) {
-      const cardId = card.id || 'default';
-      const hash = cardId.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-      const sizeMB = 150 + Math.abs(hash % 300);
-      sizeValue = `${sizeMB} MB`;
-    } else {
-      sizeValue = sizeValue.replace('📦', '').trim();
-    }
-
-    const searchTags = `${engineValue} ${ramValue} ${sizeValue}`.toLowerCase();
-    card.setAttribute('data-tags', searchTags);
-
-    const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'mod-tags-container';
-    tagsContainer.style.cssText = 'display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap;';
-
-    const engineBadge = document.createElement('span');
-    engineBadge.style.cssText = 'background: rgba(0, 234, 255, 0.1); color: var(--neon-blue); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-blue); display: inline-flex; align-items: center; gap: 3px;';
-    engineBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/8335/8335020.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${engineValue}`;
-
-    const ramBadge = document.createElement('span');
-    ramBadge.style.cssText = 'background: rgba(255, 0, 255, 0.1); color: var(--neon-pink); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-pink); display: inline-flex; align-items: center; gap: 3px;';
-    ramBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/10513/10513938.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${ramValue}`;
-
-    const sizeBadge = document.createElement('span');
-    sizeBadge.style.cssText = 'background: rgba(0, 255, 65, 0.1); color: #00ff41; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #00ff41; display: inline-flex; align-items: center; gap: 3px;';
-    sizeBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4007/4007698.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${sizeValue}`;
-
-    tagsContainer.appendChild(engineBadge);
-    tagsContainer.appendChild(ramBadge);
-    tagsContainer.appendChild(sizeBadge);
-
-    const cardButtons = card.querySelector('.card-buttons');
-    if (cardButtons) {
-      card.insertBefore(tagsContainer, cardButtons);
-    }
-  });
-});
+</html>

@@ -242,8 +242,13 @@ window.exigirRegistro = function () {
 let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
 
-if (userProfile && userProfile.key === MI_UID_ADMIN) {
+if (userProfile && (
+  userProfile.key === MI_UID_ADMIN || 
+  userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" || 
+  (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf')
+)) {
   isSuperUser = true;
+  window.isSuperUser = true; // Export globally just in case
   document.body.classList.add('is-admin');
 }
 

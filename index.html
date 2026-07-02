@@ -111,7 +111,7 @@
         </div>
 
         <h3 style="color:white; font-size:15px; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
-          Comunidad (Más votados)</h3>
+          Comunidad (Votos)</h3>
         <div id="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
           <p style="color:#aaa; font-size:13px; text-align:center;">Cargando solicitudes...</p>
         </div>
@@ -205,7 +205,7 @@
       <div class="popup-content popup-scroll-body"
         style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; box-sizing: border-box;">
         <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
-        <h2 class="glow" data-es="Ajustes FNF'" data-en="FNF' Settings">Ajustes FNF'</h2>
+        <h2 class="glow" data-es="Configuración" data-en="Settings">Configuración'</h2>
 
         <div class="color-picker-wrapper" style="box-sizing: border-box; width: 100%;">
           <input type="color" id="themeColor" value="#00eaff">
@@ -392,33 +392,10 @@
               <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
               <span data-es="Se
-                añadio un nuevo mod: <b>The Wish Super Funkin' Galaxy </b>"
-                data-en="A new mod was added: <b>The Wish Super Funkin' Galaxy </b>"
+                añadieron 2 nuevos mods: <b>Matt V3</b> & <b>Due Debts BF Mix</b>"
+                data-en="Two new mods were added: <b>Matt V3</b> & <b>Due Debts BF Mix</b>"
                 style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadio un nuevo mod: <b>The Wish Super Funkin' Galaxy </b></span>
-            </li>
-
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/4412/4412771.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es=" Se
-                añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
-                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
-                administrador no quiera portearlo,
-                es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
-                si te llega a pasar!</b>" data-en=" A new section was added to the menu, its functionality is to request
-                ports to
-                the administrator,<br><b>If the mod request you sent disappears or is deleted, it's not because the
-                administrator doesn't want to port it,
-                it's because of the difficulty and lack of time to be able to do the port alone, I hope you don't feel
-                bad
-                if it happens to you!</b>" style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
-                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
-                  administrador no quiera portearlo,
-                  es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
-                  si te llega a pasar!</b></span>
+                añadieron 2 nuevos mods: <b>Matt V3</b> & <b>Due Debts BF Mix</b></span>
             </li>
 
             <li
@@ -428,17 +405,7 @@
               <span data-es="Se mejoro el funcionamiento de particulas animadas en ajustes."
                 data-en="The functionality of animated particles in settings has been improved."
                 style="font-size: 13.5px; line-height: 1.3;">
-                Se mejoro el funcionamiento de particulas animadas en ajustes.</span>
-            </li>
-
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/16249/16249811.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se mejoro el diseño de la pildora en el menu.<br> <b>(Solo para iOS)</b>"
-                data-en="The design of the pill icon in the menu has been improved.<br> <b>(iOS only)</b>"
-                style="font-size: 13.5px; line-height: 1.3;">
-                Se mejoro el diseño de la pildora en el menu.<br> <b>(Solo para iOS)</b></span>
+                Se mejoro el funcionamiento del led naranja para mostrar comentarios nuevos en los chats.</span>
             </li>
 
             <li
@@ -475,6 +442,7 @@
         <div class="logo-text">FNF'</div>
 
         <div class="top-bar-actions">
+          <div class="action-icon" onclick="openDonatePopup()" title="Apoyar (Donar)">☕</div>
           <div class="action-icon" onclick="toggleTheme()" title="Cambiar Tema">☼</div>
           <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')"
             title="Buscar">🔍</div>
@@ -3134,6 +3102,52 @@
 
         <div id="texto-novedades-ios"
           style="color: #e5e5ea; font-size: 13px; line-height: 1.5; white-space: pre-line; text-align: left; max-height: 40vh; overflow-y: auto; padding-right: 5px;">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pestaña de Donaciones -->
+    <div id="donate-popup" class="popup" style="z-index: 100000;">
+      <div class="popup-content popup-scroll-body" style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 85vh; overflow-y: auto;">
+        <span class="popup-close" onclick="closeDonatePopup()">✖</span>
+        
+        <div style="font-size: 30px; margin-bottom: 10px;">☕❤️</div>
+        <h2 class="glow" style="font-size: 22px; margin-bottom: 10px; color: var(--neon-pink);">Apoyar a LaloCF</h2>
+        <p style="color:#aaa; font-size:13px; line-height:1.4; margin-bottom: 20px;">
+          Si disfrutas de los mods y quieres apoyar mi trabajo, ¡cualquier aporte desde $1 peso me ayuda muchísimo a seguir trayendo más ports! 🙏
+        </p>
+
+        <!-- Mercado Pago -->
+        <div style="background: rgba(0, 158, 227, 0.1); border: 1px solid #009ee3; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left;">
+          <h3 style="color: #009ee3; font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/6033/6033732.png" style="width: 20px;"> Mercado Pago
+          </h3>
+          <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">Dona la cantidad que tú quieras (desde $1 peso) de forma rápida y segura.</p>
+          <!-- AQUI VA EL LINK REAL DE MERCADO PAGO EN href -->
+          <a href="#" target="_blank" id="mp-link" style="display: block; width: 100%; padding: 10px; background: #009ee3; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s;">
+            Dona por Mercado Pago
+          </a>
+        </div>
+
+        <!-- Transferencia SPEI -->
+        <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid var(--neon-green); border-radius: 12px; padding: 15px; text-align: left;">
+          <h3 style="color: var(--neon-green); font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/2721/2721121.png" style="width: 20px; filter: invert(0.8) sepia(1) hue-rotate(80deg) saturate(5);"> Transferencia (Sin comisión)
+          </h3>
+          <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">Transfiere directo desde la app de tu banco.</p>
+          
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; font-size: 13px; color: white; margin-bottom: 10px;">
+            <div style="margin-bottom: 5px;"><strong style="color: #aaa;">Banco:</strong> BBVA (Ejemplo)</div>
+            <div style="margin-bottom: 5px;"><strong style="color: #aaa;">Nombre:</strong> Eduardo C.</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div><strong style="color: #aaa;">CLABE/Tarjeta:</strong> <span id="clabe-number" style="letter-spacing: 1px;">012345678901234567</span></div>
+            </div>
+          </div>
+          
+          <button onclick="copyCLABE()" style="width: 100%; padding: 10px; background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s;">
+            📋 Copiar Número
+          </button>
         </div>
 
       </div>

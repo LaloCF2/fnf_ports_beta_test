@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>FNF' - Mobile</title>
+  <title>FNF' - Ports
+    Mobile</title>
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
@@ -243,6 +244,24 @@
             <input type="checkbox" id="particlesToggle" style="transform: scale(1.3);">
           </label>
 
+          <div id="particle-settings-container"
+            style="display: none; border-left: 2px solid var(--neon-blue); padding-left: 10px; margin-bottom: 15px;">
+            <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;"
+              data-es="Escala de Partículas" data-en="Particle Scale">Escala de Partículas</span>
+            <input type="range" id="particleScaleSlider" min="20" max="80" value="40"
+              style="width: 100%; cursor: pointer; box-sizing: border-box; margin-bottom: 10px;">
+
+            <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;"
+              data-es="Cantidad (Frecuencia)" data-en="Spawn Rate">Cantidad (Frecuencia)</span>
+            <input type="range" id="particleSpawnSlider" min="1" max="100" value="25"
+              style="width: 100%; cursor: pointer; box-sizing: border-box; margin-bottom: 10px;">
+
+            <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;" data-es="Velocidad de subida"
+              data-en="Float Speed">Velocidad de subida</span>
+            <input type="range" id="particleSpeedSlider" min="1" max="100" value="50"
+              style="width: 100%; cursor: pointer; box-sizing: border-box;">
+          </div>
+
           <label
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
             <span data-es="Modo Gama Baja" data-en="Low-End Mode">Modo Gama Baja</span>
@@ -363,7 +382,7 @@
         </div>
         <div class="update-body">
           <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;"
-            data-es="¡Novedades v6.3.0!" data-en="What's New v6.3.0!">¡Novedades v6.3.0!</h2>
+            data-es="¡Novedades v6.4.0!" data-en="What's New v6.4.0!">¡Novedades v6.4.0!</h2>
           <p style="text-align: center; color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">Los cambios más recientes
             en FNF Mobile:</p>
           <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
@@ -372,23 +391,58 @@
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
               <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadio un nuevo mod <b>EliasFunki Revive!</b>"
-                data-en="Added new <b>EliasFunki Revive!</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadieron 2 nuevos mods: <b>Milf Erect </b> & <b>The Wish Super Funkin' Galaxy</b></span>
+              <span data-es="Se
+                añadio un nuevo mod: <b>The Wish Super Funkin' Galaxy </b>"
+                data-en="A new mod was added: <b>The Wish Super Funkin' Galaxy </b>"
+                style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo mod: <b>The Wish Super Funkin' Galaxy </b></span>
             </li>
 
             <li
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/891/891448.png" alt=""
+              <img src="https://cdn-icons-png.flaticon.com/128/4412/4412771.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadio un nuevo apartado en la pagina de Inicio"
-                data-en="A new section was added to the Home page" style="font-size: 13.5px; line-height: 1.3;"> Se
+              <span data-es=" Se
                 añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
-                administrador</span>
+                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
+                administrador no quiera portearlo,
+                es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
+                si te llega a pasar!</b>" data-en=" A new section was added to the menu, its functionality is to request
+                ports to
+                the administrator,<br><b>If the mod request you sent disappears or is deleted, it's not because the
+                administrator doesn't want to port it,
+                it's because of the difficulty and lack of time to be able to do the port alone, I hope you don't feel
+                bad
+                if it happens to you!</b>" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
+                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
+                  administrador no quiera portearlo,
+                  es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
+                  si te llega a pasar!</b></span>
             </li>
 
             <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-yellow); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/3632/3632000.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Se mejoro el funcionamiento de particulas animadas en ajustes."
+                data-en="The functionality of animated particles in settings has been improved."
+                style="font-size: 13.5px; line-height: 1.3;">
+                Se mejoro el funcionamiento de particulas animadas en ajustes.</span>
+            </li>
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-gold); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/16249/16249811.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Se mejoro el diseño de la pildora en el menu.<br> <b>(Solo para iOS)</b>"
+                data-en="The design of the pill icon in the menu has been improved.<br> <b>(iOS only)</b>"
+                style="font-size: 13.5px; line-height: 1.3;">
+                Se mejoro el diseño de la pildora en el menu.<br> <b>(Solo para iOS)</b></span>
+            </li>
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue_dark); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
               <img src="https://cdn-icons-png.flaticon.com/128/4149/4149678.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
               <span data-es="Corrección de errores y mejoras" data-en="Bug fixes and improvements"
@@ -404,25 +458,15 @@
 
     <div id="install-popup" class="popup">
       <div class="popup-content" style="text-align: center; padding: 25px; max-width: 350px;">
-        <h2 class="glow" style="margin-top:0; font-size:22px;" data-es="📱 Instalar App" data-en="📱 Install App">📱
-          Instalar App</h2>
+        <h2 class="glow" style="margin-top:0; font-size:22px;" data-es="📱 Instalar WebApp" data-en="📱 Install WebApp">
+          📱
+          Instalar WebApp</h2>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-          <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()" data-es="Luego"
-            data-en="Later">Luego</button>
-          <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Sí, instalar" data-en="Install">Sí,
-            instalar</button>
+          <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()" data-es="Despues"
+            data-en="Later">Despues</button>
+          <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Instalar" data-en="Install">
+            Instalar</button>
         </div>
-      </div>
-    </div>
-
-    <div id="register-popup" class="popup">
-      <div class="popup-content" style="text-align: center; padding: 20px;">
-        <h2 class="glow" data-es="Registro de Usuario" data-en="User Registration">Registro de Usuario</h2>
-        <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo">
-        <input type="url" id="regLink" class="reg-input" placeholder="Link de tu canal de YouTube (Opcional)">
-        <input type="url" id="regAvatar" class="reg-input" placeholder="URL Foto (Opcional)">
-        <button class="btn" onclick="saveRegistration()" style="width: 100%" data-es="Aceptar"
-          data-en="Accept">Aceptar</button>
       </div>
     </div>
 
@@ -484,7 +528,7 @@
       <section id="home" class="section active">
         <div class="hero-banner">
           <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;"
-            data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Mobile!</h1>
+            data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Ports Mobile!</h1>
           <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;"
             data-es="El mejor lugar para descargar tus mods optimizados."
             data-en="The best place to download optimized mods.">El mejor lugar para descargar tus mods optimizados.</p>
@@ -946,14 +990,14 @@
         <div class="mods-grid" id="modsContainer">
 
           <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="16.78 MB"
-            id="card-mod98_0">
+            id="card-mod98_1">
             <span class="gama-badge gama-low">Baja</span>
             <button class="admin-pin-btn" onclick="toggleModPin('mod98_0', event)"
               style="display: flex; align-items: center; gap: 4px;">
               <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
                 style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
             </button>
-            <button class="admin-led-btn" id="btn-led-mod98_2" onclick="toggleGreenLed('mod98_0', event)"
+            <button class="admin-led-btn" id="btn-led-mod98_0" onclick="toggleGreenLed('mod98_0', event)"
               style="display: flex; align-items: center; gap: 4px;">
               <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
                 style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
@@ -979,11 +1023,11 @@
             <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
               <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
                 style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
-                id="dl-mod98_0">0</span>
+                id="dl-mod98_1">0</span>
             </div>
 
             <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
-              <button onclick="abrirMenuCompartir('mod98_0', 'GameOverse')"
+              <button onclick="abrirMenuCompartir('mod98_0', 'The Wish Super Funkin´ Galaxy')"
                 style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
                 <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
                   style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
@@ -991,7 +1035,8 @@
             </div>
 
             <h3><span class="led-dot led-green" id="led-green-mod98_0" style="display:none;"></span>The Wish Super
-              Funkin' Galaxy
+              Funkin´
+              Galaxy
             </h3>
             <div class="card-buttons">
               <button class="btn" onclick="openModInfo('mod98_0')" data-es="Más Info" data-en="More Info">Más
@@ -2523,7 +2568,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V6.3.0 <br>
+      © <span id="year"></span> LaloCF | V6.5.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
       </div>
     </footer>
@@ -2935,7 +2980,7 @@
         try {
           if (window.isSuperUser) return true;
           const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-          if (userProfile && (userProfile.key === "user_a655u37rr" || (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf'))) {
+          if (userProfile && (userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" || (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf'))) {
             return true;
           }
         } catch (error) {

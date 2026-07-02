@@ -14,8 +14,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v6.3.0";
-const MI_UID_ADMIN = "user_a655u37rr";
+const APP_VERSION = "v6.5.0";
+const MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 // ==========================================
 
@@ -53,6 +53,11 @@ onAuthStateChanged(auth, async (user) => {
       key: user.uid
     }));
 
+    // Iniciar escucha de notificaciones personales
+    if (window.listenToPersonalNotifications) {
+      window.listenToPersonalNotifications(user.uid);
+    }
+
   } else {
     if (localStorage.getItem('fnf_guest_mode') === 'true') {
       if (overlayAuth) overlayAuth.style.display = 'none';
@@ -75,7 +80,7 @@ window.iniciarSesionConGoogle = async function () {
   }
 
   if (btn) {
-    btn.innerHTML = "⏳ Abriendo Google...";
+    btn.innerHTML = "⏳ Accediendo a Google...";
     btn.style.background = "#ffea00";
     btn.style.color = "#000";
   }
@@ -164,7 +169,7 @@ window.abrirPerfil = async function () {
       
       <div style="background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
         
-        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Tu Apodo (Cambiable cada 15 días)</label>
+        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Usuario</label>
         <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
         
         <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">URL de Avatar / Logo (Opcional)</label>
@@ -243,12 +248,12 @@ let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
 
 if (userProfile && (
-  userProfile.key === MI_UID_ADMIN || 
-  userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" || 
+  userProfile.key === MI_UID_ADMIN ||
+  userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" ||
   (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf')
 )) {
   isSuperUser = true;
-  window.isSuperUser = true; // Export globally just in case
+  window.isSuperUser = true;
   document.body.classList.add('is-admin');
 }
 
@@ -409,6 +414,24 @@ onValue(ref(db, 'notifications/latest'), (snap) => {
     localStorage.setItem('last_notif_id', data.id);
   }
 });
+
+let personalNotifListener = null;
+window.listenToPersonalNotifications = (uid) => {
+  if (personalNotifListener) return; // Ya estamos escuchando
+  
+  const userNotifRef = ref(db, `user_notifications/${uid}`);
+  personalNotifListener = onValue(userNotifRef, (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    
+    const lastSeen = localStorage.getItem(`last_personal_notif_${uid}`);
+    if (lastSeen !== data.id) {
+      // Mostrar ventana de notificación personal
+      alert("🔔 Notificación sobre tu pedido:\n\n" + data.message);
+      localStorage.setItem(`last_personal_notif_${uid}`, data.id);
+    }
+  });
+};
 
 let currentModCommentsId = null;
 let modCommentsListener = null;
@@ -1615,22 +1638,38 @@ setTimeout(() => {
 
         requests.forEach(req => {
           const statusColors = {
-            'Pendiente': '#ffaa00',
-            'Aprobado': '#86ffffff',
-            'En Progreso': '#00eaff',
-            'Completado': '#0eff2eff'
+            'Pendiente': '#f2ff00ff',
+            'Seleccionado': '#0091ffff',
+            'En Progreso': '#ff8800ff',
+            'No Seleccionado': '#ff0000ee',
+            'Completado': '#00ff22ff'
           };
           const badgeColor = statusColors[req.status || 'Pendiente'] || '#ffaa00';
 
           let adminBtns = '';
           if (isSuperUser) {
+            const isProgress = req.status === 'En Progreso';
             adminBtns = `
-              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap;">
-                <button onclick="updateRequestStatus('${req.id}', 'Aprobado')" style="flex:1; background:#8888ff; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Aprobar</button>
-                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#00eaff; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">En Progreso</button>
-                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff88; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Completado</button>
-                <button onclick="deleteRequest('${req.id}')" style="background:#ff003c; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">✖</button>
+              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+                <button onclick="updateRequestStatus('${req.id}', 'Seleccionado')" style="flex:1; background:#0091ff; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Seleccionado</button>
+                <button onclick="updateRequestStatus('${req.id}', 'No Seleccionado')" style="flex:1; background:#ff0040; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">No Sel.</button>
+                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#ff8800; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">En Progreso</button>
+                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff22; color:black; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Completado</button>
+                <button onclick="deleteRequest('${req.id}')" style="background:#444; color:white; border:none; border-radius:6px; font-size:10px; cursor:pointer; padding:8px;">🗑️</button>
               </div>
+              ${isProgress ? `
+                <div style="margin-top:10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid #ff880055;">
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-bottom:8px; font-weight:bold;">
+                    <span>Progreso del Port</span>
+                    <span id="prog-val-${req.id}" style="color:#ff8800;">${req.progress || 0}%</span>
+                  </div>
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="range" min="0" max="100" value="${req.progress || 0}" style="flex:1; cursor:pointer; accent-color:#ff8800;" 
+                      oninput="document.getElementById('prog-val-${req.id}').innerText = this.value + '%'"
+                      onchange="updateRequestProgress('${req.id}', this.value)">
+                  </div>
+                </div>
+              ` : ''}
             `;
           }
 
@@ -1643,9 +1682,15 @@ setTimeout(() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div style="flex:1; padding-right:10px;">
                 <span style="font-size:10px; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 5px; border-radius:10px; text-transform:uppercase; font-weight:bold;">${req.status || 'Pendiente'}</span>
-                <h4 style="margin:5px 0; color:white; font-size:15px;">${req.modName}</h4>
+                <h4 style="margin:8px 0 5px 0; color:white; font-size:15px;">${req.modName}</h4>
                 ${req.link ? `<a href="${req.link}" target="_blank" style="color:var(--neon-pink); font-size:11px; text-decoration:underline;">Ver Link Original</a>` : ''}
-                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: ${req.user || 'Anónimo'}</p>
+                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: <b style="color:#aaa;">${req.user || 'Anónimo'}</b></p>
+                ${req.status === 'En Progreso' ? `
+                  <div style="margin-top:10px; background:rgba(255,255,255,0.05); border-radius:10px; height:6px; overflow:hidden; position:relative;">
+                    <div style="position:absolute; top:0; left:0; height:100%; width:${req.progress || 0}%; background:linear-gradient(90deg, #ff8800, #ffaa00); box-shadow:0 0 5px #ff8800; transition:width 0.3s ease;"></div>
+                  </div>
+                  <div style="text-align:right; font-size:9px; color:#ff8800; margin-top:2px; font-weight:bold;">${req.progress || 0}%</div>
+                ` : ''}
               </div>
               <div style="text-align:center;">
                 <button onclick="voteRequest('${req.id}')" class="btn" style="background:${isVoted ? 'var(--neon-green)' : '#333'}; color:${isVoted ? 'black' : 'white'}; border:none; border-radius:8px; width:45px; height:40px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 4px 0 ${isVoted ? '#00cc00' : '#111'}; transform:${isVoted ? 'translateY(2px)' : 'none'}; transition:all 0.1s;">
@@ -1663,10 +1708,9 @@ setTimeout(() => {
   };
 
   window.enviarSolicitudMod = async () => {
-    // Verificar que tenga perfil configurado
     const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
     if (!profile || !profile.nombre) {
-      alert("🔒 Debes iniciar sesión con Google para pedir mods.");
+      alert("🔒 Debes iniciar sesión con Google para poder solicitar mods.");
       if (document.getElementById('auth-overlay')) document.getElementById('auth-overlay').style.display = 'flex';
       return;
     }
@@ -1683,7 +1727,7 @@ setTimeout(() => {
 
     if (lastReqTime > 0 && daysPassed < 10) {
       const daysLeft = Math.ceil(10 - daysPassed);
-      return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${daysLeft} día(s) para tu próxima solicitud. Esto es para evitar una saturacion`);
+      return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${daysLeft} día(s) restantes para pedir otro mod. Esto es para evitar saturaciones.`);
     }
 
     const sendBtn = document.getElementById('btn-enviar-solicitud');
@@ -1700,7 +1744,7 @@ setTimeout(() => {
 
       if (activeCount >= 5) {
         if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
-        return alert("🛑 La lista de peticiones está llena (Máximo 5 activas). Por favor espera a que el Administrador termine los puertos pendientes.");
+        return alert("🛑 La lista de peticiones está llena (Máximo 5 activas). Por favor espera a que el Administrador termine los puertos pendientes. Esto es para evitar saturaciones.");
       }
 
       const snap = await push(ref(db, 'mod_requests'), {
@@ -1726,7 +1770,7 @@ setTimeout(() => {
       document.getElementById('req-mod-name').value = '';
       document.getElementById('req-mod-link').value = '';
       if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
-      alert("¡Solicitud enviada! 🎉 Ahora los demás pueden votar por ella.");
+      alert("¡Solicitud enviada! Ahora los demás usuarios pueden votar.");
 
     } catch (err) {
       console.error("Error al enviar solicitud:", err);
@@ -1748,9 +1792,40 @@ setTimeout(() => {
     localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
   };
 
-  window.updateRequestStatus = (id, status) => {
+  window.updateRequestStatus = async (id, status) => {
     if (!isSuperUser) return;
-    update(ref(db, `mod_requests/${id}`), { status });
+    
+    // Obtener datos del pedido para saber a quién notificar
+    const reqSnap = await get(ref(db, `mod_requests/${id}`));
+    const reqData = reqSnap.val();
+    if (!reqData) return;
+    
+    await update(ref(db, `mod_requests/${id}`), { status });
+    
+    // Enviar notificación al dueño del pedido si no es invitado
+    if (reqData.ownerKey && reqData.ownerKey !== 'guest') {
+      let message = '';
+      if (status === 'Seleccionado') {
+        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" fue seleccionado, puedes ver el progreso que lleva de terminado el port.`;
+      } else if (status === 'No Seleccionado') {
+        message = `Hola ${reqData.user}, lamentablemente tu mod "${reqData.modName}" no fue seleccionado por pocos votos, puedes intentar de nuevo subir el mod en 10 dias.`;
+      } else if (status === 'Completado') {
+        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" que pediste fue completado, puedes encontrarlo en el menú de mods.`;
+      }
+      
+      if (message) {
+        await set(ref(db, `user_notifications/${reqData.ownerKey}`), {
+          message: message,
+          timestamp: Date.now(),
+          id: Math.random().toString(36).substr(2, 9)
+        });
+      }
+    }
+  };
+
+  window.updateRequestProgress = (id, progress) => {
+    if (!isSuperUser) return;
+    update(ref(db, `mod_requests/${id}`), { progress: parseInt(progress) });
   };
 
   window.deleteRequest = (id) => {
@@ -1877,17 +1952,47 @@ const toggleParticles = (enable) => {
   const container = document.getElementById('particles-container');
   if (!container) return;
   if (enable) {
+    if (particleInterval) clearInterval(particleInterval);
     container.style.display = 'block';
+
+    const spawnValRaw = parseInt(localStorage.getItem('particlesSpawn') || '25');
+    const spawnRate = Math.max(100, 2500 - (spawnValRaw * 24));
+
+    const speedValRaw = parseInt(localStorage.getItem('particlesSpeed') || '50');
+    const baseSpeed = 14 - (speedValRaw * 0.12);
+
     particleInterval = setInterval(() => {
       const p = document.createElement('div');
       p.className = 'fnf-particle';
-      p.innerText = Math.random() > 0.5 ? '🎵' : '✦';
+
+      const flechas = [
+        'assets/images/Particles/down.webp',
+        'assets/images/Particles/left.webp',
+        'assets/images/Particles/right.webp',
+        'assets/images/Particles/up.webp'
+      ];
+
+      const img = document.createElement('img');
+      img.src = flechas[Math.floor(Math.random() * flechas.length)];
+
+      img.onerror = () => {
+        const base = 'https://raw.githubusercontent.com/LaloCF2/fnf_ports/main/assets/images/Particles/';
+        img.onerror = null;
+        img.src = base + ['down', 'left', 'right', 'up'][Math.floor(Math.random() * 4)] + '.webp';
+      };
+
+      const escalaAleatoria = Math.random() * 0.5 + 0.8;
+      img.style.transform = `scale(${escalaAleatoria})`;
+
+      p.appendChild(img);
+
       p.style.left = Math.random() * 100 + 'vw';
-      p.style.fontSize = (Math.random() * 15 + 10) + 'px';
-      p.style.animationDuration = (Math.random() * 4 + 4) + 's';
+      const dur = Math.random() * (baseSpeed / 2) + baseSpeed;
+      p.style.animationDuration = dur + 's';
       container.appendChild(p);
-      setTimeout(() => p.remove(), 8000);
-    }, 400);
+
+      setTimeout(() => p.remove(), (dur + 2) * 1000);
+    }, spawnRate);
   } else {
     clearInterval(particleInterval);
     container.style.display = 'none';
@@ -1979,12 +2084,46 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const particlesToggle = document.getElementById('particlesToggle');
+  const particleSettings = document.getElementById('particle-settings-container');
   if (particlesToggle) {
     particlesToggle.checked = localStorage.getItem('particlesMode') === 'true';
+    if (particleSettings) particleSettings.style.display = particlesToggle.checked ? 'block' : 'none';
+
     if (particlesToggle.checked && localStorage.getItem('lowEndMode') !== 'true') toggleParticles(true);
     particlesToggle.addEventListener('change', (e) => {
       localStorage.setItem('particlesMode', e.target.checked);
+      if (particleSettings) particleSettings.style.display = e.target.checked ? 'block' : 'none';
       toggleParticles(e.target.checked);
+    });
+  }
+
+  const particleScaleSlider = document.getElementById('particleScaleSlider');
+  if (particleScaleSlider) {
+    particleScaleSlider.value = localStorage.getItem('particlesScale') || '40';
+    document.documentElement.style.setProperty('--escala-particulas', particleScaleSlider.value + 'px');
+    particleScaleSlider.addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--escala-particulas', e.target.value + 'px');
+      localStorage.setItem('particlesScale', e.target.value);
+    });
+  }
+
+  const particleSpawnSlider = document.getElementById('particleSpawnSlider');
+  if (particleSpawnSlider) {
+    particleSpawnSlider.value = localStorage.getItem('particlesSpawn') || '25';
+    particleSpawnSlider.addEventListener('change', (e) => {
+      localStorage.setItem('particlesSpawn', e.target.value);
+      if (particlesToggle && particlesToggle.checked) {
+        toggleParticles(false);
+        toggleParticles(true);
+      }
+    });
+  }
+
+  const particleSpeedSlider = document.getElementById('particleSpeedSlider');
+  if (particleSpeedSlider) {
+    particleSpeedSlider.value = localStorage.getItem('particlesSpeed') || '50';
+    particleSpeedSlider.addEventListener('change', (e) => {
+      localStorage.setItem('particlesSpeed', e.target.value);
     });
   }
 
@@ -2081,8 +2220,28 @@ document.addEventListener('DOMContentLoaded', () => {
         pill.classList.remove('is-dragging');
         const target = navItems[index];
         if (target) {
+          let currentX = 0;
+          const transformMatch = pill.style.transform.match(/translateX\(([^p]+)px\)/);
+          if (transformMatch) currentX = parseFloat(transformMatch[1]);
+
+          const targetX = target.offsetLeft;
+          const distance = Math.abs(targetX - currentX);
+
           pill.style.width = `${target.offsetWidth}px`;
-          pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`;
+
+          if (distance > 30) {
+            const stretch = Math.min(1 + (distance * 0.002), 1.35);
+            const skew = targetX > currentX ? -10 : 10;
+
+            pill.style.transform = `translateX(${currentX + (targetX - currentX) * 0.5}px) scaleX(${stretch}) scaleY(${1 / stretch}) skewX(${skew}deg)`;
+
+            setTimeout(() => {
+              pill.style.transform = `translateX(${targetX}px) scaleX(1) scaleY(1) skewX(0deg)`;
+            }, 100);
+          } else {
+            pill.style.transform = `translateX(${targetX}px) scaleX(1) scaleY(1) skewX(0deg)`;
+          }
+
           window.triggerVibrate(25);
         }
       };
@@ -2095,6 +2254,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       let isDraggingPill = false;
+      let lastXPos = null;
 
       const moveDrag = (e) => {
         if (!e.touches && !isDraggingPill) return;
@@ -2106,9 +2266,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const navRect = nav.getBoundingClientRect();
         let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
 
+        let stretch = 1.15;
+        let skew = 0;
+        if (lastXPos !== null) {
+          const diff = xPos - lastXPos;
+          const velocity = Math.min(Math.abs(diff), 25);
+          stretch = 1 + (velocity * 0.02);
+          skew = diff > 0 ? velocity * -0.6 : velocity * 0.6;
+        }
+        lastXPos = xPos;
+
         const itemWidth = navRect.width / navItems.length;
         let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
-        pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+
+        pill.style.transform = `translateX(${visualX}px) scaleX(${stretch}) scaleY(${1 / stretch}) skewX(${skew}deg)`;
 
         const hoveredIndex = Math.floor(xPos / itemWidth);
         const targetItem = navItems[hoveredIndex];
@@ -2127,6 +2298,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const endDrag = () => {
         if (isDraggingPill) {
           isDraggingPill = false;
+          lastXPos = null;
           const activeItem = document.querySelector('.nav-item.active');
           const index = Array.from(navItems).indexOf(activeItem);
           if (index !== -1) snapPill(index);
@@ -2226,7 +2398,7 @@ window.reportError = async (modId) => {
     const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
     const chatId = "5429172831";
 
-    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod a sido puesto en cuarentena automáticamente.\n\n🛠️ ¡Entra a repararlo!`;
+    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod se a cerrado.\n\n🛠️ ¡Entra a repararlo!`;
 
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 

@@ -418,12 +418,12 @@ onValue(ref(db, 'notifications/latest'), (snap) => {
 let personalNotifListener = null;
 window.listenToPersonalNotifications = (uid) => {
   if (personalNotifListener) return; // Ya estamos escuchando
-  
+
   const userNotifRef = ref(db, `user_notifications/${uid}`);
   personalNotifListener = onValue(userNotifRef, (snap) => {
     const data = snap.val();
     if (!data) return;
-    
+
     const lastSeen = localStorage.getItem(`last_personal_notif_${uid}`);
     if (lastSeen !== data.id) {
       // Mostrar ventana de notificación personal
@@ -1794,14 +1794,14 @@ setTimeout(() => {
 
   window.updateRequestStatus = async (id, status) => {
     if (!isSuperUser) return;
-    
+
     // Obtener datos del pedido para saber a quién notificar
     const reqSnap = await get(ref(db, `mod_requests/${id}`));
     const reqData = reqSnap.val();
     if (!reqData) return;
-    
+
     await update(ref(db, `mod_requests/${id}`), { status });
-    
+
     // Enviar notificación al dueño del pedido si no es invitado
     if (reqData.ownerKey && reqData.ownerKey !== 'guest') {
       let message = '';
@@ -1812,7 +1812,7 @@ setTimeout(() => {
       } else if (status === 'Completado') {
         message = `Hola ${reqData.user}, tu mod "${reqData.modName}" que pediste fue completado, puedes encontrarlo en el menú de mods.`;
       }
-      
+
       if (message) {
         await set(ref(db, `user_notifications/${reqData.ownerKey}`), {
           message: message,
@@ -2793,4 +2793,82 @@ document.addEventListener("DOMContentLoaded", () => {
       card.insertBefore(tagsContainer, cardButtons);
     }
   });
+
+  // --- Efecto Holográfico 3D (Cartas de Mods) ---
+  let rafId = null;
+
+  // Para PC: Movimiento del ratón (Event Delegation)
+  document.addEventListener('mousemove', (e) => {
+    const card = e.target.closest('.apk-card, .mod-card');
+    if (card) {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        if(rect.width === 0 || rect.height === 0) return;
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Inclinación máxima de 15 grados
+        const rotateX = ((y - centerY) / centerY) * -15;
+        const rotateY = ((x - centerX) / centerX) * 15;
+        
+        // Posición del brillo holográfico
+        const glareX = (x / rect.width) * 100;
+        const glareY = (y / rect.height) * 100;
+
+        card.style.setProperty('--rx', `${rotateX}deg`);
+        card.style.setProperty('--ry', `${rotateY}deg`);
+        card.style.setProperty('--gx', `${glareX}%`);
+        card.style.setProperty('--gy', `${glareY}%`);
+        card.style.setProperty('--g-opacity', '1');
+      });
+    }
+  });
+
+  // Restaurar la carta al salir el cursor
+  document.addEventListener('mouseout', (e) => {
+    const card = e.target.closest('.apk-card, .mod-card');
+    if (card && !card.contains(e.relatedTarget)) {
+      if (rafId) cancelAnimationFrame(rafId);
+      card.style.setProperty('--rx', `0deg`);
+      card.style.setProperty('--ry', `0deg`);
+      card.style.setProperty('--g-opacity', '0');
+    }
+  });
+
+  // Para Móvil: Giroscopio (DeviceOrientation) super optimizado
+  let deviceRafId = null;
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.beta === null || e.gamma === null) return;
+    
+    if (deviceRafId) cancelAnimationFrame(deviceRafId);
+    deviceRafId = requestAnimationFrame(() => {
+      let beta = e.beta;
+      let gamma = e.gamma;
+      
+      // Limitar ángulos a +-30 para que no gire de más
+      if (beta > 30) beta = 30;
+      if (beta < -30) beta = -30;
+      if (gamma > 30) gamma = 30;
+      if (gamma < -30) gamma = -30;
+      
+      const rotateX = (beta / 30) * 15;
+      const rotateY = (gamma / 30) * 15;
+      
+      const glareX = ((gamma + 30) / 60) * 100;
+      const glareY = ((beta + 30) / 60) * 100;
+
+      // Aplicar variables globales al root (para todas las cartas)
+      const root = document.documentElement;
+      root.style.setProperty('--m-rx', `${-rotateX}deg`);
+      root.style.setProperty('--m-ry', `${rotateY}deg`);
+      root.style.setProperty('--m-gx', `${glareX}%`);
+      root.style.setProperty('--m-gy', `${glareY}%`);
+      root.style.setProperty('--m-g-opacity', '0.6'); // Brillo constante moderado en móvil
+    });
+  });
+
 });

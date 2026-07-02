@@ -1369,6 +1369,25 @@ window.closeUpdatePopup = () => {
   }
 };
 
+window.openDonatePopup = () => {
+  document.getElementById('donate-popup').classList.add('show');
+  if (window.triggerVibrate) window.triggerVibrate(15);
+};
+
+window.closeDonatePopup = () => {
+  document.getElementById('donate-popup').classList.remove('show');
+  if (window.triggerVibrate) window.triggerVibrate(10);
+};
+
+window.copyCLABE = () => {
+  const clabe = document.getElementById('clabe-number').innerText;
+  navigator.clipboard.writeText(clabe).then(() => {
+    alert("¡Número copiado al portapapeles! 📋");
+  }).catch(err => {
+    alert("Error al copiar: " + err);
+  });
+};
+
 window.installApp = async () => {
   document.getElementById('install-popup').classList.remove('show');
   if (deferredPrompt) {

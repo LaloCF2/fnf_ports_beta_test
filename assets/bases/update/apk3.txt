@@ -1,0 +1,28 @@
+¡Versión v1.0.1
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• NUEVO ACTUALIZADOR AUTOMÁTICO! Actualizará automáticamente el ejecutable y la carpeta de recursos a la última versión.
+• ¡NUEVO SISTEMA DE VARIACIONES DE CANCIONES! Ahora puedes dividir las canciones entre variaciones.
+• Nuevas camGameZoomMultvariables camHUDZoomMultpara cambiar el zoom de la cámara
+• Nueva combinación de teclas para cambiar de modo de juego (preparada para el futuro)
+• Se agregó una corrección de ruta de Linux para mayor compatibilidad (ya no es necesario ajustar el mod) (también se aplica a macOS).
+• El modo Freeplay ahora cambia la vista previa de la canción cuando hay variaciones de la misma.
+• onSongEndAhora se puede cancelar
+• Se corrigieron los eventos no apilados en el estatuto.
+• Se corrigió la advertencia de configuración de mods al habilitar WarningState.hx.
+• Se solucionó el problema de que los iconos tuvieran tamaños inconsistentes entre los menús.
+• Se corrigió el fallo de XML de opciones xml
+• Inversión de componentes del alfabeto fijo
+• Se corrigieron errores que provocaban fallos relacionados con la falta de voces.
+• Se corrigió el error que provocaba que la llamada de audio finalizara dos veces.
+• Se corrigieron errores relacionados con el guardado de datos de gráficos (guardado de gráficos y valores de etapas).
+• Se corrigió needsVoices (ahora debería deshabilitar la carga de voces cuando se establece en falso).
+• Se solucionó el problema que provocaba que se saltara aleatoriamente la siguiente canción.
+• Se corrigió el error que hacía que beatHit se ejecutara dos veces al inicio.
+• Se corrigieron algunos errores de traducción.
+• Utiliza correctamente el título y el icono del mod para el título y el icono de la ventana.
+• ( Flags.WINDOW_TITLE_USE_MOD_NAME)
+• Traducciones adicionales al polaco
+• Claves de traducción adicionales
+• Correcciones adicionales para Funkin Modchart y actualización de la biblioteca a la versión 1.2.3.
+
+-- ¡Obtenido desde los repositorios de GitHub! --

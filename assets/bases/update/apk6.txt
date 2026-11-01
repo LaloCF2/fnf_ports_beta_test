@@ -1,0 +1,23 @@
+¡Versión v1.8.0 HOTFIX!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• En ChartingState, ahora puedes hacer clic derecho y arrastrar las flechas y los eventos colocados. En las versiones para móviles, pulsa la tecla L para activar el modo de movimiento de flechas. La interfaz de usuario se ha actualizado para imitar a PsychEngine 1.0.
+• Se agregó "Tags" (también llamado "JustSay") ( ¿qué es JustSay? ) en la parte inferior izquierda de la pantalla de precarga. Ahora se muestra un círculo de carga en la esquina superior derecha; puedes comprobar si está girando para saber si el juego se ha bloqueado.
+CopyState ahora reemplazará todos los archivos que no coincidan con los recursos internos (tamaño de memoria). Si ha modificado alguna textura, haga una copia de seguridad o muévala a la carpeta de mods correspondiente (por ejemplo, muévala assets/images/menuExtend/watermark.pnga mods/images/menuExtend/watermark.png).
+• El cálculo de la dificultad en el modo libre se ha reescrito para imitar el sistema de clasificación por estrellas de osu! (¡fase de pruebas!):
+Fácil : 0,0★–1,99★
+Normal : 2,0★–3,99★
+Dificultad : 4.0★–5.99★
+Insano : 6.0★–7.99★
+Experto : 8.0★–10+★
+• Si el número de versión assets/shared/version.txtdifiere de la versión actual del juego, el motor forzará un proceso de copia de archivos. Esto soluciona los problemas causados ​​por los usuarios que no activan la copia automática de archivos después de las actualizaciones.
+• Ahora, en la esquina superior derecha del menú principal se muestra la hora de la última actualización de las Acciones de GitHub de NovaFlare-Engine (requiere conexión a internet). Nota: Esta información es solo de referencia y no refleja la versión que estás jugando.
+Se ha añadido un interruptor para activar/desactivar la limpieza automática de memoria.
+• El menú de pausa ya no tiene retardo al cerrarse.
+• Estado de juego libre optimizado.
+• Estado de opción optimizado.
+• Se ha añadido compatibilidad para leer archivos JSON creados por el editor de escenarios de Psych Engine 1.0.
+• Se corrigieron problemas de visualización de finalización de video anormal en TitleState y PlayState.
+• Se han solucionado los problemas de bloqueo que se producían al activarse las repeticiones.
+• Optimizar el código subyacente
+
+-- ¡Obtenido desde los repositorios de GitHub! --

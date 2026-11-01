@@ -1,0 +1,12 @@
+¡Versión v4.5.2!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Esta versión finalmente incorpora la implementación adecuada de firebase-crashlytics y también corrige algunos problemas menores.
+
+Lo más destacable:
+
+• El raro fallo de Android debería haber desaparecido.
+• Mejores análisis de accidentes
+• Las malas calificaciones ahora provocan una ruptura de combo
+• Dividir algunos ajustes en los nuevos "Ajustes de V-Slice".
+
+-- ¡Obtenido desde los repositorios de GitHub! --

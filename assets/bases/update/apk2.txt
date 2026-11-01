@@ -1,0 +1,12 @@
+¡Versión v0.14.5!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• Se agregó una sección a los temas favoritos en el menú de selección.
+• Los iconos del menú (excepto los créditos) ahora se cargan de forma asíncrona, lo que significa que su carga no afecta demasiado al rendimiento del juego.
+• Los mods en la carpeta mods ahora se priorizan de forma global primero, local último.
+• Se agregó readyuna animación para cuando alguien está listo en el vestíbulo.
+• Seleccionar canciones en línea con mods que no tienen una URL válida ahora requiere una confirmación para poder establecer la canción.
+• Se corrigieron los fallos que ocurrían al añadir animaciones a los sprites de flxanimate.
+• Se solucionó el fallo del sistema en modo habitación cuando no se ha establecido ninguna conexión en un corto período de tiempo.
+• Se corrigieron varios fallos.
+
+-- ¡Obtenido desde los repositorios de GitHub! --

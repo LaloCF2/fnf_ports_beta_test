@@ -1,0 +1,5 @@
+¡Nueva Versión v1.1.0 disponible!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Se corrigió el bug de la pantalla negra en iOS.
+✅ Se optimizó el Keystroke Counter para que no gaste batería.
+✅ Añadido soporte premium para mandos en Android.

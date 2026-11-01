@@ -1,0 +1,10 @@
+¡Versión v0.4.6!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• Ya no se necesitan 4 APK diferentes para cada tipo de almacenamiento.
+• Nombre de paquete diferente: com.shadowmario.psychengine=>com.tposejank.psychengineek
+• Nombre de carpeta de tipo de almacenamiento EXTERNO diferente: .PsychEngine=>.PsychEngineEK
+• Se corrigió un error EditorPlayStaterelacionado PlayStatecon las demostraciones de atajos de teclado.
+• Mejora la utilización del almacenamiento
+• Cambios de versión de 0.4.5 a 0.4.6
+
+-- ¡Obtenido desde los repositorios de GitHub! --

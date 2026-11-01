@@ -1,0 +1,13 @@
+¡Versión v0.9.8!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• Cambié hxluajit por hxluau (somos tan roblox, sí)
+• Se cambió SScript por ShadowScript (una bifurcación mejorada de hscript).
+• Se han renovado Flixel y OpenFL para usar los de Funkin.
+• Códigos V-Slice actualizados
+• iOS corregido (una vez más)(¿Quizás no?)
+• Añadí estados programados para estados vacíos, no sé.
+• Se agregó ShadowCamera para corregir las transiciones.
+
+El cambio más importante es que ahora el juego usa SDL3. Esto significa que la mayoría de los errores para móviles están solucionados y el bucle principal ahora utiliza un tiempo delta de nanosegundos.
+
+-- ¡Obtenido desde los repositorios de GitHub! --

@@ -1,0 +1,22 @@
+¡Versión v1.0.1!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• El error de almacenamiento en Android ha sido corregido.
+• Se ha restablecido la sincronización vertical (V-Sync).
+• Nueva interfaz de usuario de Freeplay; puedes alternar entre la interfaz de usuario de Psych y la nueva en la configuración.
+• Nuevo administrador de archivos para usuarios de Android; acceda a él desde Opciones => Ajustes del móvil => Abrir administrador de archivos.
+• Nueva opción para permitir que la barra de salud supere los límites establecidos.
+• Se ha restaurado la puntuación de Psicología predeterminada; puedes cambiarla en la configuración.
+• Se ha añadido una opción para evitar que el texto de tiempo aparezca en PlayState (a este ritmo, PlayState debería verse igual que en Psych Engine =p).
+• Se ha añadido un menú desplegable nativo para Android.
+• Se ha solucionado un problema con el cuadro de texto que provocaba que se saltara una letra al borrar.
+• Nuevo modificador de juego: Drenaje del oponente.
+• Nuevo analizador de gráficos mejorado para este motor, "psych_v2", para una carga de gráficos más rápida.
+• Nueva opción experimental para usuarios de Android: WavyTimeBar. Esta opción mostrará la barra de tiempo con un patrón ondulado en lugar del formato estándar. Original:
+https://github.com/user-attachments/assets/2dc71f03-6146-438d-90fb-f1f2e34a50cd
+• Se ha corregido la lógica y la posición de los botones para activar/desactivar todos los mods en el menú de mods.
+• Ahora, los efectos Sustains Splashes podrán personalizarse desde su propio editor integrado en el menú del editor principal.
+• Nuevos convertidores de gráficos: "codename to psych" y "nmv (nightmare vision) to psych".
+• Se ha vuelto a añadir la transición propia del motor.
+• Se ha corregido la posición "y" de la dificultad en el menú de la historia.
+
+-- ¡Obtenido desde los repositorios de GitHub! --

@@ -1,0 +1,696 @@
+﻿<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>FNF' Ports Mobile</title>
+  <meta name="description" content="Los mejores ports de Friday Night Funkin' para móvil: bases, mods y scripts.">
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" type="image/png" href="assets/icons/logo192.png">
+  <link rel="apple-touch-icon" href="assets/icons/logo192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f3cdee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Preferencias antes de pintar (evita parpadeo) -->
+  <script>
+    (function () {
+      var s = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+      var theme = s('fnf_theme');
+      document.documentElement.setAttribute('data-theme', theme === 'dark' || theme === 'oled' ? 'dark' : 'light');
+      var accent = s('customThemeColor');
+      if (accent && accent !== '#00eaff') document.documentElement.style.setProperty('--accent', accent);
+      var blur = s('glassBlur');
+      if (blur) document.documentElement.style.setProperty('--glass-blur', blur + 'px');
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <!-- Sprite de iconos SVG -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v4M12 18h.01"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  </svg>
+
+  <div id="global-loader"><div class="spinner"></div><p>Cargando</p></div>
+
+  <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div id="particles-container"></div>
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- =================== APP =================== -->
+  <div class="app">
+
+    <header class="topbar">
+      <div class="greet">
+        <small id="greet-time">¡Hola!</small>
+        <h1 id="greet-name">FNF' Ports</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleNotificaciones()" aria-label="Notificaciones">
+          <svg class="icon"><use href="#i-bell"/></svg>
+          <span id="badge-contador" class="badge-dot" style="display:none">0</span>
+        </button>
+        <button class="icon-btn" onclick="openPopup('settings-popup')" aria-label="Ajustes">
+          <svg class="icon"><use href="#i-sliders"/></svg>
+        </button>
+        <button class="icon-btn avatar-btn" onclick="abrirPerfil()" aria-label="Perfil" id="profileBtn">
+          <svg class="icon"><use href="#i-user"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Banner global (se controla desde Panel de admin → Avisos) -->
+    <div id="site-banner" class="site-banner glass hidden" role="status">
+      <svg class="icon icon-sm"><use href="#i-bell"/></svg>
+      <span id="site-banner-text"></span>
+      <button onclick="dismissBanner()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+    <div id="maintenance-admin-note" class="site-banner banner-warn glass hidden">🚧 Modo mantenimiento activo: solo tú ves la página.</div>
+
+    <main>
+      <!-- ---------- INICIO ---------- -->
+      <section id="home" class="section active">
+        <div class="hero glass">
+          <div class="status-chip"><span id="statusDot" class="status-dot"></span><span id="statusText">Conectando...</span></div>
+          <h1 id="fnf-title" class="fnf-title">Friday Night Funkin'</h1>
+          <p data-es="El mejor lugar para descargar tus mods optimizados para móvil."
+            data-en="The best place to download optimized mods for mobile.">El mejor lugar para descargar tus mods optimizados para móvil.</p>
+          <button class="btn" onclick="selectSection('mods')">
+            <svg class="icon icon-sm"><use href="#i-music"/></svg>
+            <span data-es="Explorar MODs" data-en="Explore MODs">Explorar MODs</span>
+          </button>
+        </div>
+
+        <div class="section-head"><h2 data-es="Explorar" data-en="Explore">Explorar</h2></div>
+        <div class="tiles stagger">
+          <button class="tile glass featured" style="--i:0" onclick="selectSection('mods')">
+            <span class="tile-icon"><svg class="icon"><use href="#i-music"/></svg></span>
+            <span><strong>MODs</strong><small id="tile-mods">—</small></span>
+          </button>
+          <button class="tile glass" style="--i:1" onclick="selectSection('apks')">
+            <span class="tile-icon"><svg class="icon"><use href="#i-layers"/></svg></span>
+            <span><strong data-es="Bases" data-en="Engines">Bases</strong><small id="tile-apks">—</small></span>
+          </button>
+          <button class="tile glass" style="--i:2" onclick="selectSection('scripts')">
+            <span class="tile-icon"><svg class="icon"><use href="#i-code"/></svg></span>
+            <span><strong>Scripts</strong><small id="tile-scripts">—</small></span>
+          </button>
+          <button class="tile glass" style="--i:3" onclick="abrirFavoritos()">
+            <span class="tile-icon"><svg class="icon"><use href="#i-heart"/></svg></span>
+            <span><strong data-es="Favoritos" data-en="Favorites">Favoritos</strong><small id="tile-favs">—</small></span>
+          </button>
+        </div>
+
+        <div id="top-week-wrap" hidden>
+          <div class="section-head"><h2 id="top-week-title">🔥 Top de la semana</h2></div>
+          <div class="top-list glass" id="top-week"></div>
+        </div>
+
+        <div class="card glass">
+          <h3 data-es="¿De qué trata esta página?" data-en="What is this page about?">¿De qué trata esta página?</h3>
+          <p data-es="Aquí subo la mayoría de <b>MODs, Bases y Scripts para móviles</b>, con mejores optimizaciones, información detallada y una experiencia cómoda."
+            data-en="Here I upload most <b>MODs, Engines and Scripts for mobile</b>, with better optimizations, detailed info and a comfortable experience.">
+            Aquí subo la mayoría de <b>MODs, Bases y Scripts para móviles</b>, con mejores optimizaciones, información detallada y una experiencia cómoda.</p>
+          <ul class="feature-list">
+            <li><span class="fi"><svg class="icon icon-sm"><use href="#i-download"/></svg></span>
+              <span data-es="<b>Descargas directas:</b> enlaces limpios, sin acortadores." data-en="<b>Direct downloads:</b> clean links, no shorteners."><b>Descargas directas:</b> enlaces limpios, sin acortadores.</span></li>
+            <li><span class="fi"><svg class="icon icon-sm"><use href="#i-phone"/></svg></span>
+              <span data-es="<b>Optimización total:</b> versiones que corren bien en celulares de todas las gamas." data-en="<b>Full optimization:</b> versions that run well on every phone."><b>Optimización total:</b> versiones que corren bien en celulares de todas las gamas.</span></li>
+            <li><span class="fi"><svg class="icon icon-sm"><use href="#i-code"/></svg></span>
+              <span data-es="<b>Scripts especiales:</b> código suelto para añadir a tus propios juegos." data-en="<b>Special scripts:</b> code you can add to your own games."><b>Scripts especiales:</b> código suelto para añadir a tus propios juegos.</span></li>
+            <li><span class="fi"><svg class="icon icon-sm"><use href="#i-users"/></svg></span>
+              <span data-es="<b>Comunidad activa:</b> chatea, da likes y comparte tu opinión." data-en="<b>Active community:</b> chat, like and share your opinion."><b>Comunidad activa:</b> chatea, da likes y comparte tu opinión.</span></li>
+            <li><span class="fi"><svg class="icon icon-sm"><use href="#i-bell"/></svg></span>
+              <span data-es="<b>Actualizaciones constantes:</b> si tienes dudas o ideas, contáctame. ¡Ánimo!" data-en="<b>Constant updates:</b> questions or ideas? Contact me!"><b>Actualizaciones constantes:</b> si tienes dudas o ideas, contáctame. ¡Ánimo!</span></li>
+          </ul>
+        </div>
+
+        <div class="card glass promo">
+          <span class="tile-icon"><svg class="icon"><use href="#i-image"/></svg></span>
+          <div>
+            <h3>Spritesheet Generator FNF</h3>
+            <p style="color:var(--text-2);font-size:13px" data-es="Crea y edita spritesheets directamente en tu móvil." data-en="Make and edit spritesheets right on your phone.">Crea y edita spritesheets directamente en tu móvil.</p>
+          </div>
+          <a class="btn btn-sm" href="https://lalocf2.github.io/spritesheet-generator-fnf/" target="_blank" rel="noopener" data-es="Abrir" data-en="Open">Abrir</a>
+        </div>
+      </section>
+
+      <!-- Búsqueda compartida (Bases / MODs / Scripts) -->
+      <div id="searchContainer" class="search glass hidden">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="search" id="globalSearch" placeholder="Buscar..." oninput="filterContent()" autocomplete="off">
+      </div>
+
+      <!-- ---------- BASES ---------- -->
+      <section id="apks" class="section">
+        <div class="section-head"><h2 data-es="Bases" data-en="Engines">Bases</h2><span class="count" id="count-apks-label"></span></div>
+        <div class="grid stagger" id="apksContainer"></div>
+      </section>
+
+      <!-- ---------- MODS ---------- -->
+      <section id="mods" class="section">
+        <div class="section-head"><h2 data-es="MODs disponibles" data-en="Available MODs">MODs disponibles</h2><span class="count" id="count-mods-label"></span></div>
+        <button class="device-bar glass" onclick="abrirSelectorRam()">
+          <span id="device-label">📱 ¿Cuánta RAM tiene tu celular? Toca aquí</span>
+          <small data-es="Cambiar" data-en="Change">Cambiar</small>
+        </button>
+        <div class="chips" id="filterContainer">
+          <button class="chip active" data-gama="all" onclick="setFilter('all', this)" data-es="Todos" data-en="All">Todos</button>
+          <button class="chip hidden" id="compatChip" onclick="toggleOnlyCompat(this)"><span data-es="✅ Solo compatibles" data-en="✅ Compatible only">✅ Solo compatibles</span></button>
+          <button class="chip gama-low" data-gama="low" onclick="setFilter('low', this)"><span class="dot"></span><span data-es="Gama baja" data-en="Low end">Gama baja</span></button>
+          <button class="chip gama-mid" data-gama="mid" onclick="setFilter('mid', this)"><span class="dot"></span><span data-es="Gama media" data-en="Mid end">Gama media</span></button>
+          <button class="chip gama-high" data-gama="high" onclick="setFilter('high', this)"><span class="dot"></span><span data-es="Gama alta" data-en="High end">Gama alta</span></button>
+        </div>
+        <div class="toolbar">
+          <label class="select-chip glass"><span data-es="Ordenar" data-en="Sort">Ordenar</span>
+            <select id="sortSelect" onchange="setSort(this.value)">
+              <option value="recent" data-es="Recientes" data-en="Newest">Recientes</option>
+              <option value="popular" data-es="Más descargados" data-en="Most downloaded">Más descargados</option>
+              <option value="rated" data-es="Mejor valorados" data-en="Top rated">Mejor valorados</option>
+              <option value="az">A – Z</option>
+            </select>
+          </label>
+          <label class="select-chip glass"><span data-es="Motor" data-en="Engine">Motor</span>
+            <select id="engineFilter" onchange="filterContent(true)"><option value="all">Todos</option></select>
+          </label>
+        </div>
+        <div class="grid stagger" id="modsContainer"></div>
+      </section>
+
+      <!-- ---------- PANEL DE ADMIN (solo con la sesión del admin) ---------- -->
+      <section id="admin" class="section">
+        <div class="section-head"><h2>Panel de admin</h2></div>
+        <div class="seg" id="admin-tabs"></div>
+        <div id="admin-panel"></div>
+      </section>
+
+      <!-- ---------- SCRIPTS ---------- -->
+      <section id="scripts" class="section">
+        <div class="section-head"><h2 data-es="Scripts y utilidades" data-en="Scripts & utilities">Scripts y utilidades</h2><span class="count" id="count-scripts-label"></span></div>
+        <div class="grid stagger" id="scriptsContainer"></div>
+      </section>
+
+      <!-- ---------- AYUDA ---------- -->
+      <section id="help" class="section">
+        <div class="section-head"><h2 data-es="Tutoriales y ayuda" data-en="Tutorials & help">Tutoriales y ayuda</h2></div>
+        <div class="faq-item glass">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-es="¿Cómo instalar un MOD en Psych Engine Mobile?" data-en="How to install a MOD in Psych Engine Mobile?">¿Cómo instalar un MOD en Psych Engine Mobile?</span>
+            <svg class="icon"><use href="#i-down"/></svg>
+          </button>
+          <div class="faq-content"><div><div class="faq-inner">
+            <p data-es="<b>Paso 1:</b> Ten instalado el motor o la base del juego y ábrelo una vez para que se descompriman sus archivos."
+              data-en="<b>Step 1:</b> Install the game engine and open it once so its files are extracted."><b>Paso 1:</b> Ten instalado el motor o la base del juego y ábrelo una vez para que se descompriman sus archivos.</p>
+            <img src="assets/images/help/mod/1.webp" alt="" loading="lazy">
+            <p data-es="<b>Paso 2:</b> Necesitas un gestor de archivos (ZArchiver, Gestor+, Files…) para ubicar la carpeta del juego. Puedes descargarlos de Google Play:"
+              data-en="<b>Step 2:</b> You need a file manager (ZArchiver, File Manager+, Files…) to find the game folder. Get one on Google Play:"><b>Paso 2:</b> Necesitas un gestor de archivos (ZArchiver, Gestor+, Files…) para ubicar la carpeta del juego. Puedes descargarlos de Google Play:</p>
+            <div class="faq-row">
+              <a href="https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver" target="_blank" rel="noopener" class="btn btn-ghost">ZArchiver</a>
+              <a href="https://play.google.com/store/apps/details?id=com.alphainventor.filemanager" target="_blank" rel="noopener" class="btn btn-ghost">Gestor+</a>
+              <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.files" target="_blank" rel="noopener" class="btn btn-ghost">Files</a>
+            </div>
+            <p data-es="<b>Paso 3:</b> Abre tu gestor y activa la opción para mostrar los archivos ocultos. Toca uno para ver cómo:"
+              data-en="<b>Step 3:</b> Open your file manager and enable hidden files. Tap one to see how:"><b>Paso 3:</b> Abre tu gestor y activa la opción para mostrar los archivos ocultos. Toca uno para ver cómo:</p>
+            <div class="faq-row">
+              <div class="gallery-thumb" onclick="abrirGaleria('zarchiver')"><img src="assets/images/help/za/za0.webp" alt="ZArchiver" loading="lazy" style="border-radius:12px">ZArchiver</div>
+              <div class="gallery-thumb" onclick="abrirGaleria('gestor')"><img src="assets/images/help/gestor/gestor0.webp" alt="Gestor+" loading="lazy" style="border-radius:12px">Gestor+</div>
+              <div class="gallery-thumb" onclick="abrirGaleria('files')"><img src="assets/images/help/files/files0.webp" alt="Files" loading="lazy" style="border-radius:12px">Files</div>
+            </div>
+            <p data-es="<b>Paso 4:</b> Entra a la carpeta <b>.PsychEngine</b> y coloca tus mods (en su carpeta) dentro de la carpeta <b>mods</b>."
+              data-en="<b>Step 4:</b> Open the <b>.PsychEngine</b> folder and put your mods (in their own folder) inside the <b>mods</b> folder."><b>Paso 4:</b> Entra a la carpeta <b>.PsychEngine</b> y coloca tus mods (en su carpeta) dentro de la carpeta <b>mods</b>.</p>
+            <img src="assets/images/help/mod/2.webp" alt="" loading="lazy">
+            <img src="assets/images/help/mod/3.webp" alt="" loading="lazy">
+          </div></div></div>
+        </div>
+        <div class="card glass" style="text-align:center">
+          <h3 data-es="Más tutoriales en progreso" data-en="More tutorials in progress">Más tutoriales en progreso</h3>
+        </div>
+      </section>
+
+      <!-- ---------- REDES ---------- -->
+      <section id="contact" class="section">
+        <div class="section-head"><h2 data-es="Redes sociales" data-en="Social media">Redes sociales</h2></div>
+        <div class="social-grid stagger">
+          <a class="social-item glass" style="--i:0" href="https://youtube.com/@lalocf_1" target="_blank" rel="noopener"><img src="assets/icons/youtube.webp" alt="" loading="lazy">YouTube</a>
+          <a class="social-item glass" style="--i:1" href="https://t.me/lalo_cf_mods" target="_blank" rel="noopener"><img src="assets/icons/telegram.webp" alt="" loading="lazy">Telegram</a>
+          <a class="social-item glass" style="--i:2" href="https://instagram.com/lalo_cf1" target="_blank" rel="noopener"><img src="assets/icons/instagram.webp" alt="" loading="lazy">Instagram</a>
+          <a class="social-item glass" style="--i:3" href="https://tiktok.com/@lalo_cf" target="_blank" rel="noopener"><img src="assets/icons/tiktok.webp" alt="" loading="lazy">TikTok</a>
+          <a class="social-item glass" style="--i:4" href="mailto:ec331325@gmail.com?subject=Soporte%20T%C3%A9cnico%20FNF"><img src="assets/icons/gmail.webp" alt="" loading="lazy">Gmail</a>
+        </div>
+
+        <div class="card glass">
+          <h3 data-es="Mensaje rápido" data-en="Quick message">Mensaje rápido</h3>
+          <p data-es="Escríbeme tu duda o sugerencia." data-en="Send me your question or idea.">Escríbeme tu duda o sugerencia.</p>
+          <div class="stack">
+            <textarea id="txt-mensaje-telegram" class="field" placeholder="Escribe..." maxlength="600"></textarea>
+            <button id="btn-enviar-telegram" onclick="enviarMensajeAlBot()" class="btn btn-block">
+              <svg class="icon icon-sm"><use href="#i-send"/></svg><span>Enviar mensaje</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>© <span id="year"></span> LaloCF · <span id="footer-version">v7.1.0</span></footer>
+  </div>
+
+  <!-- =================== MENÚ PÍLDORA =================== -->
+  <nav class="pill-nav" id="pillNav" aria-label="Navegación">
+    <span class="pill-indicator" id="pillIndicator"></span>
+    <button class="nav-item active" data-section="home">
+      <svg class="icon"><use href="#i-home"/></svg><span data-es="Inicio" data-en="Home">Inicio</span>
+    </button>
+    <button class="nav-item" data-section="apks">
+      <svg class="icon"><use href="#i-layers"/></svg><span data-es="Bases" data-en="Engines">Bases</span>
+    </button>
+    <button class="nav-item nav-orb" data-section="mods">
+      <span class="orb"><svg class="icon"><use href="#i-music"/></svg></span><span>MODs</span>
+    </button>
+    <button class="nav-item" data-section="scripts">
+      <svg class="icon"><use href="#i-code"/></svg><span>Scripts</span>
+    </button>
+    <button class="nav-item" data-section="more" data-more="help contact">
+      <svg class="icon"><use href="#i-grid"/></svg><span data-es="Más" data-en="More">Más</span>
+    </button>
+  </nav>
+
+  <!-- =================== POPUPS =================== -->
+
+  <!-- Más -->
+  <div id="more-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('more-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Más opciones" data-en="More options">Más opciones</h2>
+      <div class="more-grid" style="margin-top:14px">
+        <button onclick="closePopup('more-popup'); selectSection('help')"><span class="tile-icon"><svg class="icon"><use href="#i-help"/></svg></span><span data-es="Ayuda" data-en="Help">Ayuda</span></button>
+        <button onclick="closePopup('more-popup'); abrirPedidos()"><span class="tile-icon"><svg class="icon"><use href="#i-list"/></svg></span><span data-es="Pedidos" data-en="Requests">Pedidos</span></button>
+        <button onclick="closePopup('more-popup'); selectSection('contact')"><span class="tile-icon"><svg class="icon"><use href="#i-send"/></svg></span><span data-es="Redes" data-en="Socials">Redes</span></button>
+        <button onclick="closePopup('more-popup'); abrirFavoritos()"><span class="tile-icon"><svg class="icon"><use href="#i-heart"/></svg></span><span data-es="Favoritos" data-en="Favorites">Favoritos</span></button>
+        <button onclick="closePopup('more-popup'); toggleTheme()"><span class="tile-icon"><svg class="icon" id="theme-icon"><use href="#i-moon"/></svg></span><span data-es="Tema" data-en="Theme">Tema</span></button>
+        <button onclick="toggleLanguage()"><span class="tile-icon"><svg class="icon"><use href="#i-globe"/></svg></span><span id="langBtn">English</span></button>
+        <button class="admin-only hidden" onclick="closePopup('more-popup'); selectSection('admin')"><span class="tile-icon"><svg class="icon"><use href="#i-shield"/></svg><span class="admin-count" hidden></span></span><span>Admin</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalle (mods / bases / scripts) -->
+  <div id="detail-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closeDetail()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" id="detail-title"></h2>
+      <div class="detail-media" id="detail-media">
+        <img id="detail-img" alt="">
+        <button class="carousel-btn carousel-prev hidden" onclick="carouselStep(-1)" aria-label="Anterior"><svg class="icon icon-sm"><use href="#i-left"/></svg></button>
+        <button class="carousel-btn carousel-next hidden" onclick="carouselStep(1)" aria-label="Siguiente"><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+        <span class="carousel-count hidden" id="carousel-count"></span>
+      </div>
+      <span class="detail-version" id="detail-version"></span>
+      <p class="detail-compat" id="detail-compat" hidden></p>
+      <p class="detail-desc" id="detail-desc"></p>
+      <div class="rating" id="detail-rating">
+        <div class="stars">
+          <button onclick="rateAppItem(1)">★</button><button onclick="rateAppItem(2)">★</button><button onclick="rateAppItem(3)">★</button><button onclick="rateAppItem(4)">★</button><button onclick="rateAppItem(5)">★</button>
+        </div>
+        <small id="detail-rating-text">Califica este contenido</small>
+      </div>
+      <div class="dl-list" id="detail-downloads"></div>
+    </div>
+  </div>
+
+  <!-- Comentarios -->
+  <div id="mod-comments-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closeModComments()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 id="mc-title" class="popup-title">Comentarios</h2>
+      <div class="comment-box" style="margin-top:12px">
+        <div id="mc-myAvatar" class="yt-avatar" style="background:#b14fe0">?</div>
+        <div style="flex:1;min-width:0">
+          <div id="mc-displayMyName" style="font-size:13px;font-weight:600;margin-bottom:6px">Cargando...</div>
+          <textarea id="mc-commentText" class="field" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100"></textarea>
+          <div class="comment-meta">
+            <span><span id="mc-charCounter">0</span> / 100</span>
+            <button class="btn btn-sm" onclick="addModComment()" data-es="Comentar" data-en="Post">Comentar</button>
+          </div>
+        </div>
+      </div>
+      <div id="mc-commentList"></div>
+    </div>
+  </div>
+
+  <!-- Perfil -->
+  <div id="profile-popup" class="popup">
+    <div class="popup-content popup-center">
+      <button class="popup-close" onclick="closePopup('profile-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Mi perfil" data-en="My profile">Mi perfil</h2>
+      <div id="perfil-dinamico-contenido"></div>
+    </div>
+  </div>
+
+  <!-- Favoritos -->
+  <div id="favorites-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('favorites-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Mis favoritos" data-en="My favorites">Mis favoritos</h2>
+      <div id="favorites-list" class="list" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- Pedidos -->
+  <div id="requests-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('requests-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Pedir un mod" data-en="Request a mod">Pedir un mod</h2>
+      <p class="popup-sub" data-es="¿Qué port te gustaría ver? ¡Vota o añade uno nuevo!" data-en="Which port would you like to see? Vote or add a new one!">¿Qué port te gustaría ver? ¡Vota o añade uno nuevo!</p>
+      <div class="stack" style="margin-bottom:18px">
+        <input type="text" id="req-mod-name" class="field" placeholder="Nombre del mod..." maxlength="80">
+        <input type="url" id="req-mod-link" class="field" placeholder="Enlace (opcional, GameBanana...)">
+        <button id="btn-enviar-solicitud" onclick="enviarSolicitudMod()" class="btn btn-block" data-es="Enviar solicitud" data-en="Send request">Enviar solicitud</button>
+      </div>
+      <h4 class="label" data-es="Comunidad (votos)" data-en="Community (votes)">Comunidad (votos)</h4>
+      <div id="requests-list" class="list"><p class="empty">Cargando...</p></div>
+    </div>
+  </div>
+
+  <!-- Notificaciones -->
+  <div id="panel-notificaciones" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="toggleNotificaciones()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Notificaciones" data-en="Notifications">Notificaciones</h2>
+      <div id="lista-notificaciones" class="list" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- Ajustes -->
+  <div id="settings-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('settings-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Ajustes" data-en="Settings">Ajustes</h2>
+
+      <div class="setting-group" style="margin-top:14px">
+        <h4 data-es="Apariencia" data-en="Appearance">Apariencia</h4>
+        <label class="setting-row"><span data-es="Modo oscuro" data-en="Dark mode">Modo oscuro</span>
+          <span class="switch"><input type="checkbox" id="darkToggle"><span></span></span></label>
+        <label class="setting-row"><span data-es="Color de acento" data-en="Accent color">Color de acento</span>
+          <input type="color" id="themeColor" value="#b14fe0"></label>
+        <div class="setting-row" style="display:block">
+          <span data-es="Intensidad del cristal" data-en="Glass intensity">Intensidad del cristal</span>
+          <input type="range" id="blurSlider" min="0" max="30" value="16" style="margin-top:8px">
+        </div>
+        <label class="setting-row"><span data-es="Idioma" data-en="Language">Idioma</span>
+          <button class="btn btn-sm btn-soft" onclick="toggleLanguage(); event.preventDefault()" id="langBtn2">English</button></label>
+        <div class="setting-row"><span><span data-es="RAM de mi celular" data-en="My phone's RAM">RAM de mi celular</span>
+            <small data-es="Para saber qué mods corren bien" data-en="To know which mods run well">Para saber qué mods corren bien</small></span>
+          <button class="btn btn-sm btn-soft" onclick="closePopup('settings-popup'); abrirSelectorRam()" id="settings-ram-label">Elegir</button></div>
+      </div>
+
+      <div class="setting-group">
+        <h4 data-es="Rendimiento" data-en="Performance">Rendimiento</h4>
+        <label class="setting-row"><span><span data-es="Modo gama baja" data-en="Low-end mode">Modo gama baja</span>
+            <small data-es="Quita el desenfoque y animaciones pesadas" data-en="Removes blur and heavy animations">Quita el desenfoque y animaciones pesadas</small></span>
+          <span class="switch"><input type="checkbox" id="lowEndToggle"><span></span></span></label>
+        <label class="setting-row"><span data-es="Partículas FNF" data-en="FNF particles">Partículas FNF</span>
+          <span class="switch"><input type="checkbox" id="particlesToggle"><span></span></span></label>
+        <div id="particle-settings-container" style="display:none">
+          <div class="setting-row" style="display:block"><small data-es="Tamaño" data-en="Size">Tamaño</small>
+            <input type="range" id="particleScaleSlider" min="20" max="80" value="40"></div>
+          <div class="setting-row" style="display:block"><small data-es="Cantidad" data-en="Amount">Cantidad</small>
+            <input type="range" id="particleSpawnSlider" min="1" max="100" value="25"></div>
+          <div class="setting-row" style="display:block"><small data-es="Velocidad" data-en="Speed">Velocidad</small>
+            <input type="range" id="particleSpeedSlider" min="1" max="100" value="50"></div>
+        </div>
+        <label class="setting-row"><span data-es="Vibración al tocar" data-en="Haptic feedback">Vibración al tocar</span>
+          <span class="switch"><input type="checkbox" id="hapticToggle"><span></span></span></label>
+      </div>
+
+      <div class="setting-group">
+        <h4 data-es="Fuente personalizada (.ttf)" data-en="Custom font (.ttf)">Fuente personalizada (.ttf)</h4>
+        <div class="setting-row"><input type="file" id="customFontUpload" accept=".ttf" style="font-size:12px;width:100%"></div>
+      </div>
+
+      <button class="btn btn-ghost btn-block" onclick="resetSettings()" data-es="Restablecer por defecto" data-en="Reset to default">Restablecer por defecto</button>
+    </div>
+  </div>
+
+  <!-- Compartir -->
+  <div id="share-modal" class="popup">
+    <div class="popup-content popup-center">
+      <button class="popup-close" onclick="closePopup('share-modal')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="¡Comparte esto!" data-en="Share this!">¡Comparte esto!</h2>
+      <div class="stack" style="margin-top:16px">
+        <button class="btn btn-block" style="background:#25d366;box-shadow:none" onclick="enviarWhatsApp()">WhatsApp</button>
+        <button class="btn btn-block" style="background:#2aa3e0;box-shadow:none" onclick="enviarTelegram()">Telegram</button>
+        <button class="btn btn-ghost btn-block" onclick="copiarEnlace()" data-es="Copiar enlace" data-en="Copy link">Copiar enlace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Novedades de una base/script -->
+  <div id="modal-novedades-ios" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="cerrarModalNovedades()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Novedades de versión" data-en="Version notes">Novedades de versión</h2>
+      <div id="texto-novedades-ios" class="detail-desc" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- Actualización de la app -->
+  <div id="update-popup" class="popup">
+    <div class="popup-content popup-center">
+      <span class="tile-icon" style="width:64px;height:64px;margin:6px auto 12px;background:var(--accent-grad);color:#fff;border-radius:20px"><svg class="icon icon-lg"><use href="#i-sparkle"/></svg></span>
+      <h2 class="popup-title" id="update-title">Versión 7.1.0</h2>
+      <p class="popup-sub" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta versión:</p>
+      <ul class="feature-list" style="text-align:left;margin-bottom:20px">
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg></span>
+          <span data-es="<b>¡Nuevo diseño!</b> Más rápido, más ligero y con modo oscuro." data-en="<b>New design!</b> Faster, lighter and with dark mode."><b>¡Nuevo diseño!</b> Más rápido, más ligero y con modo oscuro.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-phone"/></svg></span>
+          <span data-es="<b>¿Corre en mi celular?</b> Dinos tu RAM y cada mod te dirá si es compatible." data-en="<b>Will it run?</b> Tell us your RAM and each mod tells you if it's compatible."><b>¿Corre en mi celular?</b> Dinos tu RAM y cada mod te dirá si es compatible.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-list"/></svg></span>
+          <span data-es="<b>Ordena y filtra</b> los mods por popularidad, calificación y motor." data-en="<b>Sort and filter</b> mods by popularity, rating and engine."><b>Ordena y filtra</b> los mods por popularidad, calificación y motor.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg></span>
+          <span data-es="<b>Sigue tus mods:</b> guárdalos y te avisamos cuando se actualicen." data-en="<b>Follow mods:</b> save them and we'll tell you when they update."><b>Sigue tus mods:</b> guárdalos y te avisamos cuando se actualicen.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-alert"/></svg></span>
+          <span data-es="<b>Reportes con motivo</b> y respuestas del admin dentro de la página." data-en="<b>Detailed reports</b> and admin replies right inside the site."><b>Reportes con motivo</b> y respuestas del admin dentro de la página.</span></li>
+      </ul>
+      <button class="btn btn-block" onclick="closeUpdatePopup()" data-es="¡Aceptar!" data-en="OK!">¡Aceptar!</button>
+    </div>
+  </div>
+
+  <!-- Instalar -->
+  <div id="install-popup" class="popup">
+    <div class="popup-content popup-center">
+      <h2 class="popup-title" data-es="Instalar la app" data-en="Install the app">Instalar la app</h2>
+      <p class="popup-sub" data-es="Agrégala a tu pantalla de inicio para abrirla más rápido." data-en="Add it to your home screen for quicker access.">Agrégala a tu pantalla de inicio para abrirla más rápido.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:1" onclick="dismissInstall()" data-es="Después" data-en="Later">Después</button>
+        <button class="btn" style="flex:1" onclick="installApp()" data-es="Instalar" data-en="Install">Instalar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mantenimiento -->
+  <div id="maintenance-popup" class="popup">
+    <div class="popup-content popup-center">
+      <span class="tile-icon" style="width:60px;height:60px;margin:6px auto 12px;background:var(--danger);color:#fff"><svg class="icon icon-lg"><use href="#i-alert"/></svg></span>
+      <h2 class="popup-title" data-es="En mantenimiento" data-en="Under maintenance">En mantenimiento</h2>
+      <h3 id="maintenance-mod-name" style="color:var(--accent);margin:6px 0 12px">Mod</h3>
+      <p class="popup-sub" data-es="El enlace de este MOD fue reportado como caído. El administrador ya fue notificado y lo está reparando. ¡Vuelve pronto!"
+        data-en="This MOD's link was reported as broken. The admin has been notified and is fixing it. Come back soon!">El enlace de este MOD fue reportado como caído. El administrador ya fue notificado y lo está reparando. ¡Vuelve pronto!</p>
+      <button class="btn btn-block" onclick="closePopup('maintenance-popup')" data-es="Entendido" data-en="Got it">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Mod secreto desbloqueado -->
+  <div id="secret-unlocked-popup" class="popup">
+    <div class="popup-content popup-center">
+      <h2 class="popup-title">¡BINGO! 🎉</h2>
+      <p class="popup-sub">La descarga del mod fue desbloqueada. ¡Disfrútalo!</p>
+      <button class="btn btn-block" onclick="closePopup('secret-unlocked-popup'); selectSection('mods')">¡Ir a descargarlo!</button>
+    </div>
+  </div>
+
+  <!-- ¿Cuánta RAM tiene tu celular? -->
+  <div id="ram-popup" class="popup">
+    <div class="popup-content popup-center">
+      <button class="popup-close" onclick="closePopup('ram-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="¿Cuánta RAM tiene tu celular?" data-en="How much RAM does your phone have?">¿Cuánta RAM tiene tu celular?</h2>
+      <p class="popup-sub" id="ram-guess"></p>
+      <div class="ram-grid" id="ram-options"></div>
+    </div>
+  </div>
+
+  <!-- Reportar un problema -->
+  <div id="report-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('report-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Reportar un problema" data-en="Report a problem">Reportar un problema</h2>
+      <p class="popup-sub" id="report-target"></p>
+      <div class="reason-list" id="report-reasons"></div>
+      <div class="stack" style="margin-top:12px">
+        <textarea id="report-text" class="field" maxlength="400" placeholder="Cuéntame más (opcional)"></textarea>
+        <button class="btn btn-danger btn-block" id="btn-enviar-reporte" onclick="enviarReporte()" data-es="Enviar reporte" data-en="Send report">Enviar reporte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje genérico -->
+  <div id="msg-popup" class="popup">
+    <div class="popup-content popup-center">
+      <button class="popup-close" onclick="closePopup('msg-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" id="msg-title"></h2>
+      <p class="detail-desc" id="msg-text" style="margin:12px 0 18px"></p>
+      <button class="btn btn-block" onclick="closePopup('msg-popup')" data-es="Entendido" data-en="Got it">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Admin: editor de mods -->
+  <div id="mod-editor-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('mod-editor-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" id="editor-title">Nuevo mod</h2>
+      <div class="stack" style="margin-top:12px">
+        <label class="label" for="ed-title">Título</label>
+        <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
+        <label class="label" for="ed-img">Imagen principal (URL o ruta assets/...)</label>
+        <input id="ed-img" class="field" placeholder="assets/images/mods/miMod.webp" oninput="previewEditorImg()">
+        <img id="ed-preview" class="editor-preview" alt="" hidden>
+        <label class="label" for="ed-images">Capturas extra (una por línea, opcional)</label>
+        <textarea id="ed-images" class="field" placeholder="https://..."></textarea>
+        <label class="label" for="ed-desc">Descripción</label>
+        <textarea id="ed-desc" class="field"></textarea>
+        <label class="label" for="ed-version">Compatibilidad / versión</label>
+        <input id="ed-version" class="field" placeholder="Compatible: Psych Engine (Pc/Android/iOS)">
+        <div class="editor-grid">
+          <div><label class="label" for="ed-gama">Gama</label>
+            <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
+          <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" placeholder="Psych Engine"></div>
+          <div><label class="label" for="ed-ram">RAM</label><input id="ed-ram" class="field" placeholder="2GB RAM"></div>
+          <div><label class="label" for="ed-size">Tamaño</label><input id="ed-size" class="field" placeholder="56 MB"></div>
+        </div>
+        <label class="label" for="ed-downloads">Descargas (una por línea: Nombre | enlace)</label>
+        <textarea id="ed-downloads" class="field" placeholder="Descarga (MediaFire) | https://www.mediafire.com/..."></textarea>
+        <label class="setting-row" style="border:0;padding:4px 0"><span>🔒 Secreto <small>Solo se ve con enlace de desbloqueo (?unlock=id)</small></span>
+          <span class="switch"><input type="checkbox" id="ed-hidden"><span></span></span></label>
+        <button class="btn btn-block" id="btn-guardar-mod" onclick="guardarMod()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin: baneo -->
+  <div id="ban-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('ban-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title">Control de baneo</h2>
+      <p id="ban-target-info" class="popup-sub"></p>
+      <div class="stack">
+        <input type="text" id="banReason" class="field" placeholder="Motivo del baneo">
+        <input type="number" id="banDuration" class="field" placeholder="Horas (ej: 24)" value="24">
+        <button class="btn btn-danger btn-block" id="confirmBanBtn">Banear usuario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Galería de ayuda -->
+  <div id="mi-lightbox" class="lightbox" onclick="if(event.target===this) cerrarGaleria()">
+    <button class="popup-close" onclick="cerrarGaleria()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    <button class="carousel-btn carousel-prev" onclick="cambiarImagen(-1)" aria-label="Anterior"><svg class="icon icon-sm"><use href="#i-left"/></svg></button>
+    <img id="imagen-gigante" src="" alt="">
+    <button class="carousel-btn carousel-next" onclick="cambiarImagen(1)" aria-label="Siguiente"><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+    <p id="contador-imagenes"></p>
+  </div>
+
+  <!-- Inicio de sesión -->
+  <div id="auth-overlay" class="auth-screen">
+    <div class="auth-card glass">
+      <img src="assets/images/logo/LaloCF.webp" alt="" class="logo">
+      <h2>FNF' Ports Mobile</h2>
+      <p data-es="Inicia sesión para acceder a las mejores bases, mods, scripts y soporte técnico."
+        data-en="Sign in to access the best engines, mods, scripts and tech support.">Inicia sesión para acceder a las mejores bases, mods, scripts y soporte técnico.</p>
+      <div class="stack">
+        <button id="btn-google-login" class="btn btn-google btn-block" onclick="iniciarSesionConGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+          <span data-es="Entrar con Google" data-en="Sign in with Google">Entrar con Google</span>
+        </button>
+        <button class="btn btn-ghost btn-block" onclick="entrarComoInvitado()" data-es="Iniciar sesión después" data-en="Sign in later">Iniciar sesión después</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modo mantenimiento (se activa desde Panel de admin → Avisos) -->
+  <div id="maintenance-screen" class="maintenance-screen hidden">
+    <div class="auth-card glass">
+      <span class="tile-icon" style="width:64px;height:64px;margin:0 auto 14px;background:var(--accent-grad);color:#fff;border-radius:20px"><svg class="icon icon-lg"><use href="#i-zap"/></svg></span>
+      <h2 data-es="Estamos en mantenimiento" data-en="We're under maintenance">Estamos en mantenimiento</h2>
+      <p id="maintenance-text"></p>
+      <button class="btn btn-ghost btn-sm" onclick="iniciarSesionConGoogle()" style="margin-top:6px">Soy el admin</button>
+    </div>
+  </div>
+
+  <!-- Scripts normales (no módulos) para que la página funcione también abriendo el archivo con doble clic -->
+  <!-- 1) Sin Firebase: pintan la página al instante -->
+  <script defer src="js/modules/utils.js"></script>
+  <script defer src="js/modules/data-apks.js"></script>
+  <script defer src="js/modules/data-mods.js"></script>
+  <script defer src="js/modules/data-scripts.js"></script>
+  <script defer src="js/modules/render.js"></script>
+  <script defer src="js/modules/ui-theme.js"></script>
+  <script defer src="js/boot.js"></script>
+  <script defer src="js/modules/firebase-config.js"></script>
+  <script defer src="js/modules/extras.js"></script>
+  <!-- 2) Con Firebase: se conectan cuando carga -->
+  <script defer src="js/modules/auth.js"></script>
+  <script defer src="js/modules/profile.js"></script>
+  <script defer src="js/modules/live.js"></script>
+  <script defer src="js/modules/social.js"></script>
+  <script defer src="js/modules/downloads.js"></script>
+  <script defer src="js/modules/favorites.js"></script>
+  <script defer src="js/modules/requests.js"></script>
+  <script defer src="js/modules/support.js"></script>
+  <script defer src="js/modules/notifications.js"></script>
+  <script defer src="js/modules/admin.js"></script>
+  <!-- Seguro: si algo falla, la pantalla de carga nunca se queda pegada -->
+  <script>setTimeout(function () { document.body.classList.add('loaded'); }, 4000);</script>
+</body>
+
+</html>

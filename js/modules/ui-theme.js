@@ -151,9 +151,17 @@ window.toggleOnlyCompat = (btn) => {
 
 // Orden de los mods: recientes (con fijados arriba), populares, mejor valorados, A-Z
 window.applySort = () => {
+  const num = (el, k) => Number(el.dataset[k]) || 0;
+  // Bases y scripts: fijados arriba, luego el orden original
+  ['apksContainer', 'scriptsContainer'].forEach(cid => {
+    const box = document.getElementById(cid);
+    if (!box) return;
+    [...box.querySelectorAll('.item-card')]
+      .sort((a, b) => (b.classList.contains('pinned-mod') - a.classList.contains('pinned-mod')) || num(a, 'order') - num(b, 'order'))
+      .forEach(c => box.appendChild(c));
+  });
   const container = document.getElementById('modsContainer');
   if (!container) return;
-  const num = (el, k) => Number(el.dataset[k]) || 0;
   const cards = [...container.querySelectorAll('.mod-card')];
   const by = {
     recent: (a, b) => (b.classList.contains('pinned-mod') - a.classList.contains('pinned-mod')) || num(a, 'order') - num(b, 'order'),

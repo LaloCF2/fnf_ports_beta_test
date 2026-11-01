@@ -15,7 +15,7 @@ const setText = (id, v) => { const el = document.getElementById(id); if (el) el.
 // ---- Pintar sobre las tarjetas ----
 function paintDownloads() {
   Object.keys(live.downloads).forEach(id => setText('dl-' + id, live.downloads[id]));
-  document.querySelectorAll('.mod-card').forEach(c => { c.dataset.dl = live.downloads[c.dataset.id] || 0; });
+  document.querySelectorAll('.item-card').forEach(c => { c.dataset.dl = live.downloads[c.dataset.id] || 0; });
 }
 
 function paintLikes() {
@@ -46,7 +46,7 @@ function paintCommentLeds() {
 }
 
 function paintPinned() {
-  document.querySelectorAll('.mod-card').forEach(card => {
+  document.querySelectorAll('.item-card').forEach(card => {
     const pinned = !!live.pinned[card.dataset.id];
     card.classList.toggle('pinned-mod', pinned);
     const btn = card.querySelector('.admin-pin-btn');
@@ -133,23 +133,27 @@ function checkFollowedUpdates() {
   });
 }
 
+// Si el popup de detalle está abierto, se actualizan sus botones de admin
+const refreshDetail = () => { if (window.refreshDetailAdmin) window.refreshDetailAdmin(); };
+
 // ---- Escuchas ----
-onValue(ref(db, 'downloads'), s => { live.downloads = s.val() || {}; paintDownloads(); paintTopWeek(); if (window.applySort) window.applySort(); });
+onValue(ref(db, 'downloads'), s => { live.downloads = s.val() || {}; paintDownloads(); paintTopWeek(); if (window.applySort) window.applySort(); refreshDetail(); });
 onValue(ref(db, `downloads_week/${weekKey()}`), s => { live.week = s.val() || {}; paintTopWeek(); });
 onValue(ref(db, 'likes'), s => { live.likes = s.val() || {}; paintLikes(); });
-onValue(ref(db, 'updates_led'), s => { live.leds = s.val() || {}; window.liveLeds = live.leds; paintLeds(); checkFollowedUpdates(); });
+onValue(ref(db, 'updates_led'), s => { live.leds = s.val() || {}; window.liveLeds = live.leds; paintLeds(); checkFollowedUpdates(); refreshDetail(); });
 onValue(ref(db, 'last_comment_time'), s => { live.comments = s.val() || {}; paintCommentLeds(); });
-onValue(ref(db, 'pinned_mods'), s => { live.pinned = s.val() || {}; paintPinned(); if (window.applySort) window.applySort(); });
-onValue(ref(db, 'new_mods_status'), s => { live.newMods = s.val() || {}; paintFlags(); });
+onValue(ref(db, 'pinned_mods'), s => { live.pinned = s.val() || {}; paintPinned(); if (window.applySort) window.applySort(); refreshDetail(); });
+onValue(ref(db, 'new_mods_status'), s => { live.newMods = s.val() || {}; paintFlags(); refreshDetail(); });
 onValue(ref(db, 'broken_links'), s => {
   live.broken = s.val() || {};
   window.brokenLinksData = live.broken;
   paintFlags();
+  refreshDetail();
   if (window.renderAdminTab) window.renderAdminTab('reportes', true);
 });
 onValue(ref(db, 'verified_users'), s => { live.verified = s.val() || {}; });
 onValue(ref(db, 'banned_users'), s => { live.banned = s.val() || {}; });
-onValue(ref(db, 'scripts_recomendados'), s => { live.recomendados = s.val() || {}; paintRecomendados(); });
+onValue(ref(db, 'scripts_recomendados'), s => { live.recomendados = s.val() || {}; paintRecomendados(); refreshDetail(); });
 onValue(ref(db, 'ratings'), s => {
   live.ratings = s.val() || {};
   paintRatings();
@@ -163,20 +167,25 @@ onValue(ref(db, '.info/connected'), (snap) => {
   setText('statusText', on ? t('Servidor activo', 'Server online') : t('Desconectado', 'Offline'));
 });
 
-// ---- Mods creados/editados desde el panel ----
-onValue(ref(db, 'mods_custom'), s => {
-  const custom = s.val() || {};
-  live.custom = custom;
-  const before = JSON.stringify(store.json('fnf_mods_custom_cache', {}));
-  store.setJson('fnf_mods_custom_cache', custom);
-  if (JSON.stringify(custom) !== before) {
-    window.applyCustomMods(custom);
-    window.renderAll();
-    repaintLiveData();
-    window.filterContent(true);
-    paintTopWeek();
-  }
-  if (window.renderAdminTab) window.renderAdminTab('mods', true);
+// ---- Mods, bases y scripts creados/editados desde el panel ----
+live.customs = { mod: {}, apk: {}, script: {} };
+Object.entries(FNF.KINDS).forEach(([kind, k]) => {
+  onValue(ref(db, k.path), s => {
+    const custom = s.val() || {};
+    live.customs[kind] = custom;
+    if (kind === 'mod') live.custom = custom;
+    const before = JSON.stringify(store.json(k.cache, {}));
+    store.setJson(k.cache, custom);
+    if (JSON.stringify(custom) !== before) {
+      window.applyCustom(kind, custom);
+      window.renderAll();
+      repaintLiveData();
+      window.filterContent(true);
+      paintTopWeek();
+      refreshDetail();
+    }
+    if (window.renderAdminTab) window.renderAdminTab('contenido', true);
+  }, err => console.warn(k.path, err.message));
 });
 
 // ---- Banner global y modo mantenimiento ----
@@ -211,20 +220,55 @@ const toggleNode = async (path, value = true) => {
 
 window.toggleGreenLed = (id, e) => { if (e) e.stopPropagation(); if (isAdmin()) toggleNode(`updates_led/${id}`, Date.now()); };
 window.toggleModPin = (id, e) => { if (e) e.stopPropagation(); if (isAdmin()) toggleNode(`pinned_mods/${id}`); };
-window.toggleNewMod = async (cardId) => {
+// sinPreguntar = true cuando se usa desde el popup (ahí el botón ya muestra el estado)
+window.toggleNewMod = async (cardId, sinPreguntar) => {
   if (!isAdmin()) return;
   const esNuevo = live.newMods[cardId] === true;
-  if (confirm(esNuevo ? '¿Quitar la etiqueta de NUEVO a este mod?' : '¿Marcar este mod como NUEVO?')) {
+  if (sinPreguntar || confirm(esNuevo ? '¿Quitar la etiqueta de NUEVO?' : '¿Marcar como NUEVO?')) {
     await set(ref(db, `new_mods_status/${cardId}`), esNuevo ? null : true);
   }
 };
 window.toggleRecomendarScript = (id) => {
   if (isAdmin()) set(ref(db, 'scripts_recomendados/' + id), live.recomendados[id] ? null : true);
 };
-window.fixBrokenLink = async (id) => {
-  if (isAdmin() && confirm('🛠️ ¿Ya solucionaste el link de este mod?')) {
+window.fixBrokenLink = async (id, sinPreguntar) => {
+  if (!isAdmin() || !live.broken[id]) return;
+  if (sinPreguntar || confirm('🛠️ ¿Ya solucionaste el link?')) {
     await set(ref(db, `broken_links/${id}`), null);
     toast('Link marcado como reparado.', 'zap');
   }
+};
+
+// ---- Acciones extra del popup de admin ----
+const titleOf = (id) => (FNF.itemOf(id) || {}).title || id;
+
+// Apaga la descarga para todos (como si un usuario reportara el link caído)
+window.adminMarcarCaido = async (id) => {
+  if (!isAdmin()) return;
+  if (!confirm(`¿Bloquear la descarga de "${titleOf(id)}" para todos hasta que lo repares?`)) return;
+  await set(ref(db, `broken_links/${id}`), { reportedBy: 'Admin', uid: window.usuarioActualFirebase.uid, reason: 'admin', timestamp: Date.now() });
+  toast('Descarga bloqueada (en mantenimiento).', 'alert');
+};
+
+// Publica un aviso en la campana con enlace directo a este elemento
+window.adminNotificarItem = async (id) => {
+  if (!isAdmin()) return;
+  const texto = prompt('Aviso para la campana:', `¡${titleOf(id)} tiene novedades! Toca para verlo.`);
+  if (!texto || !texto.trim()) return;
+  const nid = 'notif_' + Date.now();
+  await set(ref(db, 'notificaciones/' + nid), {
+    id: nid, texto: texto.trim(), modId: id,
+    fecha: new Date().toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  });
+  toast('Aviso publicado en la campana.', 'bell');
+};
+
+// Copia el enlace para compartir (o el de desbloqueo si es secreto)
+window.adminCopiarEnlace = (id) => {
+  const d = FNF.itemOf(id) || {};
+  const url = `${location.origin}${location.pathname}?${d.hidden ? 'unlock' : 'share'}=${id}`;
+  navigator.clipboard.writeText(url)
+    .then(() => toast(d.hidden ? 'Enlace de desbloqueo copiado 🔒' : 'Enlace copiado.', 'share'))
+    .catch(() => prompt('Copia este enlace:', url));
 };
 }).catch(err => console.error(err));

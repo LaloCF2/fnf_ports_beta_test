@@ -5,7 +5,6 @@ const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, 
 
 const lookup = (id) => (window.MOD_DATA || {})[id] || (window.APK_DATA || {})[id] || (window.SCRIPTS_DATA || {})[id];
 
-const openerFor = (id) => id.startsWith('apk') ? window.openApkInfo : id.startsWith('script') ? window.openScriptInfo : window.openModInfo;
 
 window.refreshFavoritesUI = () => {
   const favs = store.json('fnf_favorites', {});
@@ -51,5 +50,5 @@ window.abrirFavoritos = () => {
   openPopup('favorites-popup');
 };
 
-window.openFavorite = (id) => { const fn = openerFor(id); if (fn) fn(id); };
+window.openFavorite = (id) => window.openItemById(id);
 }).catch(err => console.error(err));

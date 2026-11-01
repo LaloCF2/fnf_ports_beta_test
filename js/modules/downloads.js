@@ -63,28 +63,71 @@ function showDetail(type, id, d) {
       <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span>${esc(dl.name)}</span>
     </a>`).join('');
   h += `<button class="btn btn-ghost btn-block" style="margin-top:6px;color:var(--danger)" onclick="abrirReporte('${id}')">${icon('alert', 'icon icon-sm')} ${t('Reportar un problema', 'Report a problem')}</button>`;
-  if (window.isSuperUser) h += `<button class="btn btn-ghost btn-block" onclick="fixBrokenLink('${id}')">🛠️ ${t('Limpiar reportes', 'Clear reports')}</button>`;
   document.getElementById('detail-downloads').innerHTML = h;
 
+  current = { id, type };
+  window.refreshDetailAdmin();
   if (window.loadItemRating) window.loadItemRating(id);
   openPopup('detail-popup');
 }
 
+// ---- Panel de admin dentro del popup (mods, bases y scripts) ----
+let current = null;
+
+window.refreshDetailAdmin = () => {
+  const box = document.getElementById('detail-admin');
+  if (!box) return;
+  if (!window.isSuperUser || !current) { box.hidden = true; return; }
+  const { id, type } = current;
+  const L = window.live || {};
+  const d = FNF.itemOf(id) || {};
+  const pinned = !!(L.pinned || {})[id];
+  const led = !!(L.leds || {})[id];
+  const isNew = (L.newMods || {})['card-' + id] === true;
+  const broken = (L.broken || {})[id];
+  const top = !!(L.recomendados || {})[id];
+  const r = window.ratingOf ? window.ratingOf(id) : { n: 0, avg: 0 };
+  const jsTitle = esc(String(d.title || '').replace(/['"\\]/g, ''));
+
+  const btn = (label, action, on, cls = '') => `<button class="adm-chip${on ? ' on' : ''} ${cls}" onclick="${action}">${label}</button>`;
+  box.innerHTML = `
+    <div class="detail-admin-head">
+      <span>🛡️ Admin</span>
+      <small>📥 ${FNF.compact((L.downloads || {})[id])} · 📈 ${FNF.compact((L.week || {})[id])} sem. · ❤️ ${FNF.compact((L.likes || {})[id])} · ★ ${r.n ? r.avg.toFixed(1) : '—'} (${r.n})</small>
+    </div>
+    ${broken ? `<p class="detail-admin-alert">⚠️ Descarga bloqueada · reportado por ${esc(broken.reportedBy || '¿?')} ${broken.timestamp ? FNF.timeAgo(broken.timestamp) : ''}</p>` : ''}
+    <div class="detail-admin-grid">
+      ${btn(`📌 ${pinned ? 'Desfijar' : 'Fijar'}`, `toggleModPin('${id}')`, pinned)}
+      ${btn(`🟢 ${led ? 'Quitar LED' : 'Marcar actualizado'}`, `toggleGreenLed('${id}')`, led)}
+      ${btn(`⭐ ${isNew ? 'Quitar NUEVO' : 'Marcar NUEVO'}`, `toggleNewMod('card-${id}', true)`, isNew)}
+      ${broken ? btn('✅ Reparar link', `fixBrokenLink('${id}', true)`, true, 'ok') : btn('🚫 Bloquear descarga', `adminMarcarCaido('${id}')`, false)}
+      ${type === 'script' ? btn(`🔥 ${top ? 'Quitar TOP' : 'Marcar TOP'}`, `toggleRecomendarScript('${id}')`, top) : ''}
+      ${btn('✏️ Editar', `closeDetail(); abrirEditorMod('${id}', '${type}')`)}
+      ${btn('🔔 Avisar en campana', `adminNotificarItem('${id}')`)}
+      ${btn('💬 Comentarios', `closeDetail(); openModComments('${id}', '${jsTitle}')`)}
+      ${btn(d.hidden ? '🔒 Copiar enlace secreto' : '🔗 Copiar enlace', `adminCopiarEnlace('${id}')`)}
+      ${btn('🙈 Ocultar', `adminOcultarItem('${id}', true)`, false, 'danger')}
+    </div>`;
+  box.hidden = false;
+};
+
 const guard = () => window.exigirRegistro && window.exigirRegistro();
 
-window.openModInfo = (id) => {
+// Si el link está reportado como caído, los usuarios ven "en mantenimiento" (el admin sí puede entrar)
+function openItem(type, id) {
   if (guard()) return;
+  const d = FNF.itemOf(id);
   if (window.brokenLinksData && window.brokenLinksData[id] && !window.isSuperUser) {
-    const d = window.MOD_DATA[id];
     document.getElementById('maintenance-mod-name').textContent = d ? d.title : '';
     openPopup('maintenance-popup');
     return;
   }
-  showDetail('mod', id, window.MOD_DATA[id]);
-};
+  showDetail(type, id, d);
+}
 
-window.openApkInfo = (id) => { if (!guard()) showDetail('apk', id, window.APK_DATA[id]); };
-window.openScriptInfo = (id) => { if (!guard()) showDetail('script', id, window.SCRIPTS_DATA[id]); };
+window.openModInfo = (id) => openItem('mod', id);
+window.openApkInfo = (id) => openItem('apk', id);
+window.openScriptInfo = (id) => openItem('script', id);
 
 // Tocar la imagen del detalle la abre a pantalla completa
 document.getElementById('detail-img').addEventListener('click', () => window.abrirGaleria(images, imgIndex));
@@ -92,6 +135,7 @@ document.getElementById('detail-img').addEventListener('click', () => window.abr
 window.closeDetail = () => {
   closePopup('detail-popup');
   window.currentItemRatingId = null;
+  current = null;
 };
 // Nombres antiguos (por si quedan enlaces en otros archivos)
 window.closeModInfo = window.closeApkInfo = window.closeScriptInfo = window.closeDetail;

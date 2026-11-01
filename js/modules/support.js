@@ -6,7 +6,7 @@ window.fbReady.then((FB) => {
 const { db, ref, get, update, push, serverTimestamp } = FB;
 const { t, esc, openPopup, closePopup, toast, getProfile, profileName } = FNF;
 
-const TELEGRAM_PROXY_URL = 'https://telegram-proxy.ec331325.workers.dev'; // ej: 'https://fnf-telegram.tu-usuario.workers.dev'
+const TELEGRAM_PROXY_URL = 'https://telegram-proxy.ec331325.workers.dev/'; // ej: 'https://fnf-telegram.tu-usuario.workers.dev'
 
 const REASONS = {
   broken: ['🔗 El link está caído', '🔗 The link is down'],
@@ -16,10 +16,53 @@ const REASONS = {
   other: ['✏️ Otro problema', '✏️ Something else']
 };
 
+// La dirección del Worker se guarda desde Panel de admin → Avisos → Telegram (o aquí arriba en el código)
+const proxyUrl = () => {
+  const cfg = (window.live && window.live.config) || {};
+  return (cfg.telegram && cfg.telegram.url) || TELEGRAM_PROXY_URL;
+};
+
+// Envía un texto al bot. Devuelve { ok, ayuda } con una explicación clara si falla.
+window.enviarAvisoTelegram = async (text, url = proxyUrl()) => {
+  if (!url) return { ok: false, ayuda: 'No hay dirección del Worker guardada (Panel → Avisos → Telegram).' };
+  let res;
+  try {
+    // text/plain evita la "consulta previa" del navegador, así funciona con cualquier versión del Worker
+    res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ text }) });
+  } catch (err) {
+    const aqui = location.origin === 'null' ? 'un archivo abierto con doble clic' : location.origin;
+    return {
+      ok: false,
+      ayuda: `No se pudo hablar con el Worker. Puede ser: 1) la dirección está mal (debe terminar en .workers.dev y tener "Deploy"), ` +
+        `o 2) el Worker no acepta ${aqui}: en ALLOWED_ORIGIN pon ${location.origin === 'null' ? 'https://lalocf2.github.io y prueba desde ahí' : location.origin}.`
+    };
+  }
+  const body = await res.text().catch(() => '');
+  let data = {};
+  try { data = JSON.parse(body); } catch (e) { data = { error: body }; }
+  if (res.ok && data.ok !== false) return { ok: true };
+
+  const err = String(data.error || body || res.status);
+  const origin = location.origin === 'null' ? 'archivo local (file://)' : location.origin;
+  let ayuda = `Error del Worker (${res.status}): ${err}`;
+  if (res.status === 403 || /origen/i.test(err)) {
+    ayuda = `El Worker no acepta esta página (${origin}). En Cloudflare → tu Worker → Settings → Variables, pon en ALLOWED_ORIGIN exactamente: ${location.origin}` +
+      (location.origin.includes('lalocf2.github.io') ? '' : ' (o prueba desde lalocf2.github.io)');
+  } else if (/unauthorized|401/i.test(err)) {
+    ayuda = 'Telegram rechazó el token del bot. Copia el token NUEVO de BotFather en la variable secreta TELEGRAM_TOKEN del Worker (sin espacios) y vuelve a hacer Deploy.';
+  } else if (/chat not found|400/i.test(err)) {
+    ayuda = 'Telegram no encuentra el chat. Abre tu bot en Telegram, mándale /start y revisa que TELEGRAM_CHAT_ID sea 5429172831.';
+  } else if (err === 'error' && res.status === 502) {
+    ayuda = 'Telegram rechazó el mensaje (token o chat incorrectos). Pega el nuevo tools/telegram-worker.js en Cloudflare para ver el error exacto.';
+  } else if (/falta el texto/i.test(err)) {
+    ayuda = 'Tu Worker es la versión anterior. Pega el nuevo tools/telegram-worker.js en Cloudflare y dale Deploy.';
+  }
+  return { ok: false, ayuda };
+};
+
 const notifyTelegram = (text) => {
-  if (!TELEGRAM_PROXY_URL) return;
-  fetch(TELEGRAM_PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
-    .catch(err => console.warn('Telegram:', err));
+  if (!proxyUrl()) return;
+  window.enviarAvisoTelegram(text).then(r => { if (!r.ok) console.warn('Telegram:', r.ayuda); });
 };
 
 const titleOf = (id) => ((window.MOD_DATA || {})[id] || (window.APK_DATA || {})[id] || (window.SCRIPTS_DATA || {})[id] || {}).title || id;

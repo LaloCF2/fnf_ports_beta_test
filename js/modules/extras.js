@@ -117,6 +117,12 @@ window.abrirGaleria = (app, start = 0) => {
 window.cerrarGaleria = () => document.getElementById('mi-lightbox').classList.remove('show');
 window.cambiarImagen = (d) => { galIdx = (galIdx + d + galeria.length) % galeria.length; pintarGaleria(); };
 
+// Abre el detalle de cualquier elemento por su id (mod..., apk..., script...)
+window.openItemById = (id) => {
+  const fn = { apk: window.openApkInfo, script: window.openScriptInfo, mod: window.openModInfo }[FNF.kindOf(id)];
+  if (fn) fn(id);
+};
+
 // Mensaje genérico (respuestas del admin, avisos)
 window.mostrarMensaje = (titulo, texto) => {
   setText('msg-title', titulo);

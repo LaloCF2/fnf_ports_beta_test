@@ -10,21 +10,26 @@ const TABS = [
   ['reportes', 'Reportes', 'alert'],
   ['comentarios', 'Comentarios', 'chat'],
   ['usuarios', 'Usuarios', 'users'],
-  ['mods', 'Mods', 'music'],
+  ['contenido', 'Contenido', 'music'],
   ['avisos', 'Avisos', 'bell']
 ];
 let tab = 'resumen';
 const cache = { tickets: {}, users: null, comments: null };
-const ui = { userQuery: '', modQuery: '' };
+const ui = { userQuery: '', modQuery: '', kind: 'mod' };
+const kindOf = (id) => FNF.kindOf(id);
+const baseOf = (kind) => window[FNF.KINDS[kind].data + '_BASE'] || {};
+const customOf = (kind) => ((live().customs || {})[kind]) || {};
 const jsStr = (s) => esc(String(s || '').replace(/['"\\]/g, ''));
-const allTitle = (id) => ((window.MOD_DATA || {})[id] || (window.MOD_DATA_BASE || {})[id] || (window.APK_DATA || {})[id] || (window.SCRIPTS_DATA || {})[id] || {}).title || id;
+const allTitle = (id) => (FNF.itemOf(id) || baseOf(FNF.kindOf(id))[id] || {}).title || id;
 const panel = () => document.getElementById('admin-panel');
 const visible = (name) => tab === name && window.currentSection && window.currentSection() === 'admin';
 
 // ---- Escuchas solo para el admin + contador de pendientes ----
 let listening = false;
 window.startAdminListeners = () => {
-  if (listening || !isAdmin()) return;
+  if (!isAdmin()) return;
+  setTimeout(updateBadge, 0);
+  if (listening) return;
   listening = true;
   onValue(ref(db, 'support_tickets'), s => {
     cache.tickets = s.val() || {};
@@ -38,10 +43,12 @@ if (isAdmin()) window.startAdminListeners();
 function pendingCount() {
   return Object.keys(cache.tickets).length + Object.keys(live().broken || {}).length;
 }
+// Numerito rojo de pendientes (en "Más", en el botón Admin y en la pestaña Reportes). Solo lo ve el admin.
 function updateBadge() {
-  const n = pendingCount();
+  const n = isAdmin() ? pendingCount() : 0;
   document.querySelectorAll('.admin-count').forEach(el => { el.textContent = n > 9 ? '9+' : n; el.hidden = !n; });
 }
+window.updateAdminBadge = updateBadge;
 
 // ==========================================
 // GRÁFICA: barras horizontales ordenadas (una serie, un color)
@@ -200,19 +207,25 @@ const TAB = {
     }
   },
 
-  // ---------- MODS ----------
-  mods: {
-    shell: () => `<div class="adm-toolbar">
-        <div class="search glass" style="flex:1;margin:0">${icon('search')}<input type="search" placeholder="Buscar mod..." value="${esc(ui.modQuery)}" oninput="adminBuscarMods(this.value)"></div>
-        <button class="btn" onclick="abrirEditorMod()">+ Nuevo mod</button>
+  // ---------- CONTENIDO (MODs, Bases y Scripts) ----------
+  contenido: {
+    shell: () => `
+      <div class="chips" style="margin-bottom:10px">
+        ${Object.entries(FNF.KINDS).map(([k, v]) => `<button class="chip${ui.kind === k ? ' active' : ''}" onclick="adminElegirTipo('${k}')">${v.label}</button>`).join('')}
       </div>
-      <p class="adm-count">Los mods que crees o edites aquí se guardan en Firebase y aparecen al instante, sin tocar código.</p>
+      <div class="adm-toolbar">
+        <div class="search glass" style="flex:1;margin:0">${icon('search')}<input type="search" placeholder="Buscar..." value="${esc(ui.modQuery)}" oninput="adminBuscarMods(this.value)"></div>
+        <button class="btn" onclick="abrirEditorMod(null, '${ui.kind}')">+ Nuevo</button>
+      </div>
+      <p class="adm-count">Lo que crees o edites aquí se guarda en Firebase y aparece al instante, sin tocar código.</p>
       <div id="adm-mods" class="list"></div>`,
     list() {
-      const base = window.MOD_DATA_BASE || {};
-      const custom = live().custom || {};
+      const kind = ui.kind;
+      const base = baseOf(kind);
+      const custom = customOf(kind);
       const ids = [...new Set([...Object.keys(custom).filter(id => !base[id]), ...Object.keys(base)])];
       const q = ui.modQuery.trim().toLowerCase();
+      const L = live();
       document.getElementById('adm-mods').innerHTML = ids.map(id => {
         const c = custom[id];
         const d = { ...(base[id] || {}), ...(c || {}) };
@@ -221,17 +234,19 @@ const TAB = {
           !base[id] ? '<span class="status-tag" style="background:var(--accent)">Creado en el panel</span>' : '',
           base[id] && c && !c.removed ? '<span class="status-tag" style="background:#3d8bff">Editado</span>' : '',
           d.removed ? '<span class="status-tag" style="background:#777">Oculto</span>' : '',
-          d.hidden ? '<span class="status-tag" style="background:#2c2347">🔒 Secreto</span>' : ''
+          d.hidden ? '<span class="status-tag" style="background:#2c2347">🔒 Secreto</span>' : '',
+          (L.broken || {})[id] ? '<span class="status-tag" style="background:var(--danger)">Link caído</span>' : ''
         ].join(' ');
         return `
-        <div class="list-item adm-item" style="flex-wrap:wrap;${d.removed ? 'opacity:.6' : ''}">
-          <img src="${esc(d.img || '')}" alt="" loading="lazy">
-          <div class="grow"><h4>${esc(d.title)}</h4><p>${esc(id)} ${tags}</p></div>
+        <div class="list-item adm-item" style="${d.removed ? 'opacity:.6' : ''}">
+          <img src="${esc(d.img || (d.images || [])[0] || '')}" alt="" loading="lazy">
+          <div class="grow"><h4>${esc(d.title)}</h4><p>${esc(id)} · 📥 ${compact((L.downloads || {})[id])} ${tags}</p></div>
           <div class="adm-actions">
-            <button class="btn btn-sm btn-soft" onclick="abrirEditorMod('${esc(id)}')">✏️ Editar</button>
-            <button class="btn btn-sm btn-ghost" onclick="adminOcultarMod('${esc(id)}', ${!d.removed})">${d.removed ? '👁️ Mostrar' : '🙈 Ocultar'}</button>
-            ${base[id] && c && !(Object.keys(c).length === 1 && c.removed) ? `<button class="btn btn-sm btn-ghost" onclick="adminRestaurarMod('${esc(id)}')">↺ Original</button>` : ''}
-            ${!base[id] ? `<button class="btn btn-sm btn-danger" onclick="adminBorrarMod('${esc(id)}')">🗑️</button>` : ''}
+            ${d.removed ? '' : `<button class="btn btn-sm btn-ghost" onclick="openItemById('${esc(id)}')">👁️ Ver</button>`}
+            <button class="btn btn-sm btn-soft" onclick="abrirEditorMod('${esc(id)}', '${kind}')">✏️ Editar</button>
+            <button class="btn btn-sm btn-ghost" onclick="adminOcultarItem('${esc(id)}', ${!d.removed})">${d.removed ? '👁️ Mostrar' : '🙈 Ocultar'}</button>
+            ${base[id] && c && !(Object.keys(c).length === 1 && c.removed) ? `<button class="btn btn-sm btn-ghost" onclick="adminRestaurarItem('${esc(id)}')">↺ Original</button>` : ''}
+            ${!base[id] ? `<button class="btn btn-sm btn-danger" onclick="adminBorrarItem('${esc(id)}')">🗑️</button>` : ''}
           </div>
         </div>`;
       }).join('') || `<p class="empty">Sin resultados.</p>`;
@@ -244,7 +259,9 @@ const TAB = {
       const cfg = live().config || {};
       const b = cfg.banner || {};
       const m = cfg.maintenance || {};
-      const modOptions = Object.entries(window.MOD_DATA || {}).map(([id, d]) => `<option value="${esc(id)}">${esc(d.title)}</option>`).join('');
+      const tg = cfg.telegram || {};
+      const modOptions = Object.entries(FNF.KINDS).map(([, k]) =>
+        `<optgroup label="${k.label}">${Object.entries(window[k.data] || {}).map(([id, d]) => `<option value="${esc(id)}">${esc(d.title)}</option>`).join('')}</optgroup>`).join('');
       return `
       <div class="card glass">
         <h3>📢 Banner en toda la página</h3>
@@ -276,7 +293,7 @@ const TAB = {
         <h3>🔔 Nueva notificación (campana)</h3>
         <div class="stack">
           <textarea id="adm-notif-text" class="field" maxlength="300" placeholder="Aviso para los usuarios..."></textarea>
-          <label class="label" for="adm-notif-mod">Enlazar a un mod (opcional)</label>
+          <label class="label" for="adm-notif-mod">Enlazar a un mod, base o script (opcional)</label>
           <select id="adm-notif-mod" class="field"><option value="">— Ninguno —</option>${modOptions}</select>
           <label class="label" for="adm-notif-when">Programar (opcional)</label>
           <input type="datetime-local" id="adm-notif-when" class="field">
@@ -292,6 +309,19 @@ const TAB = {
         <div class="stack">
           <textarea id="globalNotifText" class="field" maxlength="200" placeholder="Ej: ¡Nuevo mod disponible!"></textarea>
           <button class="btn btn-block btn-soft" onclick="adminEnviarToast()">Enviar aviso</button>
+        </div>
+      </div>
+
+      <div class="card glass">
+        <h3>✈️ Avisos en Telegram</h3>
+        <p>Pega la dirección de tu Worker de Cloudflare (tools/telegram-worker.js). Cada reporte y mensaje de soporte te llegará al bot.</p>
+        <div class="stack">
+          <input type="url" id="adm-tg-url" class="field" placeholder="https://fnf-telegram.tuusuario.workers.dev" value="${esc(tg.url || '')}">
+          <div class="adm-row">
+            <button class="btn" style="flex:1" onclick="adminGuardarTelegram()">Guardar</button>
+            <button class="btn btn-soft" style="flex:1" onclick="adminProbarTelegram()">✈️ Probar</button>
+          </div>
+          <p id="adm-tg-result" class="tg-result" hidden></p>
         </div>
       </div>`;
     },
@@ -380,36 +410,51 @@ window.adminDesbanear = async (uid) => {
   setTimeout(() => { if (visible('usuarios')) TAB.usuarios.list(); }, 300);
 };
 window.adminBuscarUsuarios = (q) => { ui.userQuery = q; TAB.usuarios.list(); };
-window.adminBuscarMods = (q) => { ui.modQuery = q; TAB.mods.list(); };
+window.adminBuscarMods = (q) => { ui.modQuery = q; TAB.contenido.list(); };
+window.adminElegirTipo = (kind) => { ui.kind = kind; ui.modQuery = ''; window.renderAdminTab('contenido'); };
 
-// ---- Mods ----
-window.adminOcultarMod = async (id, hide) => {
-  const base = window.MOD_DATA_BASE || {};
-  const c = (live().custom || {})[id];
-  if (!hide && base[id] && c && Object.keys(c).length === 1) await remove(ref(db, `mods_custom/${id}`));
-  else await update(ref(db, `mods_custom/${id}`), { removed: hide ? true : null });
-  toast(hide ? 'Mod oculto para los usuarios.' : 'Mod visible otra vez.', 'music');
+// ---- Contenido (mods, bases y scripts) ----
+const pathOf = (id) => `${FNF.KINDS[kindOf(id)].path}/${id}`;
+const NOMBRE = { mod: 'mod', apk: 'base', script: 'script' };
+
+window.adminOcultarItem = async (id, hide) => {
+  if (!isAdmin()) return;
+  const kind = kindOf(id);
+  if (hide && !confirm(`¿Ocultar "${allTitle(id)}"? Los usuarios dejarán de verlo (puedes mostrarlo otra vez desde Panel → Contenido).`)) return;
+  const c = customOf(kind)[id];
+  if (!hide && baseOf(kind)[id] && c && Object.keys(c).length === 1) await remove(ref(db, pathOf(id)));
+  else await update(ref(db, pathOf(id)), { removed: hide ? true : null });
+  if (hide && window.closeDetail) window.closeDetail();
+  toast(hide ? 'Oculto para los usuarios.' : 'Visible otra vez.', 'music');
 };
-window.adminRestaurarMod = async (id) => {
-  if (confirm('¿Volver a la versión original de data-mods.js? Se pierden los cambios hechos en el panel.')) await remove(ref(db, `mods_custom/${id}`));
+window.adminRestaurarItem = async (id) => {
+  if (confirm('¿Volver a la versión original del archivo data? Se pierden los cambios hechos en el panel.')) await remove(ref(db, pathOf(id)));
 };
-window.adminBorrarMod = async (id) => {
-  if (confirm('¿Borrar este mod para siempre?')) await remove(ref(db, `mods_custom/${id}`));
+window.adminBorrarItem = async (id) => {
+  if (confirm(`¿Borrar "${allTitle(id)}" para siempre?`)) await remove(ref(db, pathOf(id)));
 };
+// Nombres anteriores
+window.adminOcultarMod = window.adminOcultarItem;
+window.adminRestaurarMod = window.adminRestaurarItem;
+window.adminBorrarMod = window.adminBorrarItem;
 
 let editingId = null;
+let editingKind = 'mod';
 const val = (id) => document.getElementById(id).value.trim();
 
-window.abrirEditorMod = (id) => {
+window.abrirEditorMod = (id, kind) => {
   if (!isAdmin()) return;
   editingId = id || null;
-  const d = id ? { ...((window.MOD_DATA_BASE || {})[id] || {}), ...((live().custom || {})[id] || {}) } : {};
-  document.getElementById('editor-title').textContent = id ? `Editar: ${d.title || id}` : 'Nuevo mod';
+  editingKind = kind || (id ? kindOf(id) : 'mod');
+  const d = id ? { ...(baseOf(editingKind)[id] || {}), ...(customOf(editingKind)[id] || {}) } : {};
+  const mainImg = d.img || (d.images || [])[0] || '';
+  document.getElementById('editor-title').textContent = id ? `Editar: ${d.title || id}` : `Nuevo ${NOMBRE[editingKind]}`;
+  document.getElementById('ed-mod-fields').hidden = editingKind !== 'mod';
   const setV = (k, v) => { document.getElementById(k).value = v || ''; };
-  setV('ed-title', d.title); setV('ed-img', d.img); setV('ed-desc', d.desc); setV('ed-version', d.version);
+  setV('ed-title', d.title); setV('ed-img', mainImg); setV('ed-desc', d.desc); setV('ed-version', d.version);
   setV('ed-engine', d.engine); setV('ed-ram', d.ram); setV('ed-size', d.size);
   document.getElementById('ed-gama').value = d.gama || 'low';
-  setV('ed-images', (d.images || []).join('\n'));
+  setV('ed-images', (d.images || []).filter(x => x !== mainImg).join('\n'));
   setV('ed-downloads', (d.downloads || []).map(x => `${x.name} | ${x.link}`).join('\n'));
   document.getElementById('ed-hidden').checked = !!d.hidden;
   window.previewEditorImg();
@@ -431,28 +476,31 @@ window.guardarMod = async () => {
     return i > 0 ? { name: l.slice(0, i).trim(), link: l.slice(i + 1).trim() } : { name: 'Descarga', link: l };
   });
   const bad = downloads.find(x => !/^(https?:\/\/|assets\/)/i.test(x.link));
-  if (title.length < 2) return toast('Ponle un título al mod.', 'alert');
+  if (title.length < 2) return toast('Ponle un título.', 'alert');
   if (!val('ed-img')) return toast('Falta la imagen.', 'alert');
   if (!downloads.length) return toast('Agrega al menos un enlace de descarga.', 'alert');
   if (bad) return toast(`Enlace inválido: ${bad.link}`, 'alert');
 
+  const extras = val('ed-images').split('\n').map(s => s.trim()).filter(Boolean);
+  const isMod = editingKind === 'mod';
   const data = {
     title, img: val('ed-img'), desc: val('ed-desc'), version: val('ed-version'),
-    gama: document.getElementById('ed-gama').value, engine: val('ed-engine'), ram: val('ed-ram'), size: val('ed-size'),
-    images: val('ed-images').split('\n').map(s => s.trim()).filter(Boolean),
+    gama: isMod ? document.getElementById('ed-gama').value : null,
+    engine: isMod ? val('ed-engine') : null, ram: isMod ? val('ed-ram') : null, size: isMod ? val('ed-size') : null,
+    // La galería del popup: imagen principal + capturas extra
+    images: (extras.length || editingKind === 'script') ? [val('ed-img'), ...extras] : null,
     downloads, hidden: document.getElementById('ed-hidden').checked || null,
     updatedAt: Date.now()
   };
-  if (!data.images.length) data.images = null;
-  const id = editingId || ('mod' + Date.now().toString(36));
+  const id = editingId || (editingKind + Date.now().toString(36));
   if (!editingId) data.createdAt = Date.now();
 
   const btn = document.getElementById('btn-guardar-mod');
   btn.disabled = true;
   try {
-    await update(ref(db, `mods_custom/${id}`), data);
+    await update(ref(db, `${FNF.KINDS[editingKind].path}/${id}`), data);
     closePopup('mod-editor-popup');
-    toast(editingId ? 'Mod actualizado.' : '¡Mod publicado! Ya aparece en la lista.', 'music');
+    toast(editingId ? 'Cambios guardados.' : '¡Publicado! Ya aparece en la lista.', 'music');
     if (!editingId && confirm('¿Marcarlo también como NUEVO?')) set(ref(db, `new_mods_status/card-${id}`), true);
   } catch (err) {
     console.error(err);
@@ -510,6 +558,24 @@ window.adminEnviarToast = async () => {
   await set(ref(db, 'notifications/latest'), { message, timestamp: Date.now(), id: Math.random().toString(36).slice(2, 11) });
   document.getElementById('globalNotifText').value = '';
   toast('Aviso enviado.', 'bell');
+};
+
+// ---- Telegram ----
+window.adminGuardarTelegram = async () => {
+  const url = val('adm-tg-url').replace(/\/+$/, '');
+  if (url && !/^https:\/\/[^\s]+$/i.test(url)) return toast('La dirección debe empezar con https://', 'alert');
+  await set(ref(db, 'site_config/telegram'), url ? { url } : null);
+  toast(url ? 'Dirección guardada. Ahora toca "Probar".' : 'Avisos de Telegram desactivados.', 'send');
+};
+
+window.adminProbarTelegram = async () => {
+  const out = document.getElementById('adm-tg-result');
+  const show = (ok, msg) => { out.hidden = false; out.className = 'tg-result ' + (ok ? 'ok' : 'bad'); out.textContent = msg; };
+  const url = val('adm-tg-url').replace(/\/+$/, '');
+  if (!url) return show(false, 'Primero pega la dirección del Worker.');
+  show(true, 'Enviando mensaje de prueba…');
+  const r = await window.enviarAvisoTelegram('✅ Prueba desde el panel de FNF\' Ports. ¡Los avisos funcionan!', url);
+  show(r.ok, r.ok ? '¡Listo! Revisa tu bot de Telegram.' : r.ayuda);
 };
 
 // Tooltip de las barras (toque o mouse)

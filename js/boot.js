@@ -13,6 +13,7 @@ window.setAdminMode = (on) => {
   window.isSuperUser = on;
   document.body.classList.toggle('is-admin', on);
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !on));
+  if (!on) document.querySelectorAll('.admin-count').forEach(el => { el.hidden = true; });
   if (changed) {
     window.renderAll();
     if (window.repaintLiveData) window.repaintLiveData();
@@ -25,9 +26,11 @@ window.setAdminMode = (on) => {
 // Limpieza de datos de versiones viejas que daban "admin" desde el navegador
 store.remove('superUser');
 
-// Mods guardados desde el panel (copia local para pintarlos al instante, sin esperar a Firebase)
-window.MOD_DATA_BASE = window.MOD_DATA;
-window.applyCustomMods(store.json('fnf_mods_custom_cache', {}));
+// Contenido guardado desde el panel (copia local para pintarlo al instante, sin esperar a Firebase)
+Object.entries(FNF.KINDS).forEach(([kind, k]) => {
+  window[k.data + '_BASE'] = window[k.data] || {};
+  window.applyCustom(kind, store.json(k.cache, {}));
+});
 
 const params = new URLSearchParams(location.search);
 if (params.has('set_admin')) history.replaceState({}, document.title, location.pathname + location.hash);

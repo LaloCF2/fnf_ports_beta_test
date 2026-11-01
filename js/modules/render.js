@@ -50,24 +50,35 @@ function card({ id, kind, title, img, logo, badges = '', tags = [], pre = '', op
   </article>`;
 }
 
-const ledBtn = (id) => `<button id="btn-led-${id}" class="admin-led-btn" onclick="toggleGreenLed('${id}', event)">🟢 Act. LED</button>`;
+// Botones de admin iguales para mods, bases y scripts
+const adminBtns = (kind, id) => `
+  <button class="admin-pin-btn" onclick="toggleModPin('${id}', event)">📌 Fijar</button>
+  <button id="btn-led-${id}" class="admin-led-btn" onclick="toggleGreenLed('${id}', event)">🟢 Act. LED</button>
+  <button onclick="toggleNewMod('card-${id}')">⭐ Nuevo</button>
+  <button onclick="fixBrokenLink('${id}')">🛠️ Reparar</button>
+  <button onclick="abrirEditorMod('${id}', '${kind}')">✏️ Editar</button>
+  ${kind === 'script' ? `<button onclick="toggleRecomendarScript('${id}')">🔥 Top</button>` : ''}`;
+
+// Etiquetas de fijado / nuevo / secreto para bases y scripts
+const simpleBadges = (d) => `<span></span><span><span class="pill-badge badge-pin">📌 ${t('Fijado', 'Pinned')}</span> <span class="pill-badge badge-new">${t('Nuevo', 'New')}</span>${d.hidden ? ' <span class="pill-badge">🔒</span>' : ''}</span>`;
 
 function renderAll() {
   const unlocked = store.json('unlocked_mods', []);
   const showSecrets = window.isSuperUser;
+  const visible = ([id, d]) => !d.hidden || showSecrets || unlocked.includes(id);
 
   // ---- Bases ----
-  const apks = Object.entries(window.APK_DATA || {});
+  const apks = Object.entries(window.APK_DATA || {}).filter(visible);
   document.getElementById('apksContainer').innerHTML = apks.map(([id, d], i) => card({
-    id, kind: 'apk', title: d.title, img: d.img, logo: true, i,
+    id, kind: 'apk', title: d.title, img: d.img, logo: true, i, badges: simpleBadges(d),
     tags: [d.version && d.version.split('\n')[0]],
     openFn: 'openApkInfo',
     extraAction: `<button class="btn btn-ghost" onclick="cargarNovedadesTXT('${id}', 'base')" aria-label="${t('Novedades', 'Notes')}">${icon('info', 'icon icon-sm')}</button>`,
-    adminBtns: ledBtn(id)
+    adminBtns: adminBtns('apk', id)
   })).join('');
 
   // ---- MODs ----
-  const mods = Object.entries(window.MOD_DATA || {}).filter(([id, d]) => !d.hidden || showSecrets || unlocked.includes(id));
+  const mods = Object.entries(window.MOD_DATA || {}).filter(visible);
   document.getElementById('modsContainer').innerHTML = mods.map(([id, d], i) => {
     const g = GAMA[d.gama] || GAMA.low;
     const compat = compatOf(d.ram);
@@ -79,12 +90,7 @@ function renderAll() {
       pre: compat ? `<span class="tag compat-${compat}">${t(COMPAT[compat][0], COMPAT[compat][1])}</span>` : '',
       tags: [d.engine, d.ram, d.size],
       openFn: 'openModInfo',
-      adminBtns: `
-        <button class="admin-pin-btn" onclick="toggleModPin('${id}', event)">📌 Fijar</button>
-        ${ledBtn(id)}
-        <button onclick="toggleNewMod('card-${id}')">⭐ Nuevo</button>
-        <button onclick="fixBrokenLink('${id}')">🛠️ Reparar</button>
-        <button onclick="abrirEditorMod('${id}')">✏️ Editar</button>`
+      adminBtns: adminBtns('mod', id)
     });
   }).join('');
 
@@ -109,12 +115,12 @@ function renderAll() {
   }
 
   // ---- Scripts ----
-  const scripts = Object.entries(window.SCRIPTS_DATA || {});
+  const scripts = Object.entries(window.SCRIPTS_DATA || {}).filter(visible);
   document.getElementById('scriptsContainer').innerHTML = scripts.map(([id, d], i) => card({
-    id, kind: 'script', title: d.title, img: (d.images || [])[0] || '', i,
+    id, kind: 'script', title: d.title, img: d.img || (d.images || [])[0] || '', i, badges: simpleBadges(d),
     tags: [d.version],
     openFn: 'openScriptInfo',
-    adminBtns: ledBtn(id) + `<button onclick="toggleRecomendarScript('${id}')">🔥 Top</button>`
+    adminBtns: adminBtns('script', id)
   })).join('');
 
   // Contadores
@@ -130,9 +136,19 @@ function renderAll() {
   if (window.applySort) window.applySort();
 }
 
-// Mezcla los mods de data-mods.js con los creados/editados desde el panel (Firebase: mods_custom)
-function applyCustomMods(custom) {
-  const base = window.MOD_DATA_BASE || {};
+// Dónde vive cada tipo de contenido (data-*.js) y su versión editada desde el panel (Firebase)
+const KINDS = {
+  mod: { data: 'MOD_DATA', path: 'mods_custom', cache: 'fnf_mods_custom_cache', label: 'MODs' },
+  apk: { data: 'APK_DATA', path: 'apks_custom', cache: 'fnf_apks_custom_cache', label: 'Bases' },
+  script: { data: 'SCRIPTS_DATA', path: 'scripts_custom', cache: 'fnf_scripts_custom_cache', label: 'Scripts' }
+};
+const kindOf = (id) => String(id).startsWith('apk') ? 'apk' : String(id).startsWith('script') ? 'script' : 'mod';
+const itemOf = (id) => (window[KINDS[kindOf(id)].data] || {})[id];
+
+// Mezcla lo de data-*.js con lo creado/editado desde el panel (lo nuevo va primero)
+function applyCustom(kind, custom) {
+  const k = KINDS[kind];
+  const base = window[k.data + '_BASE'] || {};
   custom = custom || {};
   const merged = {};
   Object.entries(custom)
@@ -144,9 +160,13 @@ function applyCustomMods(custom) {
     if (c && c.removed) return;
     merged[id] = c ? { ...d, ...c, edited: true } : d;
   });
-  window.MOD_DATA = merged;
+  window[k.data] = merged;
 }
 
 window.renderAll = renderAll;
-window.applyCustomMods = applyCustomMods;
+window.applyCustom = applyCustom;
+window.applyCustomMods = (custom) => applyCustom('mod', custom);
+FNF.KINDS = KINDS;
+FNF.kindOf = kindOf;
+FNF.itemOf = itemOf;
 })();

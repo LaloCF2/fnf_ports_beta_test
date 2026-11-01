@@ -30,14 +30,14 @@ function render() {
     lista.innerHTML = `<p class="empty">${t('No hay notificaciones nuevas.', 'No new notifications.')}</p>`;
   } else {
     lista.innerHTML = items.map(n => {
-      const mod = n.modId && window.MOD_DATA && window.MOD_DATA[n.modId];
+      const mod = n.modId && FNF.itemOf(n.modId);
       const pending = n.publishAt && n.publishAt > Date.now();
       return `
       <div class="notif-item">
         ${pending ? `<span class="status-tag" style="background:var(--warn)">⏰ ${t('Programado', 'Scheduled')}</span>` : ''}
         <p>${esc(n.texto)}</p>
         <small>${esc(n.fecha)}</small>
-        ${mod ? `<div class="row"><button class="btn btn-sm btn-soft" onclick="closePopup('panel-notificaciones'); openModInfo('${esc(n.modId)}')">${icon('music', 'icon icon-sm')} ${esc(mod.title)}</button></div>` : ''}
+        ${mod ? `<div class="row"><button class="btn btn-sm btn-soft" onclick="closePopup('panel-notificaciones'); openItemById('${esc(n.modId)}')">${icon('music', 'icon icon-sm')} ${esc(mod.title)}</button></div>` : ''}
       </div>`;
     }).join('');
   }

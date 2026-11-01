@@ -311,8 +311,9 @@
     <button class="nav-item" data-section="scripts">
       <svg class="icon"><use href="#i-code"/></svg><span>Scripts</span>
     </button>
-    <button class="nav-item" data-section="more" data-more="help contact">
-      <svg class="icon"><use href="#i-grid"/></svg><span data-es="Más" data-en="More">Más</span>
+    <button class="nav-item" data-section="more" data-more="help contact admin">
+      <span class="nav-icon-wrap"><svg class="icon"><use href="#i-grid"/></svg><span class="admin-count nav-count" hidden></span></span>
+      <span data-es="Más" data-en="More">Más</span>
     </button>
   </nav>
 
@@ -340,6 +341,7 @@
     <div class="popup-content">
       <button class="popup-close" onclick="closeDetail()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
       <h2 class="popup-title" id="detail-title"></h2>
+      <div id="detail-admin" class="detail-admin" hidden></div>
       <div class="detail-media" id="detail-media">
         <img id="detail-img" alt="">
         <button class="carousel-btn carousel-prev hidden" onclick="carouselStep(-1)" aria-label="Anterior"><svg class="icon icon-sm"><use href="#i-left"/></svg></button>
@@ -601,7 +603,7 @@
         <textarea id="ed-desc" class="field"></textarea>
         <label class="label" for="ed-version">Compatibilidad / versión</label>
         <input id="ed-version" class="field" placeholder="Compatible: Psych Engine (Pc/Android/iOS)">
-        <div class="editor-grid">
+        <div class="editor-grid" id="ed-mod-fields">
           <div><label class="label" for="ed-gama">Gama</label>
             <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
           <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" placeholder="Psych Engine"></div>

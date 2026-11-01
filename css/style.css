@@ -1001,6 +1001,46 @@ img.img-error { opacity: 0 !important; }
 .editor-preview { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; background: var(--line); }
 #detail-img { cursor: zoom-in; }
 
+/* Numerito de pendientes junto al icono de "Más" en la píldora */
+.nav-icon-wrap { position: relative; display: inline-flex; }
+.nav-count {
+  position: absolute; top: -7px; right: -11px;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--danger); color: #fff;
+  font-size: 10px; font-weight: 700; line-height: 18px; text-align: center;
+  box-shadow: 0 0 0 2px var(--glass-strong);
+  animation: count-pop .45s var(--spring) both;
+}
+@keyframes count-pop { from { transform: scale(0); } }
+
+/* Panel de admin dentro del popup de detalle */
+.detail-admin {
+  margin: 6px 0 14px; padding: 12px; border-radius: 16px;
+  background: rgba(177, 79, 224, .08);
+  border: 1px dashed rgba(177, 79, 224, .35);
+  animation: card-in .35s var(--ease) both;
+}
+.detail-admin-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.detail-admin-head span { font-weight: 700; font-size: 13px; color: var(--accent); }
+.detail-admin-head small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.detail-admin-alert { font-size: 12px; font-weight: 600; color: var(--danger); margin-bottom: 10px; }
+.detail-admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.adm-chip {
+  padding: 9px 8px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--glass-strong);
+  font-size: 12px; font-weight: 600; text-align: center; cursor: pointer;
+  transition: transform .2s var(--spring), background .2s, border-color .2s;
+}
+.adm-chip:active { transform: scale(.94); }
+.adm-chip.on { border-color: var(--accent); background: rgba(177, 79, 224, .16); color: var(--accent); }
+.adm-chip.ok { border-color: var(--ok); background: rgba(25, 181, 107, .14); color: var(--ok); }
+.adm-chip.danger { color: var(--danger); }
+
+/* Resultado de "Probar Telegram" */
+.tg-result { font-size: 13px; font-weight: 500; padding: 10px 12px; border-radius: 12px; line-height: 1.45; }
+.tg-result.ok { background: rgba(25, 181, 107, .12); }
+.tg-result.bad { background: rgba(239, 62, 109, .12); }
+
 /* =========================================================
    MODO GAMA BAJA y movimiento reducido: sin blur, sin animaciones caras
    ========================================================= */

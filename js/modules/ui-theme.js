@@ -114,8 +114,10 @@ indicator.style.transition = 'none';
 // ---- Tema claro / oscuro ----
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  const ic = document.querySelector('#theme-icon use');
-  if (ic) ic.setAttribute('href', theme === 'dark' ? '#i-sun' : '#i-moon');
+  const img = document.getElementById('theme-icon-img');
+  if (img) img.src = FNF.fiUrl(theme === 'dark' ? 'sun' : 'moon');
+  const label = document.getElementById('theme-label');
+  if (label) label.textContent = theme === 'dark' ? t('Oscuro', 'Dark') : t('Claro', 'Light');
   const toggle = document.getElementById('darkToggle');
   if (toggle) toggle.checked = theme === 'dark';
   const meta = document.querySelector('meta[name="theme-color"]');

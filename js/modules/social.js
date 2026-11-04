@@ -53,7 +53,8 @@ window.openBanPanel = (userKey, userName) => {
     const reason = document.getElementById('banReason').value.trim() || 'Normas';
     const hours = parseInt(document.getElementById('banDuration').value) || 24;
     await set(ref(db, `banned_users/${userKey}`), { userName: String(userName).slice(0, 40), reason, expiresAt: Date.now() + hours * 3600000 });
-    toast(`${userName} baneado por ${hours} h.`, 'shield');
+    toast(`${userName} baneado por ${hours} h.`, 'ban');
+    if (FNF.logAdmin) FNF.logAdmin('ban', `Baneó a ${userName} por ${hours} h: ${reason}`, userKey);
     closePopup('ban-popup');
     if (window.renderAdminTab) window.renderAdminTab('usuarios', true);
   };
@@ -173,20 +174,51 @@ window.addModComment = async () => {
   const text = box.value.trim();
   if (!text) return toast(t('Escribe algo...', 'Write something...'), 'chat');
 
+  // Palabras bloqueadas (se editan en Panel → Herramientas → Moderación)
+  if (!isAdmin() && tieneGroserias(text)) {
+    return window.mostrarMensaje(t('Comentario no permitido', 'Comment not allowed'),
+      t('Tu comentario tiene palabras que no están permitidas en la comunidad. Cámbialo e inténtalo de nuevo.', 'Your comment contains words that are not allowed. Please edit it and try again.'));
+  }
+
+  // 1 comentario cada 15 segundos (lo aplica Firebase)
+  const espera = 15000 - (Date.now() - Number(store.get('last_comment_sent', 0)));
+  if (!isAdmin() && espera > 0) {
+    return toast(t(`Espera ${Math.ceil(espera / 1000)} s antes de comentar otra vez.`, `Wait ${Math.ceil(espera / 1000)} s before commenting again.`), 'clock');
+  }
+
   try {
-    await push(ref(db, `mod_comments/${currentCommentsId}`), {
-      ownerKey: u.uid, user: profileName(p).slice(0, 40), link: '#', avatar: profilePhoto(p),
-      text: text.slice(0, 300), date: new Date().toLocaleString().slice(0, 40), likes: 0, isPinned: false
-    });
+    const key = push(ref(db, `mod_comments/${currentCommentsId}`)).key;
+    const upd = {
+      [`mod_comments/${currentCommentsId}/${key}`]: {
+        ownerKey: u.uid, user: profileName(p).slice(0, 40), link: '#', avatar: profilePhoto(p),
+        text: text.slice(0, 300), date: new Date().toLocaleString().slice(0, 40), likes: 0, isPinned: false
+      }
+    };
+    if (!isAdmin()) upd[`comment_cooldown/${u.uid}`] = FB.serverTimestamp();
+    await update(ref(db), upd);
+    store.set('last_comment_sent', String(Date.now()));
     set(ref(db, `last_comment_time/${currentCommentsId}`), Date.now()).catch(() => { });
     store.set(`seen_comments_${currentCommentsId}`, Date.now() + 1000);
     box.value = '';
     document.getElementById('mc-charCounter').textContent = '0';
   } catch (err) {
     console.error('Comentario:', err);
-    toast(t('No se pudo publicar tu comentario.', "Couldn't post your comment."), 'alert');
+    toast(String(err && err.message).includes('PERMISSION')
+      ? t('Espera unos segundos antes de comentar otra vez.', 'Wait a few seconds before commenting again.')
+      : t('No se pudo publicar tu comentario.', "Couldn't post your comment."), 'alert');
   }
 };
+
+// Revisa la lista de palabras bloqueadas (sin importar mayúsculas, acentos ni letras repetidas)
+const normalizar = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/[@4]/g, 'a').replace(/3/g, 'e').replace(/[1!]/g, 'i').replace(/0/g, 'o').replace(/(.)\1+/g, '$1');
+function tieneGroserias(text) {
+  const lista = (((window.live || {}).config || {}).moderation || {}).badWords || [];
+  if (!lista.length) return false;
+  const limpio = ' ' + normalizar(text).replace(/[^a-zñ0-9]+/g, ' ') + ' ';
+  return lista.some(w => { const n = normalizar(w).trim(); return n && limpio.includes(' ' + n + ' '); });
+}
+FNF.tieneGroserias = tieneGroserias;
 
 window.likeModComment = async (commentId) => {
   if (window.exigirRegistro()) return;

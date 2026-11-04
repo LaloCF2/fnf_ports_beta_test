@@ -9,6 +9,12 @@ const GAMA = {
   high: ['Alta', 'High']
 };
 
+// Idioma del contenido (se elige en el editor del panel)
+const LANGS = { es: ['Español', 'Spanish'], en: ['Inglés', 'English'], 'es-en': ['Español / Inglés', 'Spanish / English'], otro: ['Otro idioma', 'Other language'] };
+const langTag = (d) => d.lang && LANGS[d.lang] ? t(LANGS[d.lang][0], LANGS[d.lang][1]) : '';
+// Etiquetas extra: secreto y borrador
+const extraBadges = (d) => (d.hidden ? ' <span class="pill-badge">🔒</span>' : '') + (d.draft ? ` <span class="pill-badge badge-draft">${t('Borrador', 'Draft')}</span>` : '');
+
 const COMPAT = {
   ok: ['✅ Compatible', '✅ Compatible'],
   warn: ['⚠️ Puede ir lento', '⚠️ May lag'],
@@ -52,26 +58,27 @@ function card({ id, kind, title, img, logo, badges = '', tags = [], pre = '', op
 
 // Botones de admin iguales para mods, bases y scripts
 const adminBtns = (kind, id) => `
-  <button class="admin-pin-btn" onclick="toggleModPin('${id}', event)">📌 Fijar</button>
-  <button id="btn-led-${id}" class="admin-led-btn" onclick="toggleGreenLed('${id}', event)">🟢 Act. LED</button>
-  <button onclick="toggleNewMod('card-${id}')">⭐ Nuevo</button>
-  <button onclick="fixBrokenLink('${id}')">🛠️ Reparar</button>
-  <button onclick="abrirEditorMod('${id}', '${kind}')">✏️ Editar</button>
-  ${kind === 'script' ? `<button onclick="toggleRecomendarScript('${id}')">🔥 Top</button>` : ''}`;
+  <button class="admin-pin-btn" onclick="toggleModPin('${id}', event)">${FNF.fi('pin', 16)}<span>Fijar</span></button>
+  <button id="btn-led-${id}" class="admin-led-btn" onclick="toggleGreenLed('${id}', event)">${FNF.fi('led', 16)}<span>LED</span></button>
+  <button onclick="toggleNewMod('card-${id}')">${FNF.fi('star', 16)}<span>Nuevo</span></button>
+  <button onclick="fixBrokenLink('${id}')">${FNF.fi('tools', 16)}<span>Reparar</span></button>
+  <button onclick="abrirEditorMod('${id}', '${kind}')">${FNF.fi('edit', 16)}<span>Editar</span></button>
+  ${kind === 'script' ? `<button onclick="toggleRecomendarScript('${id}')">${FNF.fi('bolt', 16)}<span>Top</span></button>` : ''}`;
 
 // Etiquetas de fijado / nuevo / secreto para bases y scripts
-const simpleBadges = (d) => `<span></span><span><span class="pill-badge badge-pin">📌 ${t('Fijado', 'Pinned')}</span> <span class="pill-badge badge-new">${t('Nuevo', 'New')}</span>${d.hidden ? ' <span class="pill-badge">🔒</span>' : ''}</span>`;
+const simpleBadges = (d) => `<span></span><span><span class="pill-badge badge-pin">📌 ${t('Fijado', 'Pinned')}</span> <span class="pill-badge badge-new">${t('Nuevo', 'New')}</span>${extraBadges(d)}</span>`;
 
 function renderAll() {
   const unlocked = store.json('unlocked_mods', []);
   const showSecrets = window.isSuperUser;
-  const visible = ([id, d]) => !d.hidden || showSecrets || unlocked.includes(id);
+  // Los borradores solo los ve el admin; los secretos, el admin y quien tenga el enlace
+  const visible = ([id, d]) => (!d.draft || showSecrets) && (!d.hidden || showSecrets || unlocked.includes(id));
 
   // ---- Bases ----
   const apks = Object.entries(window.APK_DATA || {}).filter(visible);
   document.getElementById('apksContainer').innerHTML = apks.map(([id, d], i) => card({
     id, kind: 'apk', title: d.title, img: d.img, logo: true, i, badges: simpleBadges(d),
-    tags: [d.version && d.version.split('\n')[0]],
+    tags: [d.version && d.version.split('\n')[0], langTag(d)],
     openFn: 'openApkInfo',
     extraAction: `<button class="btn btn-ghost" onclick="cargarNovedadesTXT('${id}', 'base')" aria-label="${t('Novedades', 'Notes')}">${icon('info', 'icon icon-sm')}</button>`,
     adminBtns: adminBtns('apk', id)
@@ -84,11 +91,11 @@ function renderAll() {
     const compat = compatOf(d.ram);
     const badges = `
       <span class="pill-badge gama-${d.gama || 'low'}"><span class="dot"></span>${t(g[0], g[1])}</span>
-      <span><span class="pill-badge badge-pin">📌 ${t('Fijado', 'Pinned')}</span> <span class="pill-badge badge-new">${t('Nuevo', 'New')}</span>${d.hidden ? ' <span class="pill-badge">🔒</span>' : ''}</span>`;
+      <span><span class="pill-badge badge-pin">📌 ${t('Fijado', 'Pinned')}</span> <span class="pill-badge badge-new">${t('Nuevo', 'New')}</span>${extraBadges(d)}</span>`;
     return card({
       id, kind: 'mod', title: d.title, img: d.img, badges, i,
       pre: compat ? `<span class="tag compat-${compat}">${t(COMPAT[compat][0], COMPAT[compat][1])}</span>` : '',
-      tags: [d.engine, d.ram, d.size],
+      tags: [d.engine, d.ram, d.size, langTag(d)],
       openFn: 'openModInfo',
       adminBtns: adminBtns('mod', id)
     });
@@ -104,7 +111,7 @@ function renderAll() {
     el.dataset.engine = engine;
     el.dataset.compat = compatOf(d.ram) || '';
     el.dataset.title = d.title.toLowerCase();
-    el.dataset.tags = `${d.title} ${d.engine || ''} ${d.ram || ''} ${d.size || ''}`.toLowerCase();
+    el.dataset.tags = `${d.title} ${d.engine || ''} ${d.ram || ''} ${d.size || ''} ${langTag(d)} ${d.creator || ''}`.toLowerCase();
   });
   const engineSel = document.getElementById('engineFilter');
   if (engineSel) {
@@ -118,7 +125,7 @@ function renderAll() {
   const scripts = Object.entries(window.SCRIPTS_DATA || {}).filter(visible);
   document.getElementById('scriptsContainer').innerHTML = scripts.map(([id, d], i) => card({
     id, kind: 'script', title: d.title, img: d.img || (d.images || [])[0] || '', i, badges: simpleBadges(d),
-    tags: [d.version],
+    tags: [d.version, langTag(d)],
     openFn: 'openScriptInfo',
     adminBtns: adminBtns('script', id)
   })).join('');
@@ -167,6 +174,8 @@ window.renderAll = renderAll;
 window.applyCustom = applyCustom;
 window.applyCustomMods = (custom) => applyCustom('mod', custom);
 FNF.KINDS = KINDS;
+FNF.LANGS = LANGS;
+FNF.langTag = langTag;
 FNF.kindOf = kindOf;
 FNF.itemOf = itemOf;
 })();

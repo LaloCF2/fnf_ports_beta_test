@@ -26,12 +26,12 @@ function paintLikes() {
 
 function paintLeds() {
   document.querySelectorAll('.led-green').forEach(el => { el.style.display = 'none'; });
-  document.querySelectorAll('.admin-led-btn').forEach(btn => { btn.textContent = '🟢 Act. LED'; });
+  document.querySelectorAll('.admin-led-btn').forEach(btn => { const s = btn.querySelector('span'); if (s) s.textContent = 'LED'; });
   Object.keys(live.leds).forEach(id => {
     const el = document.getElementById('led-green-' + id);
     if (el) el.style.display = 'inline-block';
     const btn = document.getElementById('btn-led-' + id);
-    if (btn) btn.textContent = '⭕ Quitar LED';
+    if (btn && btn.querySelector('span')) btn.querySelector('span').textContent = 'Quitar LED';
   });
 }
 
@@ -50,7 +50,7 @@ function paintPinned() {
     const pinned = !!live.pinned[card.dataset.id];
     card.classList.toggle('pinned-mod', pinned);
     const btn = card.querySelector('.admin-pin-btn');
-    if (btn) btn.textContent = pinned ? '❌ Desfijar' : '📌 Fijar';
+    if (btn && btn.querySelector('span')) btn.querySelector('span').textContent = pinned ? 'Desfijar' : 'Fijar';
   });
 }
 
@@ -212,42 +212,64 @@ onValue(ref(db, "site_config"), s => {
 });
 
 // ---- Acciones de admin en las tarjetas (las reglas de Firebase las limitan a tu cuenta) ----
+const titleOf = (id) => (FNF.itemOf(id) || {}).title || id;
+const log = (action, detail, target) => { if (FNF.logAdmin) FNF.logAdmin(action, detail, target); };
+
+// Activa o quita un valor; devuelve true si quedó activado
 const toggleNode = async (path, value = true) => {
   const r = ref(db, path);
   const snap = await get(r);
   await set(r, snap.exists() ? null : value);
+  return !snap.exists();
 };
 
-window.toggleGreenLed = (id, e) => { if (e) e.stopPropagation(); if (isAdmin()) toggleNode(`updates_led/${id}`, Date.now()); };
-window.toggleModPin = (id, e) => { if (e) e.stopPropagation(); if (isAdmin()) toggleNode(`pinned_mods/${id}`); };
+window.toggleGreenLed = async (id, e) => {
+  if (e) e.stopPropagation();
+  if (!isAdmin()) return;
+  const on = await toggleNode(`updates_led/${id}`, Date.now());
+  log('content:led', `${on ? 'Marcó como actualizado' : 'Quitó el LED de'} "${titleOf(id)}"`, id);
+  toast(on ? 'Marcado como actualizado: se avisa a quienes lo siguen.' : 'LED quitado.', 'update');
+};
+window.toggleModPin = async (id, e) => {
+  if (e) e.stopPropagation();
+  if (!isAdmin()) return;
+  const on = await toggleNode(`pinned_mods/${id}`);
+  log('content:pin', `${on ? 'Fijó' : 'Desfijó'} "${titleOf(id)}"`, id);
+  toast(on ? 'Fijado arriba de la lista.' : 'Desfijado.', 'pin');
+};
 // sinPreguntar = true cuando se usa desde el popup (ahí el botón ya muestra el estado)
 window.toggleNewMod = async (cardId, sinPreguntar) => {
   if (!isAdmin()) return;
   const esNuevo = live.newMods[cardId] === true;
   if (sinPreguntar || confirm(esNuevo ? '¿Quitar la etiqueta de NUEVO?' : '¿Marcar como NUEVO?')) {
     await set(ref(db, `new_mods_status/${cardId}`), esNuevo ? null : true);
+    const id = cardId.replace(/^card-/, '');
+    log('content:new', `${esNuevo ? 'Quitó NUEVO a' : 'Marcó como NUEVO'} "${titleOf(id)}"`, id);
   }
 };
-window.toggleRecomendarScript = (id) => {
-  if (isAdmin()) set(ref(db, 'scripts_recomendados/' + id), live.recomendados[id] ? null : true);
+window.toggleRecomendarScript = async (id) => {
+  if (!isAdmin()) return;
+  const on = !live.recomendados[id];
+  await set(ref(db, 'scripts_recomendados/' + id), on ? true : null);
+  log('content:top', `${on ? 'Marcó como TOP' : 'Quitó TOP a'} "${titleOf(id)}"`, id);
 };
 window.fixBrokenLink = async (id, sinPreguntar) => {
-  if (!isAdmin() || !live.broken[id]) return;
-  if (sinPreguntar || confirm('🛠️ ¿Ya solucionaste el link?')) {
+  if (!isAdmin()) return;
+  if (!live.broken[id]) return toast('Este link no está reportado como caído.', 'info');
+  if (sinPreguntar || confirm('¿Ya solucionaste el link?')) {
     await set(ref(db, `broken_links/${id}`), null);
-    toast('Link marcado como reparado.', 'zap');
+    log('link:fix', `Reparó el link de "${titleOf(id)}"`, id);
+    toast('Link marcado como reparado.', 'check');
   }
 };
-
-// ---- Acciones extra del popup de admin ----
-const titleOf = (id) => (FNF.itemOf(id) || {}).title || id;
 
 // Apaga la descarga para todos (como si un usuario reportara el link caído)
 window.adminMarcarCaido = async (id) => {
   if (!isAdmin()) return;
   if (!confirm(`¿Bloquear la descarga de "${titleOf(id)}" para todos hasta que lo repares?`)) return;
   await set(ref(db, `broken_links/${id}`), { reportedBy: 'Admin', uid: window.usuarioActualFirebase.uid, reason: 'admin', timestamp: Date.now() });
-  toast('Descarga bloqueada (en mantenimiento).', 'alert');
+  log('link:block', `Bloqueó la descarga de "${titleOf(id)}"`, id);
+  toast('Descarga bloqueada (en mantenimiento).', 'ban');
 };
 
 // Publica un aviso en la campana con enlace directo a este elemento
@@ -260,6 +282,7 @@ window.adminNotificarItem = async (id) => {
     id: nid, texto: texto.trim(), modId: id,
     fecha: new Date().toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
   });
+  log('notice:bell', `Avisó en la campana sobre "${titleOf(id)}"`, id);
   toast('Aviso publicado en la campana.', 'bell');
 };
 

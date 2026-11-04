@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
 };
 
-window.APP_VERSION = "v7.1.0";
+window.APP_VERSION = "v7.2.0";
 window.MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 window.fbReady = Promise.all([
@@ -32,6 +32,7 @@ window.fbReady = Promise.all([
     googleProvider: new authM.GoogleAuthProvider(),
     ref: dbM.ref, get: dbM.get, set: dbM.set, update: dbM.update, remove: dbM.remove,
     push: dbM.push, onValue: dbM.onValue, runTransaction: dbM.runTransaction, serverTimestamp: dbM.serverTimestamp,
+    query: dbM.query, orderByKey: dbM.orderByKey, startAt: dbM.startAt, limitToLast: dbM.limitToLast,
     signInWithPopup: authM.signInWithPopup, onAuthStateChanged: authM.onAuthStateChanged, signOut: authM.signOut,
     APP_VERSION: window.APP_VERSION, MI_UID_ADMIN: window.MI_UID_ADMIN
   };

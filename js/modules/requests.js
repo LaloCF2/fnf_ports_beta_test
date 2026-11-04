@@ -123,6 +123,7 @@ window.updateRequestStatus = async (id, status) => {
   const req = (await get(ref(db, `mod_requests/${id}`))).val();
   if (!req) return;
   await update(ref(db, `mod_requests/${id}`), { status });
+  if (FNF.logAdmin) FNF.logAdmin('request:status', `Cambió el pedido "${req.modName}" a ${status}`);
   const msgs = {
     'Seleccionado': `Hola ${req.user}, tu mod "${req.modName}" fue seleccionado con éxito, puedes ver el progreso que lleva este port.`,
     'No Seleccionado': `Hola ${req.user}, lamentablemente tu mod "${req.modName}" no fue seleccionado por pocos votos, puedes intentar pedirlo después.`,
@@ -133,5 +134,10 @@ window.updateRequestStatus = async (id, status) => {
   }
 };
 window.updateRequestProgress = (id, v) => { if (isAdmin()) update(ref(db, `mod_requests/${id}`), { progress: parseInt(v) }); };
-window.deleteRequest = (id) => { if (isAdmin() && confirm('¿Eliminar esta solicitud?')) remove(ref(db, `mod_requests/${id}`)); };
+window.deleteRequest = (id) => {
+  if (!isAdmin() || !confirm('¿Eliminar esta solicitud?')) return;
+  const r = requests[id] || {};
+  remove(ref(db, `mod_requests/${id}`));
+  if (FNF.logAdmin) FNF.logAdmin('request:delete', `Eliminó el pedido "${r.modName || id}"`);
+};
 }).catch(err => console.error(err));

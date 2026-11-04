@@ -1,7 +1,7 @@
 // Todo lo que NO necesita Firebase: ajustes, partículas, compartir, galerías, RAM del celular, PWA.
 (() => {
 const { store, t, esc, vibrate, openPopup, closePopup, toast } = FNF;
-const APP_VERSION = window.APP_VERSION || 'v7.1.0';
+const APP_VERSION = window.APP_VERSION || 'v7.2.0';
 const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
 setText('footer-version', APP_VERSION);
@@ -121,6 +121,126 @@ window.cambiarImagen = (d) => { galIdx = (galIdx + d + galeria.length) % galeria
 window.openItemById = (id) => {
   const fn = { apk: window.openApkInfo, script: window.openScriptInfo, mod: window.openModInfo }[FNF.kindOf(id)];
   if (fn) fn(id);
+};
+
+// ==========================================
+// MIS DESCARGAS (historial guardado solo en este celular)
+// ==========================================
+window.abrirMisDescargas = () => {
+  const list = store.json('fnf_dl_history', []).filter(h => FNF.itemOf(h.id));
+  const box = document.getElementById('dl-history-list');
+  box.innerHTML = list.length ? list.map((h, i) => {
+    const d = FNF.itemOf(h.id);
+    const kind = { mod: 'MOD', apk: t('Base', 'Engine'), script: 'Script' }[FNF.kindOf(h.id)];
+    return `
+      <div class="list-item" role="button" style="animation-delay:${Math.min(i, 10) * 40}ms" onclick="closePopup('dl-history-popup'); openItemById('${esc(h.id)}')">
+        <img src="${esc(d.img || (d.images || [])[0] || '')}" alt="" loading="lazy">
+        <div class="grow"><h4>${esc(d.title)}</h4><p>${kind} · ${FNF.timeAgo(h.ts)}</p></div>
+        ${FNF.fi('download', 20)}
+      </div>`;
+  }).join('') : `<p class="empty">${t('Aún no descargas nada desde este celular.', "You haven't downloaded anything on this phone yet.")}</p>`;
+  document.getElementById('dl-history-count').textContent = list.length;
+  openPopup('dl-history-popup');
+};
+window.borrarMisDescargas = () => {
+  if (!confirm(t('¿Borrar tu historial de descargas de este celular?', 'Clear your download history on this phone?'))) return;
+  store.remove('fnf_dl_history');
+  window.abrirMisDescargas();
+};
+
+// ==========================================
+// GUÍA PARA PRINCIPIANTES (asistente paso a paso)
+// ==========================================
+const guia = { paso: 0, device: store.get('fnf_device', '') };
+const DEVICES = [
+  ['android', 'Android', 'gamepad'], ['ios', 'iPhone / iPad', 'lock'], ['pc', 'PC / Laptop', 'code']
+];
+
+function recomendacion() {
+  const ram = guia.device === 'pc' ? 8 : (Number(store.get('fnf_my_ram')) || 3);
+  const mods = Object.entries(window.MOD_DATA || {}).filter(([, d]) => !d.hidden && !d.draft);
+  const cabe = mods.filter(([, d]) => { const need = FNF.minRam(d.ram); return !need || ram >= need; });
+  const porMotor = {};
+  cabe.forEach(([, d]) => { const e = FNF.engineOf(d.engine) || 'Psych Engine'; porMotor[e] = (porMotor[e] || 0) + 1; });
+  const motor = Object.entries(porMotor).sort((a, b) => b[1] - a[1])[0];
+  const engine = motor ? motor[0] : 'Psych Engine';
+  const base = Object.entries(window.APK_DATA || {}).find(([, d]) => d.title.toLowerCase().includes(engine.split(' ')[0].toLowerCase()));
+  const dl = (window.live && window.live.downloads) || {};
+  const top = cabe.filter(([, d]) => (FNF.engineOf(d.engine) || 'Psych Engine') === engine)
+    .sort((a, b) => (dl[b[0]] || 0) - (dl[a[0]] || 0)).slice(0, 3);
+  return { ram, engine, base, top, total: cabe.length };
+}
+
+function pintarGuia() {
+  const box = document.getElementById('guide-body');
+  const dots = document.getElementById('guide-dots');
+  const pasos = guia.device === 'pc' ? [0, 2, 3] : [0, 1, 2, 3];
+  dots.innerHTML = pasos.map(p => `<span class="${p === guia.paso ? 'on' : ''}"></span>`).join('');
+  document.getElementById('guide-back').style.visibility = guia.paso === 0 ? 'hidden' : 'visible';
+  const next = document.getElementById('guide-next');
+  next.hidden = guia.paso === 3;
+
+  if (guia.paso === 0) {
+    box.innerHTML = `
+      <h3>${t('¿Qué dispositivo usas?', 'What device do you use?')}</h3>
+      <p class="guide-sub">${t('Así te recomendamos la base correcta.', "So we can recommend the right engine.")}</p>
+      <div class="guide-options">${DEVICES.map(([k, label, ic]) => `
+        <button class="guide-opt${guia.device === k ? ' on' : ''}" onclick="guiaElegir('${k}')">${FNF.fi(ic, 34)}<span>${label}</span></button>`).join('')}
+      </div>`;
+    next.disabled = !guia.device;
+  } else if (guia.paso === 1) {
+    const ram = Number(store.get('fnf_my_ram')) || 0;
+    box.innerHTML = `
+      <h3>${t('¿Cuánta RAM tiene tu celular?', 'How much RAM does your phone have?')}</h3>
+      <p class="guide-sub">${t('Lo ves en Ajustes → Acerca del teléfono.', 'Find it in Settings → About phone.')}${navigator.deviceMemory ? ' ' + t(`Tu navegador estima ~${navigator.deviceMemory} GB.`, `Your browser estimates ~${navigator.deviceMemory} GB.`) : ''}</p>
+      <div class="ram-grid">${[1, 2, 3, 4, 6, 8].map(n => `
+        <button class="ram-option${ram === n ? ' active' : ''}" onclick="guiaRam(${n})">${n === 8 ? '8+' : n}<small>GB</small></button>`).join('')}
+      </div>`;
+    next.disabled = !ram;
+  } else if (guia.paso === 2) {
+    const r = recomendacion();
+    const nota = {
+      android: t('Descarga el archivo <b>.apk</b> e instálalo. Si te lo pide, activa "Instalar apps desconocidas".', 'Download the <b>.apk</b> file and install it. If asked, allow "Install unknown apps".'),
+      ios: t('Descarga el archivo <b>.ipa</b> e instálalo con una app como AltStore o Sideloadly.', 'Download the <b>.ipa</b> file and install it with an app like AltStore or Sideloadly.'),
+      pc: t('Descarga la versión para Windows, Linux o Mac.', 'Download the Windows, Linux or Mac version.')
+    }[guia.device];
+    box.innerHTML = `
+      <h3>${t('Tu base recomendada', 'Your recommended engine')}</h3>
+      <p class="guide-sub">${t(`Con ${r.ram >= 8 ? '8 GB o más' : r.ram + ' GB'} puedes jugar <b>${r.total}</b> mods. La mayoría usan <b>${esc(r.engine)}</b>.`, `With ${r.ram >= 8 ? '8+ GB' : r.ram + ' GB'} you can play <b>${r.total}</b> mods. Most use <b>${esc(r.engine)}</b>.`)}</p>
+      ${r.base ? `<button class="guide-card" onclick="closePopup('guide-popup'); openApkInfo('${esc(r.base[0])}')">
+        <img src="${esc(r.base[1].img)}" alt="">
+        <span class="grow"><strong>${esc(r.base[1].title)}</strong><small>${esc((r.base[1].version || '').split('\n')[0])}</small></span>
+        ${FNF.fi('download', 22)}</button>` : ''}
+      <p class="note">${nota}</p>`;
+  } else {
+    const r = recomendacion();
+    box.innerHTML = `
+      <h3>${t('¡Instala tu primer mod!', 'Install your first mod!')}</h3>
+      <p class="guide-sub">${t('Estos son los más populares que corren en tu dispositivo:', 'These are the most popular ones that run on your device:')}</p>
+      <div class="list">${r.top.map(([id, d]) => `
+        <div class="list-item" role="button" onclick="closePopup('guide-popup'); openModInfo('${esc(id)}')">
+          <img src="${esc(d.img)}" alt="" loading="lazy">
+          <div class="grow"><h4>${esc(d.title)}</h4><p>${esc(d.ram || '')} · ${esc(d.size || '')}</p></div>
+          ${FNF.fi('download', 20)}
+        </div>`).join('') || `<p class="empty">${t('Revisa la sección MODs.', 'Check the MODs section.')}</p>`}
+      </div>
+      <button class="btn btn-soft btn-block" style="margin-top:14px" onclick="closePopup('guide-popup'); selectSection('help')">${FNF.fi('book', 18)} ${t('¿Cómo instalo un mod? Ver tutorial', 'How do I install a mod? See tutorial')}</button>`;
+    store.set('fnf_guide_done', '1');
+  }
+}
+
+window.abrirGuia = () => { guia.paso = 0; pintarGuia(); openPopup('guide-popup'); };
+window.guiaElegir = (k) => { guia.device = k; store.set('fnf_device', k); pintarGuia(); vibrate(10); };
+window.guiaRam = (n) => {
+  store.set('fnf_my_ram', String(n));
+  paintRamLabel(); window.renderAll(); if (window.repaintLiveData) window.repaintLiveData(); window.filterContent(true);
+  pintarGuia(); vibrate(10);
+};
+window.guiaPaso = (dir) => {
+  let p = guia.paso + dir;
+  if (guia.device === 'pc' && p === 1) p += dir;
+  guia.paso = Math.max(0, Math.min(3, p));
+  pintarGuia();
 };
 
 // Mensaje genérico (respuestas del admin, avisos)

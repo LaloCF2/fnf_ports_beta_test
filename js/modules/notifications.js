@@ -66,6 +66,7 @@ setInterval(actualizarCampana, 60000);
 onValue(ref(db, 'notifications/latest'), (snap) => {
   const data = snap.val();
   if (!data) return;
+  window.lastToastData = data;
   const reciente = (Date.now() - data.timestamp) < 86400000;
   if (store.get('last_notif_id') !== data.id && reciente) {
     toast(data.message);

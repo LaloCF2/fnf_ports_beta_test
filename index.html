@@ -167,6 +167,15 @@
           </ul>
         </div>
 
+        <button class="card glass promo promo-guide" onclick="abrirGuia()">
+          <img class="fi" src="https://cdn-icons-png.flaticon.com/128/7978/7978351.png" alt="" width="52" height="52">
+          <div>
+            <h3 data-es="¿Primera vez aquí?" data-en="First time here?">¿Primera vez aquí?</h3>
+            <p style="color:var(--text-2);font-size:13px" data-es="La guía te dice qué base instalar y qué mods corren en tu celular." data-en="The guide tells you which engine to install and which mods run on your phone.">La guía te dice qué base instalar y qué mods corren en tu celular.</p>
+          </div>
+          <span class="btn btn-sm" data-es="Empezar" data-en="Start">Empezar</span>
+        </button>
+
         <div class="card glass promo">
           <span class="tile-icon"><svg class="icon"><use href="#i-image"/></svg></span>
           <div>
@@ -235,6 +244,12 @@
       <!-- ---------- AYUDA ---------- -->
       <section id="help" class="section">
         <div class="section-head"><h2 data-es="Tutoriales y ayuda" data-en="Tutorials & help">Tutoriales y ayuda</h2></div>
+        <button class="card glass promo promo-guide" onclick="abrirGuia()">
+          <i data-fi="idea" data-size="48"></i>
+          <div><h3 data-es="Guía para principiantes" data-en="Beginner's guide">Guía para principiantes</h3>
+            <p style="color:var(--text-2);font-size:13px" data-es="Responde 2 preguntas y te decimos qué instalar." data-en="Answer 2 questions and we tell you what to install.">Responde 2 preguntas y te decimos qué instalar.</p></div>
+          <span class="btn btn-sm" data-es="Empezar" data-en="Start">Empezar</span>
+        </button>
         <div class="faq-item glass">
           <button class="faq-btn" onclick="toggleFaq(this)">
             <span data-es="¿Cómo instalar un MOD en Psych Engine Mobile?" data-en="How to install a MOD in Psych Engine Mobile?">¿Cómo instalar un MOD en Psych Engine Mobile?</span>
@@ -293,7 +308,14 @@
       </section>
     </main>
 
-    <footer>© <span id="year"></span> LaloCF · <span id="footer-version">v7.1.0</span></footer>
+    <footer>
+      <div>© <span id="year"></span> LaloCF · <span id="footer-version">v7.2.0</span></div>
+      <nav class="footer-links" aria-label="Legal">
+        <a href="privacidad.html" data-es="Política de privacidad" data-en="Privacy Policy">Política de privacidad</a>
+        <a href="terminos.html" data-es="Términos de uso" data-en="Terms of Use">Términos de uso</a>
+        <a href="#contact" onclick="selectSection('contact'); return false;" data-es="Contacto" data-en="Contact">Contacto</a>
+      </nav>
+    </footer>
   </div>
 
   <!-- =================== MENÚ PÍLDORA =================== -->
@@ -321,17 +343,55 @@
 
   <!-- Más -->
   <div id="more-popup" class="popup">
-    <div class="popup-content">
+    <div class="popup-content more-sheet">
       <button class="popup-close" onclick="closePopup('more-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
       <h2 class="popup-title" data-es="Más opciones" data-en="More options">Más opciones</h2>
-      <div class="more-grid" style="margin-top:14px">
-        <button onclick="closePopup('more-popup'); selectSection('help')"><span class="tile-icon"><svg class="icon"><use href="#i-help"/></svg></span><span data-es="Ayuda" data-en="Help">Ayuda</span></button>
-        <button onclick="closePopup('more-popup'); abrirPedidos()"><span class="tile-icon"><svg class="icon"><use href="#i-list"/></svg></span><span data-es="Pedidos" data-en="Requests">Pedidos</span></button>
-        <button onclick="closePopup('more-popup'); selectSection('contact')"><span class="tile-icon"><svg class="icon"><use href="#i-send"/></svg></span><span data-es="Redes" data-en="Socials">Redes</span></button>
-        <button onclick="closePopup('more-popup'); abrirFavoritos()"><span class="tile-icon"><svg class="icon"><use href="#i-heart"/></svg></span><span data-es="Favoritos" data-en="Favorites">Favoritos</span></button>
-        <button onclick="closePopup('more-popup'); toggleTheme()"><span class="tile-icon"><svg class="icon" id="theme-icon"><use href="#i-moon"/></svg></span><span data-es="Tema" data-en="Theme">Tema</span></button>
-        <button onclick="toggleLanguage()"><span class="tile-icon"><svg class="icon"><use href="#i-globe"/></svg></span><span id="langBtn">English</span></button>
-        <button class="admin-only hidden" onclick="closePopup('more-popup'); selectSection('admin')"><span class="tile-icon"><svg class="icon"><use href="#i-shield"/></svg><span class="admin-count" hidden></span></span><span>Admin</span></button>
+
+      <div class="more-section admin-only hidden">
+        <button class="more-admin" onclick="closePopup('more-popup'); selectSection('admin')">
+          <i data-fi="shield" data-size="40"></i>
+          <span class="grow"><b>Panel de administrador</b><small>Reportes, usuarios, contenido y avisos</small></span>
+          <span class="admin-count" hidden></span>
+          <svg class="icon icon-sm"><use href="#i-right"/></svg>
+        </button>
+      </div>
+
+      <div class="more-section">
+        <h4 data-es="Explorar" data-en="Explore">Explorar</h4>
+        <div class="more-grid2">
+          <button class="more-item" onclick="closePopup('more-popup'); selectSection('help')"><span class="more-ic"><i data-fi="help" data-size="30"></i></span><span class="more-txt"><b data-es="Ayuda" data-en="Help">Ayuda</b><small data-es="Tutoriales paso a paso" data-en="Step-by-step tutorials">Tutoriales paso a paso</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); abrirGuia()"><span class="more-ic"><i data-fi="idea" data-size="30"></i></span><span class="more-txt"><b data-es="Guía" data-en="Guide">Guía</b><small data-es="Qué instalar en tu celular" data-en="What to install on your phone">Qué instalar en tu celular</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); abrirPedidos()"><span class="more-ic"><i data-fi="notes" data-size="30"></i></span><span class="more-txt"><b data-es="Pedidos" data-en="Requests">Pedidos</b><small data-es="Pide y vota mods" data-en="Request and vote mods">Pide y vota mods</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); selectSection('contact')"><span class="more-ic"><i data-fi="telegram" data-size="30"></i></span><span class="more-txt"><b data-es="Redes" data-en="Socials">Redes</b><small data-es="Contacto y soporte" data-en="Contact and support">Contacto y soporte</small></span></button>
+        </div>
+      </div>
+
+      <div class="more-section">
+        <h4 data-es="Tu cuenta" data-en="Your account">Tu cuenta</h4>
+        <div class="more-grid2">
+          <button class="more-item" onclick="closePopup('more-popup'); abrirPerfil()"><span class="more-ic"><i data-fi="user" data-size="30"></i></span><span class="more-txt"><b data-es="Mi perfil" data-en="My profile">Mi perfil</b><small data-es="Insignias y estadísticas" data-en="Badges and stats">Insignias y estadísticas</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); abrirFavoritos()"><span class="more-ic"><i data-fi="heart" data-size="30"></i></span><span class="more-txt"><b data-es="Favoritos" data-en="Favorites">Favoritos</b><small data-es="Lo que guardas y sigues" data-en="What you save and follow">Lo que guardas y sigues</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); abrirMisDescargas()"><span class="more-ic"><i data-fi="download" data-size="30"></i></span><span class="more-txt"><b data-es="Mis descargas" data-en="My downloads">Mis descargas</b><small data-es="Tu historial" data-en="Your history">Tu historial</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); toggleNotificaciones()"><span class="more-ic"><i data-fi="bell" data-size="30"></i></span><span class="more-txt"><b data-es="Avisos" data-en="Notices">Avisos</b><small data-es="Notificaciones de la página" data-en="Site notifications">Notificaciones de la página</small></span></button>
+        </div>
+      </div>
+
+      <div class="more-section">
+        <h4 data-es="Preferencias" data-en="Preferences">Preferencias</h4>
+        <div class="more-grid2">
+          <button class="more-item" onclick="toggleTheme()"><span class="more-ic"><img class="fi" id="theme-icon-img" src="https://cdn-icons-png.flaticon.com/128/6714/6714978.png" alt="" width="30" height="30"></span><span class="more-txt"><b data-es="Tema" data-en="Theme">Tema</b><small id="theme-label">Claro</small></span></button>
+          <button class="more-item" onclick="toggleLanguage()"><span class="more-ic"><i data-fi="globe" data-size="30"></i></span><span class="more-txt"><b data-es="Idioma" data-en="Language">Idioma</b><small id="langBtn">English</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); abrirSelectorRam()"><span class="more-ic"><i data-fi="phone" data-size="30"></i></span><span class="more-txt"><b>RAM</b><small data-es="La de tu celular" data-en="Your phone's">La de tu celular</small></span></button>
+          <button class="more-item" onclick="closePopup('more-popup'); openPopup('settings-popup')"><span class="more-ic"><i data-fi="settings" data-size="30"></i></span><span class="more-txt"><b data-es="Ajustes" data-en="Settings">Ajustes</b><small data-es="Apariencia y rendimiento" data-en="Look and performance">Apariencia y rendimiento</small></span></button>
+        </div>
+      </div>
+
+      <div class="more-section">
+        <h4>Legal</h4>
+        <div class="more-grid2">
+          <a class="more-item" href="privacidad.html"><span class="more-ic"><i data-fi="shield" data-size="30"></i></span><span class="more-txt"><b data-es="Privacidad" data-en="Privacy">Privacidad</b><small data-es="Cómo usamos tus datos" data-en="How we use your data">Cómo usamos tus datos</small></span></a>
+          <a class="more-item" href="terminos.html"><span class="more-ic"><i data-fi="document" data-size="30"></i></span><span class="more-txt"><b data-es="Términos" data-en="Terms">Términos</b><small data-es="Normas de la comunidad" data-en="Community rules">Normas de la comunidad</small></span></a>
+        </div>
       </div>
     </div>
   </div>
@@ -349,7 +409,12 @@
         <span class="carousel-count hidden" id="carousel-count"></span>
       </div>
       <span class="detail-version" id="detail-version"></span>
+      <div class="detail-meta" id="detail-meta" hidden></div>
       <p class="detail-compat" id="detail-compat" hidden></p>
+      <details class="detail-changelog" id="detail-changelog" hidden>
+        <summary><span data-es="Qué cambió en esta versión" data-en="What's new in this version">Qué cambió en esta versión</span></summary>
+        <p id="detail-changelog-text"></p>
+      </details>
       <p class="detail-desc" id="detail-desc"></p>
       <div class="rating" id="detail-rating">
         <div class="stars">
@@ -383,9 +448,9 @@
 
   <!-- Perfil -->
   <div id="profile-popup" class="popup">
-    <div class="popup-content popup-center">
+    <div class="popup-content popup-center profile-sheet">
       <button class="popup-close" onclick="closePopup('profile-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
-      <h2 class="popup-title" data-es="Mi perfil" data-en="My profile">Mi perfil</h2>
+      <h2 class="popup-title sr-only" data-es="Mi perfil" data-en="My profile">Mi perfil</h2>
       <div id="perfil-dinamico-contenido"></div>
     </div>
   </div>
@@ -432,46 +497,62 @@
 
       <div class="setting-group" style="margin-top:14px">
         <h4 data-es="Apariencia" data-en="Appearance">Apariencia</h4>
-        <label class="setting-row"><span data-es="Modo oscuro" data-en="Dark mode">Modo oscuro</span>
+        <label class="setting-row"><span class="sr-main"><i data-fi="moon"></i><span><span data-es="Modo oscuro" data-en="Dark mode">Modo oscuro</span>
+            <small data-es="Más cómodo para la vista de noche" data-en="Easier on the eyes at night">Más cómodo para la vista de noche</small></span></span>
           <span class="switch"><input type="checkbox" id="darkToggle"><span></span></span></label>
-        <label class="setting-row"><span data-es="Color de acento" data-en="Accent color">Color de acento</span>
+        <label class="setting-row"><span class="sr-main"><i data-fi="palette"></i><span><span data-es="Color de acento" data-en="Accent color">Color de acento</span>
+            <small data-es="El color de botones y detalles" data-en="Color of buttons and details">El color de botones y detalles</small></span></span>
           <input type="color" id="themeColor" value="#b14fe0"></label>
-        <div class="setting-row" style="display:block">
-          <span data-es="Intensidad del cristal" data-en="Glass intensity">Intensidad del cristal</span>
-          <input type="range" id="blurSlider" min="0" max="30" value="16" style="margin-top:8px">
-        </div>
-        <label class="setting-row"><span data-es="Idioma" data-en="Language">Idioma</span>
+        <div class="setting-row sr-col"><span class="sr-main"><i data-fi="eye"></i><span><span data-es="Intensidad del cristal" data-en="Glass intensity">Intensidad del cristal</span>
+            <small data-es="Qué tan borroso se ve el fondo de las tarjetas" data-en="How blurry the card backgrounds look">Qué tan borroso se ve el fondo de las tarjetas</small></span></span>
+          <input type="range" id="blurSlider" min="0" max="30" value="16"></div>
+        <label class="setting-row"><span class="sr-main"><i data-fi="globe"></i><span><span data-es="Idioma" data-en="Language">Idioma</span>
+            <small data-es="Español o inglés" data-en="Spanish or English">Español o inglés</small></span></span>
           <button class="btn btn-sm btn-soft" onclick="toggleLanguage(); event.preventDefault()" id="langBtn2">English</button></label>
-        <div class="setting-row"><span><span data-es="RAM de mi celular" data-en="My phone's RAM">RAM de mi celular</span>
-            <small data-es="Para saber qué mods corren bien" data-en="To know which mods run well">Para saber qué mods corren bien</small></span>
-          <button class="btn btn-sm btn-soft" onclick="closePopup('settings-popup'); abrirSelectorRam()" id="settings-ram-label">Elegir</button></div>
       </div>
 
       <div class="setting-group">
-        <h4 data-es="Rendimiento" data-en="Performance">Rendimiento</h4>
-        <label class="setting-row"><span><span data-es="Modo gama baja" data-en="Low-end mode">Modo gama baja</span>
-            <small data-es="Quita el desenfoque y animaciones pesadas" data-en="Removes blur and heavy animations">Quita el desenfoque y animaciones pesadas</small></span>
-          <span class="switch"><input type="checkbox" id="lowEndToggle"><span></span></span></label>
-        <label class="setting-row"><span data-es="Partículas FNF" data-en="FNF particles">Partículas FNF</span>
-          <span class="switch"><input type="checkbox" id="particlesToggle"><span></span></span></label>
-        <div id="particle-settings-container" style="display:none">
-          <div class="setting-row" style="display:block"><small data-es="Tamaño" data-en="Size">Tamaño</small>
-            <input type="range" id="particleScaleSlider" min="20" max="80" value="40"></div>
-          <div class="setting-row" style="display:block"><small data-es="Cantidad" data-en="Amount">Cantidad</small>
-            <input type="range" id="particleSpawnSlider" min="1" max="100" value="25"></div>
-          <div class="setting-row" style="display:block"><small data-es="Velocidad" data-en="Speed">Velocidad</small>
-            <input type="range" id="particleSpeedSlider" min="1" max="100" value="50"></div>
-        </div>
-        <label class="setting-row"><span data-es="Vibración al tocar" data-en="Haptic feedback">Vibración al tocar</span>
+        <h4 data-es="Tu celular" data-en="Your phone">Tu celular</h4>
+        <div class="setting-row"><span class="sr-main"><i data-fi="phone"></i><span><span data-es="RAM de mi celular" data-en="My phone's RAM">RAM de mi celular</span>
+            <small data-es="Para saber qué mods corren bien" data-en="To know which mods run well">Para saber qué mods corren bien</small></span></span>
+          <button class="btn btn-sm btn-soft" onclick="closePopup('settings-popup'); abrirSelectorRam()" id="settings-ram-label">Elegir</button></div>
+        <label class="setting-row"><span class="sr-main"><i data-fi="bell"></i><span><span data-es="Vibración al tocar" data-en="Haptic feedback">Vibración al tocar</span>
+            <small data-es="Una vibración corta al presionar botones" data-en="A short vibration when tapping buttons">Una vibración corta al presionar botones</small></span></span>
           <span class="switch"><input type="checkbox" id="hapticToggle"><span></span></span></label>
       </div>
 
       <div class="setting-group">
-        <h4 data-es="Fuente personalizada (.ttf)" data-en="Custom font (.ttf)">Fuente personalizada (.ttf)</h4>
-        <div class="setting-row"><input type="file" id="customFontUpload" accept=".ttf" style="font-size:12px;width:100%"></div>
+        <h4 data-es="Rendimiento" data-en="Performance">Rendimiento</h4>
+        <label class="setting-row"><span class="sr-main"><i data-fi="bolt"></i><span><span data-es="Modo gama baja" data-en="Low-end mode">Modo gama baja</span>
+            <small data-es="Quita el desenfoque y animaciones pesadas" data-en="Removes blur and heavy animations">Quita el desenfoque y animaciones pesadas</small></span></span>
+          <span class="switch"><input type="checkbox" id="lowEndToggle"><span></span></span></label>
+        <label class="setting-row"><span class="sr-main"><i data-fi="star"></i><span><span data-es="Partículas FNF" data-en="FNF particles">Partículas FNF</span>
+            <small data-es="Flechas de colores flotando en el fondo" data-en="Colorful arrows floating in the background">Flechas de colores flotando en el fondo</small></span></span>
+          <span class="switch"><input type="checkbox" id="particlesToggle"><span></span></span></label>
+        <div id="particle-settings-container" class="sr-sub" style="display:none">
+          <div class="setting-row sr-col"><small data-es="Tamaño" data-en="Size">Tamaño</small><input type="range" id="particleScaleSlider" min="20" max="80" value="40"></div>
+          <div class="setting-row sr-col"><small data-es="Cantidad" data-en="Amount">Cantidad</small><input type="range" id="particleSpawnSlider" min="1" max="100" value="25"></div>
+          <div class="setting-row sr-col"><small data-es="Velocidad" data-en="Speed">Velocidad</small><input type="range" id="particleSpeedSlider" min="1" max="100" value="50"></div>
+        </div>
       </div>
 
-      <button class="btn btn-ghost btn-block" onclick="resetSettings()" data-es="Restablecer por defecto" data-en="Reset to default">Restablecer por defecto</button>
+      <div class="setting-group">
+        <h4 data-es="Fuente personalizada" data-en="Custom font">Fuente personalizada</h4>
+        <div class="setting-row sr-col"><span class="sr-main"><i data-fi="font"></i><span><span data-es="Tu propia letra (.ttf)" data-en="Your own font (.ttf)">Tu propia letra (.ttf)</span>
+            <small data-es="Elige un archivo de fuente de tu celular" data-en="Pick a font file from your phone">Elige un archivo de fuente de tu celular</small></span></span>
+          <input type="file" id="customFontUpload" accept=".ttf" class="sr-file"></div>
+      </div>
+
+      <div class="setting-group">
+        <h4 data-es="Más" data-en="More">Más</h4>
+        <button class="setting-row sr-link" onclick="closePopup('settings-popup'); abrirGuia()"><span class="sr-main"><i data-fi="idea"></i><span data-es="Guía para principiantes" data-en="Beginner's guide">Guía para principiantes</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+        <button class="setting-row sr-link" onclick="closePopup('settings-popup'); abrirMisDescargas()"><span class="sr-main"><i data-fi="download"></i><span data-es="Mis descargas" data-en="My downloads">Mis descargas</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+        <a class="setting-row sr-link" href="privacidad.html"><span class="sr-main"><i data-fi="shield"></i><span data-es="Política de privacidad" data-en="Privacy Policy">Política de privacidad</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></a>
+        <a class="setting-row sr-link" href="terminos.html"><span class="sr-main"><i data-fi="document"></i><span data-es="Términos de uso" data-en="Terms of Use">Términos de uso</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></a>
+      </div>
+
+      <button class="btn btn-ghost btn-block" onclick="resetSettings()"><i data-fi="refresh" data-size="18"></i> <span data-es="Restablecer por defecto" data-en="Reset to default">Restablecer por defecto</span></button>
+      <p class="auth-legal" style="text-align:center">FNF' Ports Mobile · <span class="app-version">v7.2.0</span></p>
     </div>
   </div>
 
@@ -501,19 +582,19 @@
   <div id="update-popup" class="popup">
     <div class="popup-content popup-center">
       <span class="tile-icon" style="width:64px;height:64px;margin:6px auto 12px;background:var(--accent-grad);color:#fff;border-radius:20px"><svg class="icon icon-lg"><use href="#i-sparkle"/></svg></span>
-      <h2 class="popup-title" id="update-title">Versión 7.1.0</h2>
+      <h2 class="popup-title" id="update-title">Versión 7.2.0</h2>
       <p class="popup-sub" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta versión:</p>
       <ul class="feature-list" style="text-align:left;margin-bottom:20px">
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-user"/></svg></span>
+          <span data-es="<b>Perfil nuevo</b> con estadísticas e <b>insignias</b> que puedes ganar." data-en="<b>New profile</b> with stats and <b>badges</b> you can earn."><b>Perfil nuevo</b> con estadísticas e <b>insignias</b> que puedes ganar.</span></li>
         <li><span class="fi"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg></span>
-          <span data-es="<b>¡Nuevo diseño!</b> Más rápido, más ligero y con modo oscuro." data-en="<b>New design!</b> Faster, lighter and with dark mode."><b>¡Nuevo diseño!</b> Más rápido, más ligero y con modo oscuro.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-phone"/></svg></span>
-          <span data-es="<b>¿Corre en mi celular?</b> Dinos tu RAM y cada mod te dirá si es compatible." data-en="<b>Will it run?</b> Tell us your RAM and each mod tells you if it's compatible."><b>¿Corre en mi celular?</b> Dinos tu RAM y cada mod te dirá si es compatible.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-list"/></svg></span>
-          <span data-es="<b>Ordena y filtra</b> los mods por popularidad, calificación y motor." data-en="<b>Sort and filter</b> mods by popularity, rating and engine."><b>Ordena y filtra</b> los mods por popularidad, calificación y motor.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg></span>
-          <span data-es="<b>Sigue tus mods:</b> guárdalos y te avisamos cuando se actualicen." data-en="<b>Follow mods:</b> save them and we'll tell you when they update."><b>Sigue tus mods:</b> guárdalos y te avisamos cuando se actualicen.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-alert"/></svg></span>
-          <span data-es="<b>Reportes con motivo</b> y respuestas del admin dentro de la página." data-en="<b>Detailed reports</b> and admin replies right inside the site."><b>Reportes con motivo</b> y respuestas del admin dentro de la página.</span></li>
+          <span data-es="<b>Guía para principiantes:</b> te dice qué base instalar y qué mods corren en tu celular." data-en="<b>Beginner's guide:</b> tells you which engine to install and which mods run on your phone."><b>Guía para principiantes:</b> te dice qué base instalar y qué mods corren en tu celular.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-download"/></svg></span>
+          <span data-es="<b>Mis descargas:</b> tu historial para volver a bajar algo rápido." data-en="<b>My downloads:</b> your history to grab something again quickly."><b>Mis descargas:</b> tu historial para volver a bajar algo rápido.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-info"/></svg></span>
+          <span data-es="Cada mod muestra su <b>creador original</b>, su <b>idioma</b> y <b>qué cambió</b> en la versión." data-en="Each mod shows its <b>original creator</b>, <b>language</b> and <b>what changed</b>.">Cada mod muestra su <b>creador original</b>, su <b>idioma</b> y <b>qué cambió</b> en la versión.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-shield"/></svg></span>
+          <span data-es="<b>Términos de uso</b>, comunidad más segura y la opción de <b>descargar tus datos</b>." data-en="<b>Terms of Use</b>, a safer community and the option to <b>download your data</b>."><b>Términos de uso</b>, comunidad más segura y la opción de <b>descargar tus datos</b>.</span></li>
       </ul>
       <button class="btn btn-block" onclick="closeUpdatePopup()" data-es="¡Aceptar!" data-en="OK!">¡Aceptar!</button>
     </div>
@@ -586,35 +667,104 @@
     </div>
   </div>
 
+  <!-- Mis descargas -->
+  <div id="dl-history-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('dl-history-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title"><span data-es="Mis descargas" data-en="My downloads">Mis descargas</span> <span class="count-pill" id="dl-history-count">0</span></h2>
+      <p class="popup-sub" data-es="Lo último que descargaste desde este celular." data-en="What you last downloaded on this phone.">Lo último que descargaste desde este celular.</p>
+      <div id="dl-history-list" class="list"></div>
+      <button class="btn btn-ghost btn-block" style="margin-top:14px" onclick="borrarMisDescargas()" data-es="Borrar historial" data-en="Clear history">Borrar historial</button>
+    </div>
+  </div>
+
+  <!-- Guía para principiantes -->
+  <div id="guide-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('guide-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" data-es="Guía para principiantes" data-en="Beginner's guide">Guía para principiantes</h2>
+      <div class="guide-dots" id="guide-dots"></div>
+      <div class="guide-body" id="guide-body"></div>
+      <div class="guide-nav">
+        <button class="btn btn-ghost" id="guide-back" onclick="guiaPaso(-1)" data-es="Atrás" data-en="Back">Atrás</button>
+        <button class="btn" id="guide-next" onclick="guiaPaso(1)" data-es="Siguiente" data-en="Next">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Admin: editor de mods -->
   <div id="mod-editor-popup" class="popup">
     <div class="popup-content">
       <button class="popup-close" onclick="closePopup('mod-editor-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
       <h2 class="popup-title" id="editor-title">Nuevo mod</h2>
-      <div class="stack" style="margin-top:12px">
-        <label class="label" for="ed-title">Título</label>
-        <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
-        <label class="label" for="ed-img">Imagen principal (URL o ruta assets/...)</label>
-        <input id="ed-img" class="field" placeholder="assets/images/mods/miMod.webp" oninput="previewEditorImg()">
-        <img id="ed-preview" class="editor-preview" alt="" hidden>
-        <label class="label" for="ed-images">Capturas extra (una por línea, opcional)</label>
-        <textarea id="ed-images" class="field" placeholder="https://..."></textarea>
-        <label class="label" for="ed-desc">Descripción</label>
-        <textarea id="ed-desc" class="field"></textarea>
-        <label class="label" for="ed-version">Compatibilidad / versión</label>
-        <input id="ed-version" class="field" placeholder="Compatible: Psych Engine (Pc/Android/iOS)">
-        <div class="editor-grid" id="ed-mod-fields">
-          <div><label class="label" for="ed-gama">Gama</label>
-            <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
-          <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" placeholder="Psych Engine"></div>
-          <div><label class="label" for="ed-ram">RAM</label><input id="ed-ram" class="field" placeholder="2GB RAM"></div>
-          <div><label class="label" for="ed-size">Tamaño</label><input id="ed-size" class="field" placeholder="56 MB"></div>
-        </div>
-        <label class="label" for="ed-downloads">Descargas (una por línea: Nombre | enlace)</label>
-        <textarea id="ed-downloads" class="field" placeholder="Descarga (MediaFire) | https://www.mediafire.com/..."></textarea>
-        <label class="setting-row" style="border:0;padding:4px 0"><span>🔒 Secreto <small>Solo se ve con enlace de desbloqueo (?unlock=id)</small></span>
-          <span class="switch"><input type="checkbox" id="ed-hidden"><span></span></span></label>
-        <button class="btn btn-block" id="btn-guardar-mod" onclick="guardarMod()">Guardar</button>
+      <div class="editor-body">
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/2875/2875878.png" alt="" width="18" height="18"> Información básica</h4>
+          <label class="label" for="ed-title">Título</label>
+          <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
+          <label class="label" for="ed-desc">Descripción</label>
+          <textarea id="ed-desc" class="field" placeholder="De qué trata y para qué celulares está optimizado"></textarea>
+          <label class="label" for="ed-version">Compatibilidad / versión</label>
+          <input id="ed-version" class="field" placeholder="Compatible: Psych Engine (Pc/Android/iOS)">
+          <label class="label" for="ed-lang">Idioma</label>
+          <select id="ed-lang" class="field">
+            <option value="">— Sin indicar —</option><option value="es">Español</option><option value="en">Inglés</option>
+            <option value="es-en">Español / Inglés</option><option value="otro">Otro idioma</option>
+          </select>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/1077/1077114.png" alt="" width="18" height="18"> Créditos</h4>
+          <div class="editor-grid">
+            <div><label class="label" for="ed-creator">Creador original</label><input id="ed-creator" class="field" maxlength="60" placeholder="Ej: Bumfuzzle Team"></div>
+            <div><label class="label" for="ed-creator-link">Enlace del creador</label><input id="ed-creator-link" class="field" type="url" placeholder="https://gamebanana.com/..."></div>
+          </div>
+          <p class="note"><b>NOTA:</b> aparece en el popup como "Creado por…". Dar crédito al autor original da confianza y evita reclamos.</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/1001/1001371.png" alt="" width="18" height="18"> Qué cambió en esta versión</h4>
+          <textarea id="ed-changelog" class="field" maxlength="1200" placeholder="- Se optimizaron las canciones&#10;- Se arregló el crasheo en la semana 2"></textarea>
+          <p class="note"><b>NOTA:</b> los usuarios lo ven en el popup. Úsalo junto con el botón "Marcar actualizado" para avisar a quienes siguen este contenido.</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/2195/2195700.png" alt="" width="18" height="18"> Imágenes</h4>
+          <label class="label" for="ed-img">Imagen principal (URL o ruta assets/...)</label>
+          <input id="ed-img" class="field" placeholder="assets/images/mods/miMod.webp" oninput="previewEditorImg()">
+          <img id="ed-preview" class="editor-preview" alt="" hidden>
+          <label class="label" for="ed-images">Capturas extra (una por línea, opcional)</label>
+          <textarea id="ed-images" class="field" placeholder="https://..."></textarea>
+        </section>
+
+        <section class="ed-section" id="ed-mod-fields">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/8176/8176146.png" alt="" width="18" height="18"> Requisitos del mod</h4>
+          <div class="editor-grid">
+            <div><label class="label" for="ed-gama">Gama</label>
+              <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
+            <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" placeholder="Psych Engine"></div>
+            <div><label class="label" for="ed-ram">RAM</label><input id="ed-ram" class="field" placeholder="2GB RAM"></div>
+            <div><label class="label" for="ed-size">Tamaño</label><input id="ed-size" class="field" placeholder="56 MB"></div>
+          </div>
+          <p class="note"><b>NOTA:</b> la RAM se usa para decirle a cada usuario si el mod corre en su celular. Escribe el mínimo primero (ej: "2-3GB RAM").</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="" width="18" height="18"> Descargas</h4>
+          <textarea id="ed-downloads" class="field" placeholder="Descarga (MediaFire) | https://www.mediafire.com/..."></textarea>
+          <p class="note"><b>NOTA:</b> una por línea con el formato <i>Nombre | enlace</i>. Solo se aceptan enlaces https:// o rutas assets/.</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/6195/6195700.png" alt="" width="18" height="18"> Visibilidad</h4>
+          <label class="setting-row" style="border:0;padding:4px 0"><span>Borrador <small>Guardado pero sin publicar: solo tú lo ves</small></span>
+            <span class="switch"><input type="checkbox" id="ed-draft"><span></span></span></label>
+          <label class="setting-row" style="border:0;padding:4px 0"><span>Secreto <small>Solo se ve con el enlace de desbloqueo</small></span>
+            <span class="switch"><input type="checkbox" id="ed-hidden"><span></span></span></label>
+          <p class="note"><b>NOTA:</b> usa Borrador mientras preparas un mod; cuando esté listo, desactívalo y guarda para publicarlo.</p>
+        </section>
+
+        <button class="btn btn-block" id="btn-guardar-mod" onclick="guardarMod()"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="" width="18" height="18"> Guardar</button>
       </div>
     </div>
   </div>
@@ -656,6 +806,8 @@
         </button>
         <button class="btn btn-ghost btn-block" onclick="entrarComoInvitado()" data-es="Iniciar sesión después" data-en="Sign in later">Iniciar sesión después</button>
       </div>
+      <p class="auth-legal" data-es="Al iniciar sesión aceptas los <a href=&quot;terminos.html&quot;>Términos de uso</a> y la <a href=&quot;privacidad.html&quot;>Política de privacidad</a>."
+        data-en="By signing in you accept the <a href=&quot;terminos.html&quot;>Terms of Use</a> and the <a href=&quot;privacidad.html&quot;>Privacy Policy</a>.">Al iniciar sesión aceptas los <a href="terminos.html">Términos de uso</a> y la <a href="privacidad.html">Política de privacidad</a>.</p>
     </div>
   </div>
 
@@ -691,6 +843,10 @@
   <script defer src="js/modules/support.js"></script>
   <script defer src="js/modules/notifications.js"></script>
   <script defer src="js/modules/admin.js"></script>
+  <script defer src="js/modules/admin-users.js"></script>
+  <script defer src="js/modules/admin-content.js"></script>
+  <script defer src="js/modules/admin-avisos.js"></script>
+  <script defer src="js/modules/admin-tools.js"></script>
   <!-- Seguro: si algo falla, la pantalla de carga nunca se queda pegada -->
   <script>setTimeout(function () { document.body.classList.add('loaded'); }, 4000);</script>
 </body>

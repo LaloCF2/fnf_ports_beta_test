@@ -1,14 +1,17 @@
 // Service Worker: red primero, caché como respaldo sin conexión.
-const CACHE_NAME = 'fnf-mobile-v7.1.0';
+const CACHE_NAME = 'fnf-mobile-v7.2.0';
 
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
+  './privacidad.html',
+  './terminos.html',
   './css/style.css',
   './js/boot.js',
   ...['utils', 'render', 'ui-theme', 'firebase-config', 'extras', 'auth', 'profile', 'live', 'social',
-      'downloads', 'favorites', 'requests', 'support', 'notifications', 'admin'].map(f => `./js/modules/${f}.js`),
+      'downloads', 'favorites', 'requests', 'support', 'notifications', 'admin',
+      'admin-users', 'admin-content', 'admin-avisos', 'admin-tools'].map(f => `./js/modules/${f}.js`),
   './js/modules/data-apks.js',
   './js/modules/data-mods.js',
   './js/modules/data-scripts.js',

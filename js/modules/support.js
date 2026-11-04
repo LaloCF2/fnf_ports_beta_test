@@ -77,6 +77,10 @@ async function crearTicket(ticket, extra = {}) {
     ...extra
   });
 }
+window.crearTicketSoporte = async (ticket) => {
+  await crearTicket(ticket);
+  notifyTelegram(`🗑️ SOLICITUD DE BORRAR CUENTA de ${profileName(getProfile())}`);
+};
 
 const errorAmigable = (err) => {
   console.error(err);

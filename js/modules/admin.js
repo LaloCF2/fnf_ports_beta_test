@@ -1,64 +1,132 @@
-// Panel de admin: estadísticas, reportes, moderación, usuarios, mods y avisos.
+// Panel de admin — núcleo: pestañas, contador, registro de actividad, gráficas, Resumen y Reportes.
+// Las demás pestañas están en admin-users.js, admin-content.js, admin-avisos.js y admin-tools.js.
 // Solo se muestra con la sesión de Google del admin; las reglas de Firebase bloquean a cualquier otra cuenta.
 window.fbReady.then((FB) => {
-const { db, ref, get, set, update, remove, onValue } = FB;
-const { t, esc, icon, toast, openPopup, closePopup, isAdmin, compact, timeAgo, stringToColor } = FNF;
+const { db, ref, get, set, update, remove, push, onValue, query, orderByKey, startAt, limitToLast } = FB;
+const { t, esc, fi, toast, isAdmin, compact, timeAgo, fmtDateTime, stringToColor, dayKey, copyText } = FNF;
 const live = () => window.live || {};
 
 const TABS = [
-  ['resumen', 'Resumen', 'sparkle'],
-  ['reportes', 'Reportes', 'alert'],
+  ['resumen', 'Resumen', 'code'],
+  ['reportes', 'Reportes', 'warning'],
   ['comentarios', 'Comentarios', 'chat'],
   ['usuarios', 'Usuarios', 'users'],
-  ['contenido', 'Contenido', 'music'],
-  ['avisos', 'Avisos', 'bell']
+  ['contenido', 'Contenido', 'box'],
+  ['avisos', 'Avisos', 'megaphone'],
+  ['herramientas', 'Herramientas', 'tools']
 ];
-let tab = 'resumen';
-const cache = { tickets: {}, users: null, comments: null };
-const ui = { userQuery: '', modQuery: '', kind: 'mod' };
-const kindOf = (id) => FNF.kindOf(id);
-const baseOf = (kind) => window[FNF.KINDS[kind].data + '_BASE'] || {};
-const customOf = (kind) => ((live().customs || {})[kind]) || {};
-const jsStr = (s) => esc(String(s || '').replace(/['"\\]/g, ''));
-const allTitle = (id) => (FNF.itemOf(id) || baseOf(FNF.kindOf(id))[id] || {}).title || id;
-const panel = () => document.getElementById('admin-panel');
-const visible = (name) => tab === name && window.currentSection && window.currentSection() === 'admin';
+
+// Estado y utilidades compartidas por todos los archivos del panel
+const A = window.ADMIN = {
+  TAB: {},
+  tab: 'resumen',
+  cache: { tickets: {}, users: null, comments: null, requests: null, days: null, log: null },
+  ui: {},
+  live,
+  kindOf: (id) => FNF.kindOf(id),
+  baseOf: (kind) => window[FNF.KINDS[kind].data + '_BASE'] || {},
+  customOf: (kind) => ((live().customs || {})[kind]) || {},
+  jsStr: (s) => esc(String(s || '').replace(/['"\\\n\r]/g, ' ')),
+  panel: () => document.getElementById('admin-panel'),
+  visible: (name) => A.tab === name && window.currentSection && window.currentSection() === 'admin',
+  // Botón con icono de Flaticon
+  btn: (ic, label, onclick, cls = 'btn-ghost') => `<button class="btn btn-sm abtn ${cls}" onclick="${onclick}">${fi(ic, 18)}<span>${label}</span></button>`,
+  // Texto pequeño explicativo
+  note: (text) => `<p class="note"><b>NOTA:</b> ${text}</p>`,
+  pill: (text, color) => `<span class="status-tag" style="background:${color}">${text}</span>`,
+  userOf: (uid) => (A.cache.users || {})[uid] || null,
+  // Avatar de un usuario (foto de su perfil o su inicial)
+  avatar: (uid, name, photo, size = 40) => {
+    const u = A.userOf(uid) || {};
+    const src = photo || u.foto;
+    const nm = name || u.nombre || '?';
+    return src
+      ? `<img class="adm-avatar" src="${esc(src)}" alt="" width="${size}" height="${size}" loading="lazy" style="border-color:${esc(u.marcoAvatar && !String(u.marcoAvatar).includes('neon') ? u.marcoAvatar : 'transparent')}">`
+      : `<span class="adm-avatar adm-avatar-letter" style="width:${size}px;height:${size}px;background:${stringToColor(nm)}">${esc(nm.charAt(0).toUpperCase())}</span>`;
+  },
+  allTitle: (id) => (FNF.itemOf(id) || A.baseOf(FNF.kindOf(id))[id] || {}).title || id,
+  itemThumb: (id) => { const d = FNF.itemOf(id) || A.baseOf(FNF.kindOf(id))[id] || {}; return d.img || (d.images || [])[0] || ''; },
+  kindLabel: (id) => ({ mod: 'MOD', apk: 'Base', script: 'Script' })[FNF.kindOf(id)],
+  copy: (txt, msg) => copyText(txt, msg)
+};
+window.adminCopiar = (txt) => A.copy(txt);
+
+// ---- Datos que solo carga el admin ----
+A.loadUsers = async (force) => {
+  if (A.cache.users && !force) return A.cache.users;
+  try { A.cache.users = (await get(ref(db, 'usuarios'))).val() || {}; } catch (err) { console.warn('Usuarios:', err.message); A.cache.users = {}; }
+  return A.cache.users;
+};
+A.loadComments = async (force) => {
+  if (A.cache.comments && !force) return A.cache.comments;
+  try {
+    const data = (await get(ref(db, 'mod_comments'))).val() || {};
+    A.cache.comments = Object.entries(data).flatMap(([modId, cs]) => Object.entries(cs || {}).map(([id, c]) => ({ modId, id, ...c })))
+      .sort((a, b) => b.id.localeCompare(a.id));
+  } catch (err) { console.warn('Comentarios:', err.message); A.cache.comments = []; }
+  return A.cache.comments;
+};
+A.loadRequests = async (force) => {
+  if (A.cache.requests && !force) return A.cache.requests;
+  try { A.cache.requests = (await get(ref(db, 'mod_requests'))).val() || {}; } catch (err) { A.cache.requests = {}; }
+  return A.cache.requests;
+};
+A.loadDays = async (force) => {
+  if (A.cache.days && !force) return A.cache.days;
+  const desde = dayKey(new Date(Date.now() - 29 * 86400000));
+  try { A.cache.days = (await get(query(ref(db, 'downloads_day'), orderByKey(), startAt(desde)))).val() || {}; } catch (err) { A.cache.days = {}; }
+  return A.cache.days;
+};
+A.loadLog = async (force) => {
+  if (A.cache.log && !force) return A.cache.log;
+  try {
+    const data = (await get(query(ref(db, 'admin_log'), limitToLast(150)))).val() || {};
+    A.cache.log = Object.entries(data).map(([id, l]) => ({ id, ...l })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  } catch (err) { A.cache.log = []; }
+  return A.cache.log;
+};
+
+// ---- Registro de actividad (todo lo que hace el admin queda anotado) ----
+A.log = (action, detail = '', target = '') => {
+  if (!isAdmin()) return;
+  const entry = { action, detail: String(detail).slice(0, 200), target: String(target).slice(0, 60), ts: Date.now() };
+  push(ref(db, 'admin_log'), entry).catch(err => console.warn('Registro:', err.message));
+  if (A.cache.log) A.cache.log.unshift(entry);
+};
+FNF.logAdmin = A.log;
 
 // ---- Escuchas solo para el admin + contador de pendientes ----
 let listening = false;
 window.startAdminListeners = () => {
   if (!isAdmin()) return;
-  setTimeout(updateBadge, 0);
+  setTimeout(A.updateBadge, 0);
   if (listening) return;
   listening = true;
   onValue(ref(db, 'support_tickets'), s => {
-    cache.tickets = s.val() || {};
-    updateBadge();
-    if (visible('reportes')) TAB.reportes.list();
-    if (visible('resumen')) TAB.resumen.list();
+    A.cache.tickets = s.val() || {};
+    A.updateBadge();
+    if (A.visible('reportes')) A.TAB.reportes.list();
+    if (A.visible('resumen')) A.TAB.resumen.list();
   }, err => console.warn('Tickets:', err.message));
 };
-if (isAdmin()) window.startAdminListeners();
 
-function pendingCount() {
-  return Object.keys(cache.tickets).length + Object.keys(live().broken || {}).length;
-}
+A.pendingCount = () => Object.keys(A.cache.tickets).length + Object.keys(live().broken || {}).length;
 // Numerito rojo de pendientes (en "Más", en el botón Admin y en la pestaña Reportes). Solo lo ve el admin.
-function updateBadge() {
-  const n = isAdmin() ? pendingCount() : 0;
+A.updateBadge = () => {
+  const n = isAdmin() ? A.pendingCount() : 0;
   document.querySelectorAll('.admin-count').forEach(el => { el.textContent = n > 9 ? '9+' : n; el.hidden = !n; });
-}
-window.updateAdminBadge = updateBadge;
+};
+window.updateAdminBadge = A.updateBadge;
 
 // ==========================================
-// GRÁFICA: barras horizontales ordenadas (una serie, un color)
+// GRÁFICAS (una serie, un color, valor al final, tooltip al tocar)
 // ==========================================
-function rankedBars(entries, unit) {
+A.rankedBars = (entries, unit) => {
   if (!entries.length) return `<p class="empty">${t('Aún no hay datos.', 'No data yet.')}</p>`;
   const max = Math.max(...entries.map(e => e[1]));
   const total = entries.reduce((a, e) => a + e[1], 0);
   return `<ol class="bar-chart">${entries.map(([id, n]) => {
-    const name = allTitle(id);
+    const name = A.allTitle(id);
     const pct = total ? Math.round(n / total * 100) : 0;
     return `<li class="bar-row" tabindex="0" data-tip="${esc(name)} · ${n.toLocaleString('en-US')} ${unit} (${pct}%)" aria-label="${esc(name)}: ${n} ${unit}">
       <span class="bar-label">${esc(name)}</span>
@@ -66,522 +134,324 @@ function rankedBars(entries, unit) {
       <span class="bar-value">${compact(n)}</span></span>
     </li>`;
   }).join('')}</ol>`;
-}
+};
 
-const statTile = (label, value, sub = '') =>
-  `<div class="stat-tile glass"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+// Columnas por día (últimos 30 días)
+A.dailyChart = (days) => {
+  const rows = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const k = dayKey(d);
+    const n = Object.values(days[k] || {}).reduce((a, v) => a + (Number(v) || 0), 0);
+    rows.push({ k, n, label: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}` });
+  }
+  const total = rows.reduce((a, r) => a + r.n, 0);
+  if (!total) return `<p class="empty">Aún no hay datos por día. Se empiezan a juntar desde esta versión.</p>`;
+  const max = Math.max(...rows.map(r => r.n));
+  const best = rows.reduce((a, r) => r.n > a.n ? r : a, rows[0]);
+  return `
+    <div class="col-summary">
+      <span><b>${compact(total)}</b> en 30 días</span><span><b>${(total / 30).toFixed(1)}</b> por día</span><span>Mejor día: <b>${best.label}</b> (${best.n})</span>
+    </div>
+    <div class="col-chart" role="img" aria-label="Descargas por día de los últimos 30 días">
+      <span class="col-max">${compact(max)}</span>
+      <div class="cols">${rows.map(r => `<div class="col" tabindex="0" data-tip="${r.label}: ${r.n} descargas"><span class="col-fill" style="height:${r.n ? Math.max(3, r.n / max * 100) : 0}%"></span></div>`).join('')}</div>
+      <div class="col-axis">${rows.map((r, i) => `<span>${i % 6 === 0 || i === 29 ? r.label : ''}</span>`).join('')}</div>
+    </div>`;
+};
+
+A.statTile = (ic, label, value, sub = '', onclick = '') =>
+  `<div class="stat-tile glass"${onclick ? ` role="button" onclick="${onclick}"` : ''}>
+    <span class="stat-head">${fi(ic, 20)}<span class="stat-label">${label}</span></span>
+    <strong class="stat-value">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+
+const LOG_ICONS = {
+  ban: 'ban', unban: 'check', verify: 'verified', comment: 'chat', content: 'box', notice: 'bell', link: 'link',
+  account: 'trash', config: 'settings', ticket: 'support', backup: 'database', request: 'idea'
+};
+A.logIcon = (action) => LOG_ICONS[String(action).split(':')[0]] || 'history';
 
 // ==========================================
-// PESTAÑAS
+// RESUMEN
 // ==========================================
-const TAB = {
-  // ---------- RESUMEN ----------
-  resumen: {
-    shell: () => `<div id="adm-stats" class="stat-grid"></div>
-      <div class="card glass"><h3>${t('Top 8 mods por descargas', 'Top 8 mods by downloads')}</h3><div id="adm-top-all"></div></div>
-      <div class="card glass"><h3>${t('Más descargados esta semana', 'Most downloaded this week')}</h3><div id="adm-top-week"></div></div>`,
-    list() {
-      const L = live();
-      const sum = (o) => Object.values(o || {}).reduce((a, v) => a + (Number(v) || 0), 0);
-      const ratings = Object.values(L.ratings || {}).flatMap(o => Object.values(o || {})).filter(v => typeof v === 'number');
-      const avg = ratings.length ? (ratings.reduce((a, v) => a + v, 0) / ratings.length).toFixed(1) : '—';
-      const users = cache.users ? Object.keys(cache.users).length : null;
-      document.getElementById('adm-stats').innerHTML = [
-        statTile('Descargas totales', compact(sum(L.downloads))),
-        statTile('Esta semana', compact(sum(L.week)), FNF.weekKey()),
-        statTile('Likes', compact(sum(L.likes))),
-        statTile('Usuarios', users === null ? '…' : compact(users)),
-        statTile('Pendientes', pendingCount(), 'reportes y mensajes'),
-        statTile('Calificación', avg === '—' ? avg : `${avg} ★`, `${ratings.length} votos`)
-      ].join('');
-      const mods = window.MOD_DATA || {};
-      const top = (src, n) => Object.entries(src || {}).filter(([id, v]) => mods[id] && v > 0).sort((a, b) => b[1] - a[1]).slice(0, n);
-      document.getElementById('adm-top-all').innerHTML = rankedBars(top(L.downloads, 8), 'descargas');
-      document.getElementById('adm-top-week').innerHTML = rankedBars(top(L.week, 5), 'descargas');
-      if (cache.users === null) loadUsers().then(() => { if (visible('resumen')) this.list(); });
-    }
-  },
+A.TAB.resumen = {
+  shell: () => `
+    <div class="adm-toolbar">
+      <p>Vista general de tu página. Toca una tarjeta para ir a su sección.</p>
+      ${A.btn('refresh', 'Actualizar', 'adminRecargarTodo()', 'btn-soft')}
+    </div>
+    <div id="adm-stats" class="stat-grid"></div>
+    <div class="adm-two">
+      <div class="card glass"><h3>${fi('settings', 20)} Estado del sitio</h3><div id="adm-status" class="status-list"></div></div>
+      <div class="card glass"><h3>${fi('bolt', 20)} Accesos rápidos</h3><div id="adm-quick" class="quick-grid"></div></div>
+    </div>
+    <div class="card glass"><h3>${fi('calendar', 20)} Descargas de los últimos 30 días</h3><div id="adm-days"></div></div>
+    <div class="adm-two">
+      <div class="card glass"><h3>${fi('trophy', 20)} Top 8 de todos los tiempos</h3><div id="adm-top-all"></div></div>
+      <div class="card glass"><h3>${fi('bolt', 20)} Top de esta semana</h3><div id="adm-top-week"></div></div>
+    </div>
+    <div class="adm-two">
+      <div class="card glass"><h3>${fi('users', 20)} Usuarios nuevos</h3><div id="adm-new-users" class="list"></div></div>
+      <div class="card glass"><h3>${fi('history', 20)} Actividad reciente</h3><div id="adm-recent-log" class="list"></div></div>
+    </div>`,
+  list() {
+    const L = live();
+    const sum = (o) => Object.values(o || {}).reduce((a, v) => a + (Number(v) || 0), 0);
+    const ratings = Object.values(L.ratings || {}).flatMap(o => Object.values(o || {})).filter(v => typeof v === 'number');
+    const avg = ratings.length ? (ratings.reduce((a, v) => a + v, 0) / ratings.length).toFixed(1) : '—';
+    const users = A.cache.users;
+    const nUsers = users ? Object.keys(users).length : null;
+    const nuevos = users ? Object.values(users).filter(u => u.fechaRegistro && Date.now() - new Date(u.fechaRegistro).getTime() < 7 * 86400000).length : null;
+    const comments = A.cache.comments;
+    const hoyKey = dayKey();
+    const hoy = sum((A.cache.days || {})[hoyKey]);
+    const reqs = Object.values(A.cache.requests || {});
+    const activos = reqs.filter(r => r.status !== 'Completado' && r.status !== 'No Seleccionado').length;
+    const baneados = Object.values(L.banned || {}).filter(b => b && b.expiresAt > Date.now()).length;
+    const contenido = Object.keys(window.MOD_DATA || {}).length + Object.keys(window.APK_DATA || {}).length + Object.keys(window.SCRIPTS_DATA || {}).length;
+    const dots = '…';
 
-  // ---------- REPORTES ----------
-  reportes: {
-    shell: () => `<div class="card glass"><h3>🔗 ${t('Links caídos', 'Broken links')}</h3><p>Estos mods están bloqueados para los usuarios hasta que los marques como reparados.</p><div id="adm-broken" class="list"></div></div>
-      <div class="card glass"><h3>🎫 ${t('Reportes y mensajes', 'Reports & messages')}</h3><div id="adm-tickets" class="list"></div></div>`,
-    list() {
-      const broken = Object.entries(live().broken || {});
-      document.getElementById('adm-broken').innerHTML = broken.length ? broken.map(([id, b]) => `
-        <div class="list-item adm-item">
-          <div class="grow"><h4>${esc(allTitle(id))}</h4><p>${esc(b.reportedBy || '¿?')} · ${timeAgo(b.timestamp)}</p></div>
-          <div class="adm-actions">
-            <button class="btn btn-sm btn-ghost" onclick="openModInfo('${esc(id)}')">Ver</button>
-            <button class="btn btn-sm" onclick="fixBrokenLink('${esc(id)}')">✅ Reparado</button>
-          </div>
-        </div>`).join('') : `<p class="empty">Ningún link caído. 🎉</p>`;
+    document.getElementById('adm-stats').innerHTML = [
+      A.statTile('download', 'Descargas totales', compact(sum(L.downloads)), 'desde el inicio'),
+      A.statTile('calendar', 'Hoy', A.cache.days ? compact(hoy) : dots, 'descargas'),
+      A.statTile('bolt', 'Esta semana', compact(sum(L.week)), FNF.weekKey()),
+      A.statTile('users', 'Usuarios', nUsers === null ? dots : compact(nUsers), 'registrados', "renderAdminTab('usuarios')"),
+      A.statTile('plus', 'Nuevos', nuevos === null ? dots : nuevos, 'últimos 7 días', "adminVerUsuarios('nuevos')"),
+      A.statTile('chat', 'Comentarios', comments ? compact(comments.length) : dots, 'en total', "renderAdminTab('comentarios')"),
+      A.statTile('like', 'Likes', compact(sum(L.likes)), 'en mods y bases'),
+      A.statTile('star', 'Calificación', avg === '—' ? avg : `${avg} ★`, `${ratings.length} votos`),
+      A.statTile('idea', 'Pedidos activos', A.cache.requests ? activos : dots, 'de 5 posibles', "abrirPedidos()"),
+      A.statTile('warning', 'Pendientes', A.pendingCount(), 'reportes y mensajes', "renderAdminTab('reportes')"),
+      A.statTile('ban', 'Baneados', baneados, 'ahora mismo', "adminVerUsuarios('baneados')"),
+      A.statTile('box', 'Contenido', contenido, 'mods, bases y scripts', "renderAdminTab('contenido')")
+    ].join('');
 
-      const tickets = Object.entries(cache.tickets).sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
-      document.getElementById('adm-tickets').innerHTML = tickets.length ? tickets.map(([key, tk]) => `
-        <div class="list-item adm-item" style="flex-wrap:wrap">
-          <div class="grow">
-            <span class="status-tag" style="background:${tk.type === 'report' ? 'var(--danger)' : 'var(--accent)'}">${tk.type === 'report' ? 'Reporte' : 'Soporte'}</span>
-            ${tk.modId ? `<b style="font-size:13px"> · ${esc(allTitle(tk.modId))}</b>` : ''}
-            <p class="adm-text">${esc(tk.text)}</p>
-            <p>👤 ${esc(tk.user || '¿?')} · ${timeAgo(tk.timestamp)}</p>
-          </div>
-          <div class="adm-actions">
-            <button class="btn btn-sm btn-soft" onclick="adminResponder('${esc(tk.uid)}', '${jsStr(tk.user)}')">💬 Responder</button>
-            <button class="btn btn-sm btn-ghost" onclick="openBanPanel('${esc(tk.uid)}', '${jsStr(tk.user)}')">⛔</button>
-            <button class="btn btn-sm" onclick="adminResolverTicket('${esc(key)}')">✅ Resuelto</button>
-          </div>
-        </div>`).join('') : `<p class="empty">Bandeja vacía. 🎉</p>`;
-      updateBadge();
-    }
-  },
+    // Estado del sitio
+    const cfg = L.config || {};
+    const on = (v, a = 'Activo', b = 'Apagado') => v ? A.pill(a, 'var(--ok)') : A.pill(b, '#8a7f99');
+    const ultimoRespaldo = FNF.store.get('fnf_last_backup');
+    document.getElementById('adm-status').innerHTML = [
+      ['tools', 'Modo mantenimiento', cfg.maintenance && cfg.maintenance.active ? A.pill('ACTIVO', 'var(--danger)') : A.pill('Apagado', '#8a7f99')],
+      ['megaphone', 'Banner', on(cfg.banner && cfg.banner.active)],
+      ['telegram', 'Avisos en Telegram', on(cfg.telegram && cfg.telegram.url, 'Configurado', 'Sin configurar')],
+      ['filter', 'Palabras bloqueadas', A.pill(String(((cfg.moderation || {}).badWords || []).length), 'var(--accent)')],
+      ['database', 'Último respaldo', ultimoRespaldo ? `<small>${timeAgo(ultimoRespaldo)}</small>` : A.pill('Nunca', 'var(--warn)')],
+      ['info', 'Versión', `<small>${esc(window.APP_VERSION || '')}</small>`]
+    ].map(([ic, label, val]) => `<div class="status-row">${fi(ic, 20)}<span class="grow">${label}</span>${val}</div>`).join('');
 
-  // ---------- COMENTARIOS ----------
-  comentarios: {
-    shell: () => `<div class="adm-toolbar"><p>Los 40 comentarios más recientes de todos los mods.</p>
-      <button class="btn btn-sm btn-soft" onclick="adminRecargarComentarios()">↻ Recargar</button></div>
-      <div id="adm-comments" class="list"><p class="empty">Cargando…</p></div>`,
-    async list() {
-      if (cache.comments === null) {
-        const data = (await get(ref(db, 'mod_comments'))).val() || {};
-        cache.comments = Object.entries(data).flatMap(([modId, cs]) => Object.entries(cs || {}).map(([id, c]) => ({ modId, id, ...c })))
-          .sort((a, b) => b.id.localeCompare(a.id)).slice(0, 40);
-      }
-      if (!visible('comentarios')) return;
-      const L = live();
-      document.getElementById('adm-comments').innerHTML = cache.comments.length ? cache.comments.map(c => {
-        const name = c.user || 'Usuario';
-        const banned = L.banned && L.banned[c.ownerKey] && L.banned[c.ownerKey].expiresAt > Date.now();
-        return `
-        <div class="list-item adm-item" style="align-items:flex-start;flex-wrap:wrap">
-          <div class="yt-avatar" style="background:${c.avatar ? 'transparent' : stringToColor(name)}">${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : esc(name.charAt(0).toUpperCase())}</div>
-          <div class="grow">
-            <h4>${esc(name)} ${L.verified && L.verified[c.ownerKey] ? '☑️' : ''}${banned ? ' <span class="status-tag" style="background:var(--danger)">Baneado</span>' : ''}</h4>
-            <p>en <b>${esc(allTitle(c.modId))}</b> · ${esc(c.date || '')}${c.isPinned ? ' · 📌' : ''}</p>
-            <p class="adm-text">${esc(c.text)}</p>
-          </div>
-          <div class="adm-actions">
-            <button class="btn btn-sm btn-ghost" onclick="adminPinComentario('${esc(c.modId)}', '${esc(c.id)}', ${!!c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</button>
-            <button class="btn btn-sm btn-ghost" onclick="adminVerificar('${esc(c.ownerKey)}')">☑️</button>
-            <button class="btn btn-sm btn-ghost" onclick="openBanPanel('${esc(c.ownerKey)}', '${jsStr(name)}')">⛔</button>
-            <button class="btn btn-sm btn-danger" onclick="adminBorrarComentario('${esc(c.modId)}', '${esc(c.id)}')">🗑️</button>
-          </div>
-        </div>`;
-      }).join('') : `<p class="empty">Aún no hay comentarios.</p>`;
-    }
-  },
+    // Accesos rápidos
+    const maint = cfg.maintenance && cfg.maintenance.active;
+    document.getElementById('adm-quick').innerHTML = [
+      A.btn('plus', 'Nuevo mod', "abrirEditorMod(null, 'mod')", 'btn-soft'),
+      A.btn('warning', 'Ver reportes', "renderAdminTab('reportes')"),
+      A.btn('bell', 'Publicar aviso', "adminIrAvisos('campana')"),
+      A.btn('database', 'Respaldo', "adminIrHerramientas('respaldo')"),
+      A.btn('link', 'Revisar links', "adminIrHerramientas('links')"),
+      A.btn('tools', maint ? 'Apagar mantenimiento' : 'Mantenimiento', 'adminMantenimientoRapido()', maint ? 'btn-danger' : 'btn-ghost')
+    ].join('');
 
-  // ---------- USUARIOS ----------
-  usuarios: {
-    shell: () => `<div class="search glass" style="margin-bottom:12px">${icon('search')}<input type="search" id="adm-user-q" placeholder="Buscar por nombre o correo..." value="${esc(ui.userQuery)}" oninput="adminBuscarUsuarios(this.value)"></div>
-      <p class="adm-count" id="adm-user-count"></p><div id="adm-users" class="list"><p class="empty">Cargando…</p></div>`,
-    async list() {
-      if (cache.users === null) await loadUsers();
-      if (!visible('usuarios')) return;
-      const L = live();
-      const q = ui.userQuery.trim().toLowerCase();
-      const all = Object.entries(cache.users || {}).sort((a, b) => String(b[1].fechaRegistro || '').localeCompare(String(a[1].fechaRegistro || '')));
-      const found = all.filter(([, u]) => !q || `${u.nombre || ''} ${u.correo || ''}`.toLowerCase().includes(q));
-      document.getElementById('adm-user-count').textContent = `${found.length} de ${all.length} usuarios${found.length > 50 ? ' (mostrando 50)' : ''}`;
-      document.getElementById('adm-users').innerHTML = found.slice(0, 50).map(([uid, u]) => {
-        const verified = L.verified && L.verified[uid];
-        const ban = L.banned && L.banned[uid];
-        const banned = ban && ban.expiresAt > Date.now();
-        const name = u.nombre || 'Usuario';
-        return `
-        <div class="list-item adm-item" style="flex-wrap:wrap">
-          <img src="${esc(u.foto || '')}" alt="" loading="lazy" style="width:44px;height:44px;border-radius:50%">
-          <div class="grow">
-            <h4>${esc(name)} ${verified ? '☑️' : ''}${uid === window.MI_UID_ADMIN ? ' <span class="admin-tag">ADMIN</span>' : ''}</h4>
-            <p>${esc(u.correo || '')} · ${u.fechaRegistro ? new Date(u.fechaRegistro).toLocaleDateString('es-MX') : ''}</p>
-            ${banned ? `<p style="color:var(--danger)">⛔ Baneado: ${esc(ban.reason)} (termina ${new Date(ban.expiresAt).toLocaleString('es-MX')})</p>` : ''}
-          </div>
-          ${uid === window.MI_UID_ADMIN ? '' : `<div class="adm-actions">
-            <button class="btn btn-sm btn-ghost" onclick="adminVerificar('${esc(uid)}')">${verified ? 'Quitar ☑️' : '☑️ Verificar'}</button>
-            <button class="btn btn-sm btn-soft" onclick="adminResponder('${esc(uid)}', '${jsStr(name)}')">💬</button>
-            ${banned ? `<button class="btn btn-sm" onclick="adminDesbanear('${esc(uid)}')">Desbanear</button>`
-              : `<button class="btn btn-sm btn-danger" onclick="openBanPanel('${esc(uid)}', '${jsStr(name)}')">⛔ Banear</button>`}
-          </div>`}
-        </div>`;
-      }).join('') || `<p class="empty">Sin resultados.</p>`;
-    }
-  },
+    // Gráficas
+    document.getElementById('adm-days').innerHTML = A.cache.days ? A.dailyChart(A.cache.days) : `<p class="empty">Cargando…</p>`;
+    const items = { ...(window.MOD_DATA || {}), ...(window.APK_DATA || {}), ...(window.SCRIPTS_DATA || {}) };
+    const top = (src, n) => Object.entries(src || {}).filter(([id, v]) => items[id] && v > 0).sort((a, b) => b[1] - a[1]).slice(0, n);
+    document.getElementById('adm-top-all').innerHTML = A.rankedBars(top(L.downloads, 8), 'descargas');
+    document.getElementById('adm-top-week').innerHTML = A.rankedBars(top(L.week, 5), 'descargas');
 
-  // ---------- CONTENIDO (MODs, Bases y Scripts) ----------
-  contenido: {
-    shell: () => `
-      <div class="chips" style="margin-bottom:10px">
-        ${Object.entries(FNF.KINDS).map(([k, v]) => `<button class="chip${ui.kind === k ? ' active' : ''}" onclick="adminElegirTipo('${k}')">${v.label}</button>`).join('')}
-      </div>
-      <div class="adm-toolbar">
-        <div class="search glass" style="flex:1;margin:0">${icon('search')}<input type="search" placeholder="Buscar..." value="${esc(ui.modQuery)}" oninput="adminBuscarMods(this.value)"></div>
-        <button class="btn" onclick="abrirEditorMod(null, '${ui.kind}')">+ Nuevo</button>
-      </div>
-      <p class="adm-count">Lo que crees o edites aquí se guarda en Firebase y aparece al instante, sin tocar código.</p>
-      <div id="adm-mods" class="list"></div>`,
-    list() {
-      const kind = ui.kind;
-      const base = baseOf(kind);
-      const custom = customOf(kind);
-      const ids = [...new Set([...Object.keys(custom).filter(id => !base[id]), ...Object.keys(base)])];
-      const q = ui.modQuery.trim().toLowerCase();
-      const L = live();
-      document.getElementById('adm-mods').innerHTML = ids.map(id => {
-        const c = custom[id];
-        const d = { ...(base[id] || {}), ...(c || {}) };
-        if (!d.title || (q && !d.title.toLowerCase().includes(q))) return '';
-        const tags = [
-          !base[id] ? '<span class="status-tag" style="background:var(--accent)">Creado en el panel</span>' : '',
-          base[id] && c && !c.removed ? '<span class="status-tag" style="background:#3d8bff">Editado</span>' : '',
-          d.removed ? '<span class="status-tag" style="background:#777">Oculto</span>' : '',
-          d.hidden ? '<span class="status-tag" style="background:#2c2347">🔒 Secreto</span>' : '',
-          (L.broken || {})[id] ? '<span class="status-tag" style="background:var(--danger)">Link caído</span>' : ''
-        ].join(' ');
-        return `
-        <div class="list-item adm-item" style="${d.removed ? 'opacity:.6' : ''}">
-          <img src="${esc(d.img || (d.images || [])[0] || '')}" alt="" loading="lazy">
-          <div class="grow"><h4>${esc(d.title)}</h4><p>${esc(id)} · 📥 ${compact((L.downloads || {})[id])} ${tags}</p></div>
-          <div class="adm-actions">
-            ${d.removed ? '' : `<button class="btn btn-sm btn-ghost" onclick="openItemById('${esc(id)}')">👁️ Ver</button>`}
-            <button class="btn btn-sm btn-soft" onclick="abrirEditorMod('${esc(id)}', '${kind}')">✏️ Editar</button>
-            <button class="btn btn-sm btn-ghost" onclick="adminOcultarItem('${esc(id)}', ${!d.removed})">${d.removed ? '👁️ Mostrar' : '🙈 Ocultar'}</button>
-            ${base[id] && c && !(Object.keys(c).length === 1 && c.removed) ? `<button class="btn btn-sm btn-ghost" onclick="adminRestaurarItem('${esc(id)}')">↺ Original</button>` : ''}
-            ${!base[id] ? `<button class="btn btn-sm btn-danger" onclick="adminBorrarItem('${esc(id)}')">🗑️</button>` : ''}
-          </div>
-        </div>`;
-      }).join('') || `<p class="empty">Sin resultados.</p>`;
-    }
-  },
+    // Usuarios nuevos
+    document.getElementById('adm-new-users').innerHTML = users ? Object.entries(users)
+      .sort((a, b) => String(b[1].fechaRegistro || '').localeCompare(String(a[1].fechaRegistro || ''))).slice(0, 5)
+      .map(([uid, u]) => `<div class="list-item mini" role="button" onclick="adminVerUsuario('${esc(uid)}')">
+          ${A.avatar(uid, u.nombre, u.foto, 36)}<div class="grow"><h4>${esc(u.nombre || 'Usuario')}</h4><p>${fmtDateTime(u.fechaRegistro)}</p></div></div>`).join('')
+      : `<p class="empty">Cargando…</p>`;
 
-  // ---------- AVISOS ----------
-  avisos: {
-    shell() {
-      const cfg = live().config || {};
-      const b = cfg.banner || {};
-      const m = cfg.maintenance || {};
-      const tg = cfg.telegram || {};
-      const modOptions = Object.entries(FNF.KINDS).map(([, k]) =>
-        `<optgroup label="${k.label}">${Object.entries(window[k.data] || {}).map(([id, d]) => `<option value="${esc(id)}">${esc(d.title)}</option>`).join('')}</optgroup>`).join('');
-      return `
-      <div class="card glass">
-        <h3>📢 Banner en toda la página</h3>
-        <div class="stack">
-          <textarea id="adm-banner-text" class="field" maxlength="200" placeholder="Ej: ¡Nuevo mod este fin de semana!">${esc(b.text || '')}</textarea>
-          <div class="adm-row">
-            <select id="adm-banner-type" class="field">
-              <option value="info" ${b.type === 'info' ? 'selected' : ''}>💜 Información</option>
-              <option value="success" ${b.type === 'success' ? 'selected' : ''}>✅ Buena noticia</option>
-              <option value="warn" ${b.type === 'warn' ? 'selected' : ''}>⚠️ Advertencia</option>
-            </select>
-            <label class="setting-row" style="border:0;padding:0;gap:10px">Activo <span class="switch"><input type="checkbox" id="adm-banner-on" ${b.active ? 'checked' : ''}><span></span></span></label>
-          </div>
-          <button class="btn btn-block" onclick="adminGuardarBanner()">Guardar banner</button>
-        </div>
-      </div>
+    // Actividad reciente
+    const log = A.cache.log;
+    document.getElementById('adm-recent-log').innerHTML = log ? (log.slice(0, 5).map(l => `
+        <div class="list-item mini">${fi(A.logIcon(l.action), 22)}<div class="grow"><h4>${esc(l.detail || l.action)}</h4><p>${timeAgo(l.ts)}</p></div></div>`).join('')
+        || `<p class="empty">Todavía no hay actividad registrada.</p>`) + A.btn('history', 'Ver todo', "adminIrHerramientas('actividad')")
+      : `<p class="empty">Cargando…</p>`;
 
-      <div class="card glass">
-        <h3>🚧 Modo mantenimiento</h3>
-        <p>Tapa la página para todos menos para ti. Úsalo mientras haces cambios grandes.</p>
-        <div class="stack">
-          <textarea id="adm-maint-text" class="field" maxlength="200" placeholder="Mensaje para los usuarios">${esc(m.message || '')}</textarea>
-          <label class="setting-row" style="border:0;padding:0">Activar mantenimiento <span class="switch"><input type="checkbox" id="adm-maint-on" ${m.active ? 'checked' : ''}><span></span></span></label>
-          <button class="btn btn-block ${m.active ? 'btn-danger' : ''}" onclick="adminGuardarMantenimiento()">Guardar</button>
-        </div>
-      </div>
-
-      <div class="card glass">
-        <h3>🔔 Nueva notificación (campana)</h3>
-        <div class="stack">
-          <textarea id="adm-notif-text" class="field" maxlength="300" placeholder="Aviso para los usuarios..."></textarea>
-          <label class="label" for="adm-notif-mod">Enlazar a un mod, base o script (opcional)</label>
-          <select id="adm-notif-mod" class="field"><option value="">— Ninguno —</option>${modOptions}</select>
-          <label class="label" for="adm-notif-when">Programar (opcional)</label>
-          <input type="datetime-local" id="adm-notif-when" class="field">
-          <button class="btn btn-block" onclick="adminPublicarNotificacion()">Publicar</button>
-        </div>
-        <h4 class="label" style="margin-top:18px">Publicadas</h4>
-        <div id="adm-notif-list" class="list"></div>
-      </div>
-
-      <div class="card glass">
-        <h3>⚡ Aviso emergente</h3>
-        <p>Aparece una sola vez como globito arriba, a quien entre en las próximas 24 h.</p>
-        <div class="stack">
-          <textarea id="globalNotifText" class="field" maxlength="200" placeholder="Ej: ¡Nuevo mod disponible!"></textarea>
-          <button class="btn btn-block btn-soft" onclick="adminEnviarToast()">Enviar aviso</button>
-        </div>
-      </div>
-
-      <div class="card glass">
-        <h3>✈️ Avisos en Telegram</h3>
-        <p>Pega la dirección de tu Worker de Cloudflare (tools/telegram-worker.js). Cada reporte y mensaje de soporte te llegará al bot.</p>
-        <div class="stack">
-          <input type="url" id="adm-tg-url" class="field" placeholder="https://fnf-telegram.tuusuario.workers.dev" value="${esc(tg.url || '')}">
-          <div class="adm-row">
-            <button class="btn" style="flex:1" onclick="adminGuardarTelegram()">Guardar</button>
-            <button class="btn btn-soft" style="flex:1" onclick="adminProbarTelegram()">✈️ Probar</button>
-          </div>
-          <p id="adm-tg-result" class="tg-result" hidden></p>
-        </div>
-      </div>`;
-    },
-    list() {
-      const el = document.getElementById('adm-notif-list');
-      if (!el) return;
-      const notifs = [...(window.liveNotifs || [])].sort((a, b) => String(b.id).localeCompare(String(a.id)));
-      el.innerHTML = notifs.length ? notifs.map(n => `
-        <div class="notif-item">
-          ${n.publishAt && n.publishAt > Date.now() ? `<span class="status-tag" style="background:var(--warn)">⏰ ${new Date(n.publishAt).toLocaleString('es-MX')}</span>` : ''}
-          <p>${esc(n.texto)}</p>
-          <small>${esc(n.fecha)}${n.modId ? ' · 🎵 ' + esc(allTitle(n.modId)) : ''}</small>
-          <div class="row">
-            <button class="btn btn-sm btn-soft" onclick="adminEditarNotificacion('${esc(n.id)}')">Editar</button>
-            <button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="adminBorrarNotificacion('${esc(n.id)}')">Borrar</button>
-          </div>
-        </div>`).join('') : `<p class="empty">No hay notificaciones.</p>`;
-    }
+    // Carga lo que falte y vuelve a pintar
+    const faltan = [];
+    if (!A.cache.users) faltan.push(A.loadUsers());
+    if (!A.cache.comments) faltan.push(A.loadComments());
+    if (!A.cache.requests) faltan.push(A.loadRequests());
+    if (!A.cache.days) faltan.push(A.loadDays());
+    if (!A.cache.log) faltan.push(A.loadLog());
+    if (faltan.length) Promise.all(faltan).then(() => { if (A.visible('resumen')) A.TAB.resumen.list(); });
   }
 };
 
-async function loadUsers() {
-  try { cache.users = (await get(ref(db, 'usuarios'))).val() || {}; }
-  catch (err) { console.warn('Usuarios:', err.message); cache.users = {}; }
+window.adminRecargarTodo = async () => {
+  toast('Actualizando datos…', 'refresh');
+  await Promise.all([A.loadUsers(true), A.loadComments(true), A.loadRequests(true), A.loadDays(true), A.loadLog(true)]);
+  window.renderAdminTab(A.tab);
+};
+window.adminMantenimientoRapido = async () => {
+  const m = ((live().config || {}).maintenance) || {};
+  const active = !m.active;
+  if (active && !confirm('¿Activar el modo mantenimiento? Nadie más podrá usar la página hasta que lo apagues.')) return;
+  await set(ref(db, 'site_config/maintenance'), { active, message: m.message || '' });
+  A.log('config:maintenance', active ? 'Activó el modo mantenimiento' : 'Apagó el modo mantenimiento');
+  toast(active ? 'Mantenimiento ACTIVADO.' : 'Mantenimiento apagado.', 'tools');
+  setTimeout(() => window.renderAdminTab('resumen'), 300);
+};
+
+// ==========================================
+// REPORTES
+// ==========================================
+A.ui.repFilter = 'todos';
+const TICKET_TYPES = {
+  report: ['Reporte', 'var(--danger)', 'warning'],
+  support: ['Soporte', 'var(--accent)', 'support'],
+  cuenta: ['Borrar cuenta', '#2c2347', 'trash']
+};
+const REASON_LABEL = {
+  broken: 'Link caído', corrupt: 'Archivo dañado', crash: 'Se cierra / no abre', missing: 'Falta contenido', other: 'Otro', admin: 'Bloqueado por ti'
+};
+
+A.TAB.reportes = {
+  shell: () => `
+    <div class="chips" id="rep-chips"></div>
+    <div class="adm-toolbar">
+      <p id="rep-count"></p>
+      ${A.btn('check', 'Resolver todos los visibles', 'adminResolverVisibles()')}
+    </div>
+    <div id="adm-reports" class="rep-list"></div>`,
+  list() {
+    const L = live();
+    const broken = Object.entries(L.broken || {}).map(([id, b]) => ({ kind: 'broken', key: id, ts: b.timestamp || 0, ...b, modId: id }));
+    const tickets = Object.entries(A.cache.tickets).map(([key, tk]) => ({ kind: tk.type === 'report' ? 'report' : tk.type === 'cuenta' ? 'cuenta' : 'support', key, ts: tk.timestamp || 0, ...tk }));
+    const all = [...broken, ...tickets].sort((a, b) => b.ts - a.ts);
+    const counts = { todos: all.length, broken: broken.length, report: tickets.filter(x => x.kind === 'report').length, support: tickets.filter(x => x.kind === 'support').length, cuenta: tickets.filter(x => x.kind === 'cuenta').length };
+    const f = A.ui.repFilter;
+    document.getElementById('rep-chips').innerHTML = [
+      ['todos', 'Todos', 'filter'], ['broken', 'Links caídos', 'link'], ['report', 'Reportes', 'warning'], ['support', 'Soporte', 'support'], ['cuenta', 'Borrar cuenta', 'trash']
+    ].map(([k, label, ic]) => `<button class="chip${f === k ? ' active' : ''}" onclick="adminFiltrarReportes('${k}')">${fi(ic, 16)} ${label} <span class="chip-n">${counts[k]}</span></button>`).join('');
+
+    const shown = f === 'todos' ? all : all.filter(x => x.kind === f);
+    document.getElementById('rep-count').textContent = shown.length ? `${shown.length} pendiente(s). Los más recientes primero.` : '';
+    document.getElementById('adm-reports').innerHTML = shown.length ? shown.map(card).join('') : `<div class="empty-state">${fi('check', 48)}<p>¡Todo en orden! No hay nada pendiente aquí.</p></div>`;
+    A.updateBadge();
+    if (!A.cache.users) A.loadUsers().then(() => { if (A.visible('reportes')) A.TAB.reportes.list(); });
+  }
+};
+
+function card(x) {
+  const L = live();
+  const uid = x.uid || '';
+  const u = A.userOf(uid) || {};
+  const name = x.kind === 'broken' ? (x.reportedBy || '¿?') : (x.user || u.nombre || '¿?');
+  const type = x.kind === 'broken' ? ['Link caído', 'var(--danger)', 'link'] : TICKET_TYPES[x.kind];
+  const reason = x.reason && REASON_LABEL[x.reason] ? A.pill(REASON_LABEL[x.reason], '#8a7f99') : '';
+  const jsName = A.jsStr(name);
+  const isBroken = !!(L.broken || {})[x.modId];
+  const item = x.modId ? `
+    <div class="rep-item" role="button" onclick="openItemById('${esc(x.modId)}')">
+      <img src="${esc(A.itemThumb(x.modId))}" alt="" loading="lazy">
+      <span class="grow"><b>${esc(A.allTitle(x.modId))}</b><small>${A.kindLabel(x.modId)} · ${esc(x.modId)}</small></span>
+      ${isBroken ? A.pill('Bloqueado', 'var(--danger)') : ''}
+    </div>` : '';
+
+  const actions = [];
+  if (uid) actions.push(A.btn('mail', 'Responder', `adminResponder('${esc(uid)}', '${jsName}', '${x.kind === 'broken' ? '' : esc(x.key)}')`, 'btn-soft'));
+  if (x.modId) actions.push(A.btn('eye', 'Ver', `openItemById('${esc(x.modId)}')`));
+  if (x.modId && isBroken) actions.push(A.btn('check', 'Reparar link', `fixBrokenLink('${esc(x.modId)}', true)`));
+  if (x.modId && !isBroken && x.kind === 'report') actions.push(A.btn('ban', 'Bloquear descarga', `adminMarcarCaido('${esc(x.modId)}')`));
+  if (uid) actions.push(A.btn('user', 'Ver usuario', `adminVerUsuario('${esc(uid)}')`));
+  if (x.text) actions.push(A.btn('copy', 'Copiar', `adminCopiar(${esc(JSON.stringify(String(x.text)))})`));
+  if (uid && uid !== window.MI_UID_ADMIN) actions.push(A.btn('ban', 'Banear', `openBanPanel('${esc(uid)}', '${jsName}')`));
+  if (x.kind === 'cuenta' && uid) actions.push(A.btn('trash', 'Borrar cuenta', `adminBorrarCuenta('${esc(uid)}', '${jsName}')`, 'btn-danger'));
+  if (x.kind !== 'broken') actions.push(A.btn('check', 'Resuelto', `adminResolverTicket('${esc(x.key)}')`, 'btn'));
+
+  return `
+  <article class="rep-card glass" style="--rep:${type[1]}">
+    <div class="rep-head">
+      ${A.avatar(uid, name, u.foto, 42)}
+      <div class="grow">
+        <b>${esc(name)}</b>
+        <small>${uid ? `UID ${esc(uid.slice(0, 8))}…` : 'Reporte anterior (sin cuenta)'}${u.correo ? ' · ' + esc(u.correo) : ''}</small>
+      </div>
+      <span class="rep-type">${fi(type[2], 16)} ${type[0]}</span>
+    </div>
+    ${item}
+    ${x.text ? `<p class="rep-text">${esc(x.text)}</p>` : ''}
+    <div class="rep-meta">
+      <span>${fi('calendar', 15)} ${fmtDateTime(x.ts)}</span>
+      <span>${fi('clock', 15)} ${timeAgo(x.ts)}</span>
+      ${reason}
+    </div>
+    <div class="adm-actions">${actions.join('')}</div>
+  </article>`;
 }
 
-// ---- Navegación del panel ----
+window.adminFiltrarReportes = (k) => { A.ui.repFilter = k; A.TAB.reportes.list(); };
+
+// Responde al usuario con un mensaje privado (le aparece dentro de la página)
+window.adminResponder = async (uid, name, ticketKey) => {
+  const msg = prompt(`Mensaje privado para ${name}:`);
+  if (!msg || !msg.trim()) return;
+  await set(ref(db, `user_notifications/${uid}`), { message: msg.trim(), timestamp: Date.now(), id: Math.random().toString(36).slice(2, 11) });
+  A.log('ticket:reply', `Respondió a ${name}: "${msg.trim().slice(0, 80)}"`, uid);
+  toast(`Mensaje enviado a ${name}.`, 'send');
+  if (ticketKey && confirm('¿Marcar este ticket como resuelto?')) window.adminResolverTicket(ticketKey, true);
+};
+window.adminResolverTicket = async (key, silencioso) => {
+  const tk = A.cache.tickets[key] || {};
+  await remove(ref(db, `support_tickets/${key}`));
+  A.log('ticket:resolve', `Resolvió un ticket de ${tk.user || '¿?'} (${TICKET_TYPES[tk.type] ? TICKET_TYPES[tk.type][0] : tk.type})`, tk.uid);
+  if (!silencioso) toast('Ticket resuelto.', 'check');
+};
+window.adminResolverVisibles = async () => {
+  const f = A.ui.repFilter;
+  const keys = Object.entries(A.cache.tickets).filter(([, tk]) => f === 'todos' || (f === 'report' ? tk.type === 'report' : f === 'cuenta' ? tk.type === 'cuenta' : f === 'support' ? (tk.type !== 'report' && tk.type !== 'cuenta') : false)).map(([k]) => k);
+  if (!keys.length) return toast(f === 'broken' ? 'Los links caídos se resuelven con "Reparar link".' : 'No hay tickets para resolver.', 'info');
+  if (!confirm(`¿Marcar ${keys.length} ticket(s) como resueltos? (Los links caídos no se tocan.)`)) return;
+  await update(ref(db), Object.fromEntries(keys.map(k => [`support_tickets/${k}`, null])));
+  A.log('ticket:resolve', `Resolvió ${keys.length} ticket(s) de una vez`);
+  toast(`${keys.length} ticket(s) resueltos.`, 'check');
+};
+
+// ==========================================
+// NAVEGACIÓN DEL PANEL
+// ==========================================
 window.openAdminPanel = () => {
   if (!isAdmin()) return;
   window.startAdminListeners();
   document.getElementById('admin-tabs').innerHTML = TABS.map(([k, label, ic]) =>
-    `<button class="seg-btn${k === tab ? ' active' : ''}" onclick="renderAdminTab('${k}')">${icon(ic, 'icon icon-sm')}<span>${label}</span>${k === 'reportes' ? '<span class="admin-count" hidden></span>' : ''}</button>`).join('');
-  updateBadge();
-  window.renderAdminTab(tab);
+    `<button class="seg-btn${k === A.tab ? ' active' : ''}" data-tab="${k}" onclick="renderAdminTab('${k}')">${fi(ic, 18)}<span>${label}</span>${k === 'reportes' ? '<span class="admin-count" hidden></span>' : ''}</button>`).join('');
+  A.updateBadge();
+  window.renderAdminTab(A.tab);
 };
 
 // fromData = true: llegaron datos nuevos; solo se refrescan las listas (no se borra lo que estás escribiendo)
 window.renderAdminTab = (name, fromData) => {
-  if (!TAB[name]) return;
+  const T = A.TAB[name];
+  if (!T) return;
   if (fromData) {
-    if (name === 'reportes') updateBadge();
-    if (visible(name)) TAB[name].list();
-    if (name !== 'resumen' && visible('resumen')) TAB.resumen.list();
+    if (name === 'reportes') A.updateBadge();
+    if (A.visible(name)) T.list();
+    if (name !== 'resumen' && A.visible('resumen')) A.TAB.resumen.list();
     return;
   }
-  tab = name;
-  document.querySelectorAll('#admin-tabs .seg-btn').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(`'${name}'`)));
-  panel().innerHTML = TAB[name].shell();
-  panel().classList.remove('adm-anim'); void panel().offsetWidth; panel().classList.add('adm-anim');
-  TAB[name].list();
-};
-
-// ==========================================
-// ACCIONES
-// ==========================================
-window.adminResponder = async (uid, name) => {
-  const msg = prompt(`Mensaje para ${name}:`);
-  if (!msg || !msg.trim()) return;
-  await set(ref(db, `user_notifications/${uid}`), { message: msg.trim(), timestamp: Date.now(), id: Math.random().toString(36).slice(2, 11) });
-  toast(`Mensaje enviado a ${name}.`, 'send');
-};
-window.adminResolverTicket = (key) => remove(ref(db, `support_tickets/${key}`));
-window.adminRecargarComentarios = () => { cache.comments = null; TAB.comentarios.list(); };
-window.adminPinComentario = async (modId, id, state) => {
-  await update(ref(db, `mod_comments/${modId}/${id}`), { isPinned: !state });
-  const c = (cache.comments || []).find(x => x.id === id);
-  if (c) c.isPinned = !state;
-  TAB.comentarios.list();
-};
-window.adminBorrarComentario = async (modId, id) => {
-  if (!confirm('¿Borrar este comentario?')) return;
-  await remove(ref(db, `mod_comments/${modId}/${id}`));
-  cache.comments = (cache.comments || []).filter(x => x.id !== id);
-  TAB.comentarios.list();
-};
-window.adminVerificar = async (uid) => {
-  const on = !(live().verified || {})[uid];
-  await set(ref(db, `verified_users/${uid}`), on ? true : null);
-  toast(on ? 'Usuario verificado ☑️' : 'Verificación quitada', 'shield');
-  if (visible('usuarios')) TAB.usuarios.list();
-  if (visible('comentarios')) TAB.comentarios.list();
-};
-window.adminDesbanear = async (uid) => {
-  await remove(ref(db, `banned_users/${uid}`));
-  toast('Usuario desbaneado.', 'shield');
-  setTimeout(() => { if (visible('usuarios')) TAB.usuarios.list(); }, 300);
-};
-window.adminBuscarUsuarios = (q) => { ui.userQuery = q; TAB.usuarios.list(); };
-window.adminBuscarMods = (q) => { ui.modQuery = q; TAB.contenido.list(); };
-window.adminElegirTipo = (kind) => { ui.kind = kind; ui.modQuery = ''; window.renderAdminTab('contenido'); };
-
-// ---- Contenido (mods, bases y scripts) ----
-const pathOf = (id) => `${FNF.KINDS[kindOf(id)].path}/${id}`;
-const NOMBRE = { mod: 'mod', apk: 'base', script: 'script' };
-
-window.adminOcultarItem = async (id, hide) => {
-  if (!isAdmin()) return;
-  const kind = kindOf(id);
-  if (hide && !confirm(`¿Ocultar "${allTitle(id)}"? Los usuarios dejarán de verlo (puedes mostrarlo otra vez desde Panel → Contenido).`)) return;
-  const c = customOf(kind)[id];
-  if (!hide && baseOf(kind)[id] && c && Object.keys(c).length === 1) await remove(ref(db, pathOf(id)));
-  else await update(ref(db, pathOf(id)), { removed: hide ? true : null });
-  if (hide && window.closeDetail) window.closeDetail();
-  toast(hide ? 'Oculto para los usuarios.' : 'Visible otra vez.', 'music');
-};
-window.adminRestaurarItem = async (id) => {
-  if (confirm('¿Volver a la versión original del archivo data? Se pierden los cambios hechos en el panel.')) await remove(ref(db, pathOf(id)));
-};
-window.adminBorrarItem = async (id) => {
-  if (confirm(`¿Borrar "${allTitle(id)}" para siempre?`)) await remove(ref(db, pathOf(id)));
-};
-// Nombres anteriores
-window.adminOcultarMod = window.adminOcultarItem;
-window.adminRestaurarMod = window.adminRestaurarItem;
-window.adminBorrarMod = window.adminBorrarItem;
-
-let editingId = null;
-let editingKind = 'mod';
-const val = (id) => document.getElementById(id).value.trim();
-
-window.abrirEditorMod = (id, kind) => {
-  if (!isAdmin()) return;
-  editingId = id || null;
-  editingKind = kind || (id ? kindOf(id) : 'mod');
-  const d = id ? { ...(baseOf(editingKind)[id] || {}), ...(customOf(editingKind)[id] || {}) } : {};
-  const mainImg = d.img || (d.images || [])[0] || '';
-  document.getElementById('editor-title').textContent = id ? `Editar: ${d.title || id}` : `Nuevo ${NOMBRE[editingKind]}`;
-  document.getElementById('ed-mod-fields').hidden = editingKind !== 'mod';
-  const setV = (k, v) => { document.getElementById(k).value = v || ''; };
-  setV('ed-title', d.title); setV('ed-img', mainImg); setV('ed-desc', d.desc); setV('ed-version', d.version);
-  setV('ed-engine', d.engine); setV('ed-ram', d.ram); setV('ed-size', d.size);
-  document.getElementById('ed-gama').value = d.gama || 'low';
-  setV('ed-images', (d.images || []).filter(x => x !== mainImg).join('\n'));
-  setV('ed-downloads', (d.downloads || []).map(x => `${x.name} | ${x.link}`).join('\n'));
-  document.getElementById('ed-hidden').checked = !!d.hidden;
-  window.previewEditorImg();
-  openPopup('mod-editor-popup');
-};
-
-window.previewEditorImg = () => {
-  const img = document.getElementById('ed-preview');
-  const src = val('ed-img');
-  img.removeAttribute('data-fallback');
-  img.hidden = !src;
-  if (src) img.src = src;
-};
-
-window.guardarMod = async () => {
-  const title = val('ed-title');
-  const downloads = val('ed-downloads').split('\n').map(l => l.trim()).filter(Boolean).map(l => {
-    const i = l.lastIndexOf('|');
-    return i > 0 ? { name: l.slice(0, i).trim(), link: l.slice(i + 1).trim() } : { name: 'Descarga', link: l };
+  A.tab = name;
+  document.querySelectorAll('#admin-tabs .seg-btn').forEach(b => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('active', on);
+    if (on) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   });
-  const bad = downloads.find(x => !/^(https?:\/\/|assets\/)/i.test(x.link));
-  if (title.length < 2) return toast('Ponle un título.', 'alert');
-  if (!val('ed-img')) return toast('Falta la imagen.', 'alert');
-  if (!downloads.length) return toast('Agrega al menos un enlace de descarga.', 'alert');
-  if (bad) return toast(`Enlace inválido: ${bad.link}`, 'alert');
-
-  const extras = val('ed-images').split('\n').map(s => s.trim()).filter(Boolean);
-  const isMod = editingKind === 'mod';
-  const data = {
-    title, img: val('ed-img'), desc: val('ed-desc'), version: val('ed-version'),
-    gama: isMod ? document.getElementById('ed-gama').value : null,
-    engine: isMod ? val('ed-engine') : null, ram: isMod ? val('ed-ram') : null, size: isMod ? val('ed-size') : null,
-    // La galería del popup: imagen principal + capturas extra
-    images: (extras.length || editingKind === 'script') ? [val('ed-img'), ...extras] : null,
-    downloads, hidden: document.getElementById('ed-hidden').checked || null,
-    updatedAt: Date.now()
-  };
-  const id = editingId || (editingKind + Date.now().toString(36));
-  if (!editingId) data.createdAt = Date.now();
-
-  const btn = document.getElementById('btn-guardar-mod');
-  btn.disabled = true;
-  try {
-    await update(ref(db, `${FNF.KINDS[editingKind].path}/${id}`), data);
-    closePopup('mod-editor-popup');
-    toast(editingId ? 'Cambios guardados.' : '¡Publicado! Ya aparece en la lista.', 'music');
-    if (!editingId && confirm('¿Marcarlo también como NUEVO?')) set(ref(db, `new_mods_status/card-${id}`), true);
-  } catch (err) {
-    console.error(err);
-    toast('No se pudo guardar. ¿Tienes la sesión de admin abierta?', 'alert');
-  } finally {
-    btn.disabled = false;
-  }
+  const p = A.panel();
+  p.innerHTML = T.shell();
+  p.classList.remove('adm-anim'); void p.offsetWidth; p.classList.add('adm-anim');
+  T.list();
 };
 
-// ---- Avisos ----
-window.adminGuardarBanner = async () => {
-  await set(ref(db, 'site_config/banner'), {
-    text: val('adm-banner-text'), type: document.getElementById('adm-banner-type').value,
-    active: document.getElementById('adm-banner-on').checked, updatedAt: Date.now()
-  });
-  toast('Banner guardado.', 'bell');
-};
-window.adminGuardarMantenimiento = async () => {
-  const active = document.getElementById('adm-maint-on').checked;
-  if (active && !confirm('¿Activar el modo mantenimiento? Nadie más podrá usar la página hasta que lo apagues.')) return;
-  await set(ref(db, 'site_config/maintenance'), { active, message: val('adm-maint-text') });
-  toast(active ? 'Mantenimiento ACTIVADO.' : 'Mantenimiento apagado.', 'alert');
-  window.renderAdminTab('avisos');
-};
-window.adminPublicarNotificacion = async () => {
-  const texto = val('adm-notif-text');
-  if (!texto) return toast('Escribe el aviso.', 'bell');
-  const when = val('adm-notif-when');
-  const publishAt = when ? new Date(when).getTime() : null;
-  const fechaBase = publishAt ? new Date(publishAt) : new Date();
-  const id = 'notif_' + Date.now();
-  const data = {
-    id, texto,
-    fecha: fechaBase.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-  };
-  const modId = document.getElementById('adm-notif-mod').value;
-  if (modId) data.modId = modId;
-  if (publishAt && publishAt > Date.now()) data.publishAt = publishAt;
-  await set(ref(db, 'notificaciones/' + id), data);
-  document.getElementById('adm-notif-text').value = '';
-  document.getElementById('adm-notif-when').value = '';
-  toast(data.publishAt ? 'Notificación programada.' : 'Notificación publicada.', 'bell');
-};
-window.adminEditarNotificacion = (id) => {
-  const actual = (window.liveNotifs || []).find(n => n.id === id);
-  const nuevo = prompt('Edita la notificación:', actual ? actual.texto : '');
-  if (nuevo && nuevo.trim()) update(ref(db, 'notificaciones/' + id), { texto: nuevo.trim() });
-};
-window.adminBorrarNotificacion = (id) => {
-  if (confirm('¿Borrar esta notificación?')) remove(ref(db, 'notificaciones/' + id));
-};
-window.adminEnviarToast = async () => {
-  const message = val('globalNotifText');
-  if (!message) return toast('Escribe un mensaje primero.', 'bell');
-  await set(ref(db, 'notifications/latest'), { message, timestamp: Date.now(), id: Math.random().toString(36).slice(2, 11) });
-  document.getElementById('globalNotifText').value = '';
-  toast('Aviso enviado.', 'bell');
-};
-
-// ---- Telegram ----
-window.adminGuardarTelegram = async () => {
-  const url = val('adm-tg-url').replace(/\/+$/, '');
-  if (url && !/^https:\/\/[^\s]+$/i.test(url)) return toast('La dirección debe empezar con https://', 'alert');
-  await set(ref(db, 'site_config/telegram'), url ? { url } : null);
-  toast(url ? 'Dirección guardada. Ahora toca "Probar".' : 'Avisos de Telegram desactivados.', 'send');
-};
-
-window.adminProbarTelegram = async () => {
-  const out = document.getElementById('adm-tg-result');
-  const show = (ok, msg) => { out.hidden = false; out.className = 'tg-result ' + (ok ? 'ok' : 'bad'); out.textContent = msg; };
-  const url = val('adm-tg-url').replace(/\/+$/, '');
-  if (!url) return show(false, 'Primero pega la dirección del Worker.');
-  show(true, 'Enviando mensaje de prueba…');
-  const r = await window.enviarAvisoTelegram('✅ Prueba desde el panel de FNF\' Ports. ¡Los avisos funcionan!', url);
-  show(r.ok, r.ok ? '¡Listo! Revisa tu bot de Telegram.' : r.ayuda);
-};
-
-// Tooltip de las barras (toque o mouse)
+// Tooltip de barras y columnas (toque o mouse)
 document.addEventListener('pointerover', (e) => {
-  const row = e.target.closest && e.target.closest('.bar-row');
-  document.querySelectorAll('.bar-row.tip').forEach(r => { if (r !== row) r.classList.remove('tip'); });
+  const row = e.target.closest && e.target.closest('.bar-row, .col');
+  document.querySelectorAll('.bar-row.tip, .col.tip').forEach(r => { if (r !== row) r.classList.remove('tip'); });
   if (row) row.classList.add('tip');
 });
+
+if (isAdmin()) window.startAdminListeners();
 }).catch(err => console.error(err));

@@ -7,6 +7,11 @@ const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, 
 window.trackDownload = (id) => {
   runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
   runTransaction(ref(db, `downloads_week/${FNF.weekKey()}/${id}`), (current) => (current || 0) + 1).catch(() => { });
+  runTransaction(ref(db, `downloads_day/${FNF.dayKey()}/${id}`), (current) => (current || 0) + 1).catch(() => { });
+  // Historial "Mis descargas" (solo en este celular)
+  const hist = store.json('fnf_dl_history', []).filter(h => h.id !== id);
+  hist.unshift({ id, ts: Date.now() });
+  store.setJson('fnf_dl_history', hist.slice(0, 60));
 };
 
 const COMPAT_TEXT = {
@@ -44,11 +49,31 @@ function showDetail(type, id, d) {
   version.style.display = d.version ? '' : 'none';
 
   images = d.images && d.images.length ? d.images : [d.img];
+  if (d.img && !images.includes(d.img)) images = [d.img, ...images];
   imgIndex = 0;
   setImage();
   document.getElementById('detail-media').classList.toggle('is-logo', type === 'apk');
   const multi = images.length > 1;
   document.querySelectorAll('#detail-media .carousel-btn, #carousel-count').forEach(b => b.classList.toggle('hidden', !multi));
+
+  // Créditos del creador original e idioma
+  const meta = document.getElementById('detail-meta');
+  const safeHttp = (u) => /^https?:\/\//i.test(u || '') ? u : '';
+  const parts = [];
+  if (d.creator) {
+    const link = safeHttp(d.creatorLink);
+    parts.push(`<span>${FNF.fi('user', 16)} ${t('Creado por', 'Created by')} ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener">${esc(d.creator)}</a>` : `<b>${esc(d.creator)}</b>`}</span>`);
+  }
+  if (FNF.langTag && FNF.langTag(d)) parts.push(`<span>${FNF.fi('globe', 16)} ${esc(FNF.langTag(d))}</span>`);
+  if (d.updatedAt) parts.push(`<span>${FNF.fi('calendar', 16)} ${t('Actualizado', 'Updated')} ${FNF.fmtDateTime(d.updatedAt).split(' · ')[0]}</span>`);
+  meta.innerHTML = parts.join('');
+  meta.hidden = !parts.length;
+
+  // Qué cambió en esta versión
+  const cl = document.getElementById('detail-changelog');
+  document.getElementById('detail-changelog-text').textContent = d.changelog || '';
+  cl.hidden = !d.changelog;
+  cl.open = false;
 
   // ¿Corre en mi celular?
   const compatEl = document.getElementById('detail-compat');
@@ -89,24 +114,27 @@ window.refreshDetailAdmin = () => {
   const r = window.ratingOf ? window.ratingOf(id) : { n: 0, avg: 0 };
   const jsTitle = esc(String(d.title || '').replace(/['"\\]/g, ''));
 
-  const btn = (label, action, on, cls = '') => `<button class="adm-chip${on ? ' on' : ''} ${cls}" onclick="${action}">${label}</button>`;
+  const fi = FNF.fi;
+  const btn = (ic, label, action, on, cls = '') => `<button class="adm-chip${on ? ' on' : ''} ${cls}" onclick="${action}">${fi(ic, 18)}<span>${label}</span></button>`;
   box.innerHTML = `
     <div class="detail-admin-head">
-      <span>🛡️ Admin</span>
-      <small>📥 ${FNF.compact((L.downloads || {})[id])} · 📈 ${FNF.compact((L.week || {})[id])} sem. · ❤️ ${FNF.compact((L.likes || {})[id])} · ★ ${r.n ? r.avg.toFixed(1) : '—'} (${r.n})</small>
+      <span>${fi('shield', 18)} Admin</span>
+      <small>${fi('download', 14)} ${FNF.compact((L.downloads || {})[id])} · ${fi('bolt', 14)} ${FNF.compact((L.week || {})[id])} sem. · ${fi('like', 14)} ${FNF.compact((L.likes || {})[id])} · ${fi('star', 14)} ${r.n ? r.avg.toFixed(1) : '—'} (${r.n})</small>
     </div>
-    ${broken ? `<p class="detail-admin-alert">⚠️ Descarga bloqueada · reportado por ${esc(broken.reportedBy || '¿?')} ${broken.timestamp ? FNF.timeAgo(broken.timestamp) : ''}</p>` : ''}
+    ${broken ? `<p class="detail-admin-alert">${fi('warning', 16)} Descarga bloqueada · reportado por ${esc(broken.reportedBy || '¿?')} ${broken.timestamp ? FNF.timeAgo(broken.timestamp) : ''}</p>` : ''}
     <div class="detail-admin-grid">
-      ${btn(`📌 ${pinned ? 'Desfijar' : 'Fijar'}`, `toggleModPin('${id}')`, pinned)}
-      ${btn(`🟢 ${led ? 'Quitar LED' : 'Marcar actualizado'}`, `toggleGreenLed('${id}')`, led)}
-      ${btn(`⭐ ${isNew ? 'Quitar NUEVO' : 'Marcar NUEVO'}`, `toggleNewMod('card-${id}', true)`, isNew)}
-      ${broken ? btn('✅ Reparar link', `fixBrokenLink('${id}', true)`, true, 'ok') : btn('🚫 Bloquear descarga', `adminMarcarCaido('${id}')`, false)}
-      ${type === 'script' ? btn(`🔥 ${top ? 'Quitar TOP' : 'Marcar TOP'}`, `toggleRecomendarScript('${id}')`, top) : ''}
-      ${btn('✏️ Editar', `closeDetail(); abrirEditorMod('${id}', '${type}')`)}
-      ${btn('🔔 Avisar en campana', `adminNotificarItem('${id}')`)}
-      ${btn('💬 Comentarios', `closeDetail(); openModComments('${id}', '${jsTitle}')`)}
-      ${btn(d.hidden ? '🔒 Copiar enlace secreto' : '🔗 Copiar enlace', `adminCopiarEnlace('${id}')`)}
-      ${btn('🙈 Ocultar', `adminOcultarItem('${id}', true)`, false, 'danger')}
+      ${btn('pin', pinned ? 'Desfijar' : 'Fijar', `toggleModPin('${id}')`, pinned)}
+      ${btn('led', led ? 'Quitar LED' : 'Marcar actualizado', `toggleGreenLed('${id}')`, led)}
+      ${btn('star', isNew ? 'Quitar NUEVO' : 'Marcar NUEVO', `toggleNewMod('card-${id}', true)`, isNew)}
+      ${broken ? btn('check', 'Reparar link', `fixBrokenLink('${id}', true)`, true, 'ok') : btn('ban', 'Bloquear descarga', `adminMarcarCaido('${id}')`, false)}
+      ${type === 'script' ? btn('bolt', top ? 'Quitar TOP' : 'Marcar TOP', `toggleRecomendarScript('${id}')`, top) : ''}
+      ${btn('edit', 'Editar', `closeDetail(); abrirEditorMod('${id}', '${type}')`)}
+      ${btn('copy', 'Duplicar', `closeDetail(); adminDuplicarItem('${id}')`)}
+      ${btn('bell', 'Avisar en campana', `adminNotificarItem('${id}')`)}
+      ${btn('chat', 'Comentarios', `closeDetail(); openModComments('${id}', '${jsTitle}')`)}
+      ${btn(d.hidden ? 'lock' : 'link', d.hidden ? 'Enlace secreto' : 'Copiar enlace', `adminCopiarEnlace('${id}')`)}
+      ${btn('code', 'Ver en el panel', `closeDetail(); adminVerContenido('${id}')`)}
+      ${btn('hide', 'Ocultar', `adminOcultarItem('${id}', true)`, false, 'danger')}
     </div>`;
   box.hidden = false;
 };

@@ -46,7 +46,9 @@ const toast = (msg, iconName = 'bell') => {
   if (!container) return;
   const el = document.createElement('div');
   el.className = 'toast';
-  el.innerHTML = `<span class="tile-icon">${icon(iconName, 'icon icon-sm')}</span><span>${esc(msg)}</span>`;
+  // Icono SVG propio si existe; si no, el de Flaticon
+  const ic = document.getElementById('i-' + iconName) ? icon(iconName, 'icon icon-sm') : (window.FNF && FNF.fi ? FNF.fi(iconName, 18) : '');
+  el.innerHTML = `<span class="tile-icon">${ic}</span><span>${esc(msg)}</span>`;
   container.appendChild(el);
   setTimeout(() => { el.classList.add('hide'); setTimeout(() => el.remove(), 400); }, 5000);
 };
@@ -121,5 +123,54 @@ const engineOf = (e) => {
 
 const isAdmin = () => !!window.isSuperUser;
 
-window.FNF = { store, getProfile, profileName, profilePhoto, t, esc, icon, vibrate, openPopup, closePopup, toast, stringToColor, weekKey, compact, timeAgo, minRam, compatOf, engineOf, isAdmin };
+// Iconos de Flaticon (flaticon.com) verificados uno por uno
+const FI = {
+  pin: 12483013, led: 14035769, star: 1828884, update: 5278663, edit: 5996831, trash: 1214428, eye: 709612,
+  hide: 2767146, ban: 1828665, verify: 1828640, check: 4436481, chat: 1041916, mail: 3062634, copy: 1621635,
+  link: 455691, send: 2099085, bell: 1827370, refresh: 2805355, sync: 1688988, download: 892303, calendar: 747310,
+  clock: 2088617, user: 1077114, users: 33308, shield: 1161388, settings: 1040221, tools: 1077147, warning: 595067,
+  alert: 564619, info: 471664, database: 2906274, search: 622669, code: 2920277, like: 8028304, heart: 1077035,
+  telegram: 2111646, megaphone: 1998087, bolt: 616494, trophy: 3112946, medal: 2583344, filter: 107799,
+  notes: 1001371, book: 2195700, box: 2875878, support: 3889581, plus: 1665731, lock: 6195700, handshake: 2618576,
+  history: 2961948, logout: 1828490, gamepad: 8176146, idea: 7978351, globe: 3898082, close: 6711656,
+  rules: 11532765, upload: 725008, verified: 7641727, help: 471664,
+  moon: 6714978, sun: 869869, palette: 2970785, phone: 541070, document: 3601157, font: 3253235
+};
+const fiUrl = (name) => { const id = FI[name] || FI.info; return `https://cdn-icons-png.flaticon.com/128/${Math.floor(id / 1000)}/${id}.png`; };
+const fi = (name, size = 18) => `<img class="fi" src="${fiUrl(name)}" alt="" width="${size}" height="${size}" loading="lazy" decoding="async">`;
+
+// En el HTML: <i data-fi="moon" data-size="24"></i> se convierte en el icono de Flaticon
+document.querySelectorAll('i[data-fi]').forEach(el => { el.outerHTML = fi(el.dataset.fi, Number(el.dataset.size) || 24); });
+
+// Fechas: "2026-11-04" (para contadores diarios) y "04/11/2026 · 21:35" (para mostrar)
+const pad2 = (n) => String(n).padStart(2, '0');
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const fmtDateTime = (ts) => {
+  if (!ts) return '—';
+  const d = new Date(typeof ts === 'string' && !/^\d+$/.test(ts) ? ts : Number(ts));
+  if (isNaN(d)) return String(ts);
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} · ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+
+// Descarga un objeto como archivo .json (respaldos y "descargar mis datos")
+const downloadJSON = (name, obj) => {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+};
+
+const copyText = (txt, okMsg) => {
+  const done = () => toast(okMsg || t('Copiado.', 'Copied.'), 'copy');
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done).catch(() => prompt(t('Copia esto:', 'Copy this:'), txt));
+  else prompt(t('Copia esto:', 'Copy this:'), txt);
+};
+
+window.FNF = {
+  store, getProfile, profileName, profilePhoto, t, esc, icon, vibrate, openPopup, closePopup, toast, stringToColor,
+  weekKey, compact, timeAgo, minRam, compatOf, engineOf, isAdmin, fi, fiUrl, dayKey, fmtDateTime, downloadJSON, copyText
+};
 })();

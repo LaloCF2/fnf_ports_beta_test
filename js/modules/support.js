@@ -25,10 +25,13 @@ const proxyUrl = () => {
 // Envía un texto al bot. Devuelve { ok, ayuda } con una explicación clara si falla.
 window.enviarAvisoTelegram = async (text, url = proxyUrl()) => {
   if (!url) return { ok: false, ayuda: 'No hay dirección del Worker guardada (Panel → Avisos → Telegram).' };
+  // El Worker solo acepta usuarios con sesión: se le manda el token de Firebase (él revisa la firma)
+  const token = await window.tokenSesion();
+  if (!token) return { ok: false, ayuda: 'Inicia sesión con Google para enviar avisos.' };
   let res;
   try {
     // text/plain evita la "consulta previa" del navegador, así funciona con cualquier versión del Worker
-    res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ text }) });
+    res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ text, token }) });
   } catch (err) {
     const aqui = location.origin === 'null' ? 'un archivo abierto con doble clic' : location.origin;
     return {
@@ -45,7 +48,11 @@ window.enviarAvisoTelegram = async (text, url = proxyUrl()) => {
   const err = String(data.error || body || res.status);
   const origin = location.origin === 'null' ? 'archivo local (file://)' : location.origin;
   let ayuda = `Error del Worker (${res.status}): ${err}`;
-  if (res.status === 403 || /origen/i.test(err)) {
+  if (res.status === 401) {
+    ayuda = 'El Worker no reconoció tu sesión. Cierra sesión y vuelve a entrar con Google. Si sigue igual, revisa que FIREBASE_PROJECT_ID del Worker sea fnf-mobile-lalocf.';
+  } else if (res.status === 429 || /baneado/i.test(err)) {
+    ayuda = `El Worker no envió el aviso: ${err}`;
+  } else if (res.status === 403 || /origen/i.test(err)) {
     ayuda = `El Worker no acepta esta página (${origin}). En Cloudflare → tu Worker → Settings → Variables, pon en ALLOWED_ORIGIN exactamente: ${location.origin}` +
       (location.origin.includes('lalocf2.github.io') ? '' : ' (o prueba desde lalocf2.github.io)');
   } else if (/unauthorized|401/i.test(err)) {
@@ -60,11 +67,18 @@ window.enviarAvisoTelegram = async (text, url = proxyUrl()) => {
   return { ok: false, ayuda };
 };
 
+// Token de la sesión de Google (Firebase lo renueva solo cuando caduca)
+window.tokenSesion = async () => {
+  const u = window.usuarioActualFirebase;
+  try { return u ? await u.getIdToken() : ''; } catch (err) { console.warn('Token:', err.message); return ''; }
+};
+
 const notifyTelegram = (text) => {
   if (!proxyUrl()) return;
   window.enviarAvisoTelegram(text).then(r => { if (!r.ok) console.warn('Telegram:', r.ayuda); });
 };
 
+const LINK_REPORT_WINDOW = 6 * 86400000; // reportes de link caído que cuentan (las reglas aceptan hasta 7 días)
 const titleOf = (id) => ((window.MOD_DATA || {})[id] || (window.APK_DATA || {})[id] || (window.SCRIPTS_DATA || {})[id] || {}).title || id;
 
 // Crea un ticket (máximo 1 por minuto por usuario; lo controla Firebase)
@@ -99,7 +113,7 @@ window.abrirReporte = (id) => {
   document.getElementById('report-reasons').innerHTML = Object.entries(REASONS).map(([k, [es, en]], i) => `
     <label class="reason">
       <input type="radio" name="reportReason" value="${k}" ${i === 0 ? 'checked' : ''}>
-      <span>${t(es, en)}${k === 'broken' ? `<small>${t('Apaga la descarga para todos hasta que se repare.', 'Turns off the download for everyone until fixed.')}</small>` : ''}</span>
+      <span>${t(es, en)}${k === 'broken' ? `<small>${t('Si otra persona también lo reporta, se apaga la descarga para todos hasta que se repare.', 'If someone else reports it too, the download is turned off for everyone until fixed.')}</small>` : ''}</span>
     </label>`).join('');
   document.getElementById('report-text').value = '';
   openPopup('report-popup');
@@ -116,18 +130,35 @@ window.enviarReporte = async () => {
 
   try {
     const extra = {};
+    const uid = window.usuarioActualFirebase.uid;
+    let bloqueado = false;
+    let esperaConfirmacion = false;
     if (reason === 'broken' && !(window.brokenLinksData || {})[reportId]) {
-      extra[`broken_links/${reportId}`] = {
-        reportedBy: profileName(getProfile()).slice(0, 40), uid: window.usuarioActualFirebase.uid,
-        reason: 'broken', timestamp: Date.now()
-      };
+      // Una sola persona ya no puede apagar la descarga: hacen falta 2 cuentas distintas en 7 días
+      // (lo revisan las reglas de Firebase, no solo este código)
+      const previos = (await get(ref(db, `broken_reports/${reportId}`))).val() || {};
+      if (!previos[uid]) extra[`broken_reports/${reportId}/${uid}`] = serverTimestamp();
+      const otro = Object.entries(previos).find(([u, ts]) => u !== uid && Date.now() - Number(ts) < LINK_REPORT_WINDOW);
+      if (otro) {
+        extra[`broken_links/${reportId}`] = {
+          reportedBy: profileName(getProfile()).slice(0, 40), uid, confirmUid: otro[0],
+          reason: 'broken', timestamp: Date.now()
+        };
+        bloqueado = true;
+      } else {
+        esperaConfirmacion = true;
+      }
     }
     const text = `${REASONS[reason][0]}${details ? '\n' + details : ''}`.slice(0, 600);
     await crearTicket({ type: 'report', reason, modId: reportId.slice(0, 40), text }, extra);
     closePopup('report-popup');
     window.closeDetail();
-    toast(t('¡Gracias! El administrador ya recibió tu reporte.', 'Thanks! The admin got your report.'), 'alert');
-    notifyTelegram(`🚨 REPORTE: ${REASONS[reason][0]}\n📦 ${titleOf(reportId)} (${reportId})\n👤 ${profileName(getProfile())}${details ? '\n💬 ' + details : ''}`);
+    toast(bloqueado
+      ? t('¡Gracias! Otra persona ya lo había reportado: la descarga quedó apagada hasta que se repare.', 'Thanks! Someone else reported it too: the download is off until fixed.')
+      : esperaConfirmacion
+        ? t('¡Gracias! El admin ya recibió tu reporte. Si alguien más lo confirma, se apagará la descarga.', 'Thanks! The admin got your report. If someone else confirms it, the download will be turned off.')
+        : t('¡Gracias! El administrador ya recibió tu reporte.', 'Thanks! The admin got your report.'), 'alert');
+    notifyTelegram(`🚨 REPORTE: ${REASONS[reason][0]}${bloqueado ? ' (confirmado por 2 personas: descarga APAGADA)' : ''}\n📦 ${titleOf(reportId)} (${reportId})\n👤 ${profileName(getProfile())}${details ? '\n💬 ' + details : ''}`);
   } catch (err) {
     errorAmigable(err);
   } finally {

@@ -97,7 +97,7 @@ window.abrirPerfil = async function () {
     const [user, dom] = correo.split('@');
     const correoOculto = user && dom ? user.slice(0, 3) + '***@' + dom : correo;
     const fechaObj = new Date(datos.fechaRegistro || Date.now());
-    const marco = datos.marcoAvatar && !String(datos.marcoAvatar).includes('neon') ? datos.marcoAvatar : 'var(--accent)';
+    const marco = FNF.marcoValido(datos.marcoAvatar) ? datos.marcoAvatar : 'var(--accent)';
     const dias = Math.max(0, Math.floor((Date.now() - fechaObj.getTime()) / 86400000));
     const rango = dias > 180 ? t('Leyenda FNF', 'FNF Legend') : dias > 30 ? "Funkin' Gamer" : t('Port-Boy (Nuevo)', 'Port-Boy (New)');
     const verified = !!((window.live || {}).verified || {})[u.uid];
@@ -194,18 +194,23 @@ window.guardarNuevoApodo = async function () {
 
   const nuevoNombre = nombreInput.value.trim();
   const nuevoAvatar = document.getElementById('input-nuevo-avatar').value.trim();
-  const nuevoMarco = document.getElementById('select-marco').dataset.value || 'var(--accent)';
+  const marcoElegido = document.getElementById('select-marco').dataset.value;
+  const nuevoMarco = FNF.marcoValido(marcoElegido) ? marcoElegido : 'var(--accent)';
 
   if (nuevoNombre.length < 3) return toast(t('El apodo debe tener mínimo 3 letras.', 'Nickname must be at least 3 letters.'), 'alert');
   if (nuevoAvatar && !/^https?:\/\//i.test(nuevoAvatar)) return toast(t('La foto debe ser un enlace https://', 'The photo must be an https:// link'), 'alert');
 
   const actual = (getProfile() || {}).nombre;
   const cambiaNombre = !nombreInput.disabled && nuevoNombre !== actual;
+  if (cambiaNombre && window.usuarioActualFirebase.uid !== window.MI_UID_ADMIN && FNF.nombreReservado(nuevoNombre)) {
+    return toast(t('Ese apodo está reservado para el administrador.', 'That nickname is reserved for the admin.'), 'alert');
+  }
   if (cambiaNombre && !confirm(t('¿Seguro que quieres este apodo? Se bloqueará por 15 días.', 'Keep this nickname? It will be locked for 15 days.'))) return;
 
   const data = { marcoAvatar: nuevoMarco };
   if (nuevoAvatar) data.foto = nuevoAvatar;
-  if (cambiaNombre) { data.nombre = nuevoNombre; data.ultimaFechaCambio = Date.now(); data.usernameModificado = false; }
+  // La fecha la pone el servidor: las reglas exigen que el cambio de apodo y su fecha vayan juntos
+  if (cambiaNombre) { data.nombre = nuevoNombre; data.ultimaFechaCambio = FB.serverTimestamp(); data.usernameModificado = false; }
 
   try {
     await update(ref(db, 'usuarios/' + window.usuarioActualFirebase.uid), data);

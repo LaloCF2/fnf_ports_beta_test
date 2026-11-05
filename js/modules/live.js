@@ -1,6 +1,6 @@
 // Datos en vivo de Firebase pintados sobre las tarjetas + configuración global del sitio.
 window.fbReady.then((FB) => {
-const { db, ref, get, set, onValue } = FB;
+const { db, ref, get, set, update, onValue } = FB;
 const { store, t, esc, icon, toast, isAdmin, weekKey, compact } = FNF;
 
 const live = window.live = {
@@ -13,12 +13,16 @@ window.liveLeds = live.leds;
 const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
 // ---- Pintar sobre las tarjetas ----
+const paintHome = () => { if (window.paintHomeStats) window.paintHomeStats(); };
+
 function paintDownloads() {
+  paintHome();
   Object.keys(live.downloads).forEach(id => setText('dl-' + id, live.downloads[id]));
   document.querySelectorAll('.item-card').forEach(c => { c.dataset.dl = live.downloads[c.dataset.id] || 0; });
 }
 
 function paintLikes() {
+  paintHome();
   Object.keys(live.likes).forEach(id => setText('count-' + id, live.likes[id]));
   const mine = store.json('my_liked_items', {});
   document.querySelectorAll('.item-card .stat-btn[id^="like-"]').forEach(b => b.classList.toggle('active', !!mine[b.id.slice(5)]));
@@ -77,6 +81,7 @@ const ratingOf = (id) => {
 };
 
 function paintRatings() {
+  paintHome();
   document.querySelectorAll('.item-card').forEach(card => {
     const { n, avg } = ratingOf(card.dataset.id);
     card.dataset.rating = avg.toFixed(2);
@@ -207,6 +212,7 @@ function paintConfig() {
 }
 onValue(ref(db, "site_config"), s => {
   live.config = s.val() || {};
+  if (window.setHomeData) window.setHomeData(live.config.home || null); // Inicio editable (home.js)
   paintConfig();
   if (window.renderAdminTab) window.renderAdminTab("avisos", true);
 });
@@ -257,7 +263,8 @@ window.fixBrokenLink = async (id, sinPreguntar) => {
   if (!isAdmin()) return;
   if (!live.broken[id]) return toast('Este link no está reportado como caído.', 'info');
   if (sinPreguntar || confirm('¿Ya solucionaste el link?')) {
-    await set(ref(db, `broken_links/${id}`), null);
+    // También se borran los reportes pendientes, para que vuelvan a hacer falta 2 personas
+    await update(ref(db), { [`broken_links/${id}`]: null, [`broken_reports/${id}`]: null });
     log('link:fix', `Reparó el link de "${titleOf(id)}"`, id);
     toast('Link marcado como reparado.', 'check');
   }

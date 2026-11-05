@@ -273,17 +273,20 @@ window.adminBorrarCuenta = async (uid, name) => {
   if (ok !== 'BORRAR') return toast('Cancelado.', 'info');
   toast('Borrando cuenta…', 'trash');
   try {
-    const [comments, likesReg, requests, tickets] = await Promise.all([
+    const [comments, likesReg, requests, tickets, brokenReports] = await Promise.all([
       get(ref(db, 'mod_comments')).then(s => s.val() || {}),
       get(ref(db, 'likes_registry')).then(s => s.val() || {}),
       get(ref(db, 'mod_requests')).then(s => s.val() || {}),
-      Promise.resolve(A.cache.tickets || {})
+      Promise.resolve(A.cache.tickets || {}),
+      get(ref(db, 'broken_reports')).then(s => s.val() || {}).catch(() => ({}))
     ]);
     const L = live();
     const upd = {
       [`usuarios/${uid}`]: null, [`user_notifications/${uid}`]: null, [`request_cooldown/${uid}`]: null,
-      [`ticket_cooldown/${uid}`]: null, [`comment_cooldown/${uid}`]: null, [`verified_users/${uid}`]: null
+      [`ticket_cooldown/${uid}`]: null, [`comment_cooldown/${uid}`]: null, [`verified_users/${uid}`]: null,
+      [`dl_last/${uid}`]: null
     };
+    Object.entries(brokenReports).forEach(([item, users]) => { if (users && users[uid]) upd[`broken_reports/${item}/${uid}`] = null; });
     let nC = 0, nL = 0, nR = 0, nV = 0;
     Object.entries(comments).forEach(([modId, cs]) => Object.entries(cs || {}).forEach(([cid, c]) => {
       if (!c) return;

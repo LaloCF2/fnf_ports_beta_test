@@ -3,15 +3,46 @@ window.fbReady.then((FB) => {
 const { db, auth, googleProvider, ref, get, set, update, remove, push, onValue, runTransaction, signInWithPopup, onAuthStateChanged, signOut, APP_VERSION } = FB;
 const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, profileName, profilePhoto, stringToColor } = FNF;
 
-// Suma la descarga al total y al contador de la semana (para el Top de la semana)
+// Suma la descarga al total, a la semana (Top de la semana) y al día (gráfica del panel) en UNA sola escritura.
+// Las reglas de Firebase solo aceptan +1 por persona y por elemento cada hora (dl_last): así nadie infla el Top.
+const UNA_HORA = 3600000;
+
+async function sumarDescarga(id, uid) {
+  const paths = [`downloads/${id}`, `downloads_week/${FNF.weekKey()}/${id}`, `downloads_day/${FNF.dayKey()}/${id}`];
+  for (let intento = 0; intento < 3; intento++) {
+    const [ultima, ...vals] = await Promise.all([`dl_last/${uid}/${id}`, ...paths].map(p => get(ref(db, p)).then(s => Number(s.val()) || 0)));
+    if (Date.now() - ultima < UNA_HORA) return true; // ya se contó hace poco
+    const upd = { [`dl_last/${uid}/${id}`]: FB.serverTimestamp() };
+    paths.forEach((p, i) => { upd[p] = vals[i] + 1; });
+    try {
+      await update(ref(db), upd);
+      return true;
+    } catch (err) {
+      // Otra persona descargó al mismo tiempo: se vuelve a leer y se intenta otra vez
+      if (intento === 2) console.warn('Descarga:', err.message);
+    }
+  }
+  return false;
+}
+
 window.trackDownload = (id) => {
-  runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
-  runTransaction(ref(db, `downloads_week/${FNF.weekKey()}/${id}`), (current) => (current || 0) + 1).catch(() => { });
-  runTransaction(ref(db, `downloads_day/${FNF.dayKey()}/${id}`), (current) => (current || 0) + 1).catch(() => { });
   // Historial "Mis descargas" (solo en este celular)
   const hist = store.json('fnf_dl_history', []).filter(h => h.id !== id);
   hist.unshift({ id, ts: Date.now() });
   store.setJson('fnf_dl_history', hist.slice(0, 60));
+
+  const u = window.usuarioActualFirebase;
+  if (!u) return;
+  const last = store.json('fnf_dl_last', {});
+  if (Date.now() - (last[id] || 0) < UNA_HORA) return; // en este celular ya contó hace menos de 1 hora
+  sumarDescarga(id, u.uid).then(ok => {
+    if (!ok) return;
+    const now = Date.now();
+    // Se guardan solo las de la última hora para que no crezca
+    const fresh = Object.fromEntries(Object.entries(store.json('fnf_dl_last', {})).filter(([, ts]) => now - ts < UNA_HORA));
+    fresh[id] = now;
+    store.setJson('fnf_dl_last', fresh);
+  }).catch(err => console.warn('Descarga:', err.message));
 };
 
 const COMPAT_TEXT = {

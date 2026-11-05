@@ -141,6 +141,7 @@ function renderAll() {
   setTxt('tile-favs', `${Object.keys(store.json('fnf_favorites', {})).length} ${t('guardados', 'saved')}`);
 
   if (window.applySort) window.applySort();
+  if (window.renderHome) window.renderHome(); // el "Mod especial" del Inicio usa estos datos
 }
 
 // Dónde vive cada tipo de contenido (data-*.js) y su versión editada desde el panel (Firebase)

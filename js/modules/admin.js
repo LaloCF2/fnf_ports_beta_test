@@ -41,7 +41,7 @@ const A = window.ADMIN = {
     const src = photo || u.foto;
     const nm = name || u.nombre || '?';
     return src
-      ? `<img class="adm-avatar" src="${esc(src)}" alt="" width="${size}" height="${size}" loading="lazy" style="border-color:${esc(u.marcoAvatar && !String(u.marcoAvatar).includes('neon') ? u.marcoAvatar : 'transparent')}">`
+      ? `<img class="adm-avatar" src="${esc(src)}" alt="" width="${size}" height="${size}" loading="lazy" style="border-color:${esc(FNF.marcoValido(u.marcoAvatar) ? u.marcoAvatar : 'transparent')}">`
       : `<span class="adm-avatar adm-avatar-letter" style="width:${size}px;height:${size}px;background:${stringToColor(nm)}">${esc(nm.charAt(0).toUpperCase())}</span>`;
   },
   allTitle: (id) => (FNF.itemOf(id) || A.baseOf(FNF.kindOf(id))[id] || {}).title || id,
@@ -247,6 +247,7 @@ A.TAB.resumen = {
       A.btn('bell', 'Publicar aviso', "adminIrAvisos('campana')"),
       A.btn('database', 'Respaldo', "adminIrHerramientas('respaldo')"),
       A.btn('link', 'Revisar links', "adminIrHerramientas('links')"),
+      A.btn('edit', 'Editar inicio', 'homeIrEditar()'),
       A.btn('tools', maint ? 'Apagar mantenimiento' : 'Mantenimiento', 'adminMantenimientoRapido()', maint ? 'btn-danger' : 'btn-ghost')
     ].join('');
 

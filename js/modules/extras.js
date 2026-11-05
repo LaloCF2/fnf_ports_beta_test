@@ -352,7 +352,8 @@ document.getElementById('customFontUpload').addEventListener('change', (e) => {
 
 window.resetSettings = () => {
   if (!confirm(t('¿Restablecer el diseño predeterminado?', 'Reset to default design?'))) return;
-  ['customThemeColor', 'customUserFont', 'lowEndMode', 'hapticMode', 'glassBlur', 'particlesMode', 'particlesScale', 'particlesSpawn', 'particlesSpeed', 'fnf_theme', 'fnf_sort']
+  ['customThemeColor', 'customUserFont', 'lowEndMode', 'hapticMode', 'glassBlur', 'particlesMode', 'particlesScale', 'particlesSpawn', 'particlesSpeed', 'fnf_theme', 'fnf_sort',
+    'homeAutoCarousel', 'homeHideTop', 'fnf_home_dismissed']
     .forEach(k => store.remove(k));
   location.reload();
 };

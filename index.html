@@ -58,6 +58,8 @@
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
     <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
@@ -112,7 +114,17 @@
     <main>
       <!-- ---------- INICIO ---------- -->
       <section id="home" class="section active">
-        <div class="hero glass">
+        <!-- Barra para editar el Inicio (solo la ve el admin) -->
+        <div id="home-admin-bar" class="home-admin-bar glass admin-only hidden">
+          <label class="hab-switch"><span class="switch"><input type="checkbox" id="homeEditToggle" onchange="homeModoEdicion(this.checked)"><span></span></span>
+            <span><b>Editar inicio</b><small>Agrega, mueve u oculta lo que ven todos</small></span></label>
+          <div class="hab-actions">
+            <button class="btn btn-sm" onclick="homeNuevoBloque()"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg> Agregar</button>
+            <button class="btn btn-sm btn-ghost" onclick="homeRestaurarOrden()">Orden original</button>
+          </div>
+        </div>
+
+        <div class="hero glass" data-home="sys_hero">
           <div class="status-chip"><span id="statusDot" class="status-dot"></span><span id="statusText">Conectando...</span></div>
           <h1 id="fnf-title" class="fnf-title">Friday Night Funkin'</h1>
           <p data-es="El mejor lugar para descargar tus mods optimizados para móvil."
@@ -123,6 +135,7 @@
           </button>
         </div>
 
+        <div data-home="sys_explorar">
         <div class="section-head"><h2 data-es="Explorar" data-en="Explore">Explorar</h2></div>
         <div class="tiles stagger">
           <button class="tile glass featured" style="--i:0" onclick="selectSection('mods')">
@@ -142,13 +155,14 @@
             <span><strong data-es="Favoritos" data-en="Favorites">Favoritos</strong><small id="tile-favs">—</small></span>
           </button>
         </div>
+        </div>
 
-        <div id="top-week-wrap" hidden>
+        <div id="top-week-wrap" data-home="sys_top" hidden>
           <div class="section-head"><h2 id="top-week-title">🔥 Top de la semana</h2></div>
           <div class="top-list glass" id="top-week"></div>
         </div>
 
-        <div class="card glass">
+        <div class="card glass" data-home="sys_about">
           <h3 data-es="¿De qué trata esta página?" data-en="What is this page about?">¿De qué trata esta página?</h3>
           <p data-es="Aquí subo la mayoría de <b>MODs, Bases y Scripts para móviles</b>, con mejores optimizaciones, información detallada y una experiencia cómoda."
             data-en="Here I upload most <b>MODs, Engines and Scripts for mobile</b>, with better optimizations, detailed info and a comfortable experience.">
@@ -167,7 +181,7 @@
           </ul>
         </div>
 
-        <button class="card glass promo promo-guide" onclick="abrirGuia()">
+        <button class="card glass promo promo-guide" data-home="sys_guia" onclick="abrirGuia()">
           <img class="fi" src="https://cdn-icons-png.flaticon.com/128/7978/7978351.png" alt="" width="52" height="52">
           <div>
             <h3 data-es="¿Primera vez aquí?" data-en="First time here?">¿Primera vez aquí?</h3>
@@ -176,7 +190,7 @@
           <span class="btn btn-sm" data-es="Empezar" data-en="Start">Empezar</span>
         </button>
 
-        <div class="card glass promo">
+        <div class="card glass promo" data-home="sys_sprite">
           <span class="tile-icon"><svg class="icon"><use href="#i-image"/></svg></span>
           <div>
             <h3>Spritesheet Generator FNF</h3>
@@ -544,6 +558,18 @@
       </div>
 
       <div class="setting-group">
+        <h4 data-es="Inicio" data-en="Home">Inicio</h4>
+        <label class="setting-row"><span class="sr-main"><i data-fi="refresh"></i><span><span data-es="Carruseles automáticos" data-en="Auto-play carousels">Carruseles automáticos</span>
+            <small data-es="Las imágenes del inicio pasan solas" data-en="Home images slide by themselves">Las imágenes del inicio pasan solas</small></span></span>
+          <span class="switch"><input type="checkbox" id="homeAutoToggle"><span></span></span></label>
+        <label class="setting-row"><span class="sr-main"><i data-fi="eye"></i><span><span data-es="Ocultar el Top de la semana" data-en="Hide the weekly Top">Ocultar el Top de la semana</span>
+            <small data-es="Un inicio más corto" data-en="A shorter home page">Un inicio más corto</small></span></span>
+          <span class="switch"><input type="checkbox" id="homeHideTopToggle"><span></span></span></label>
+        <button class="setting-row sr-link" onclick="homeMostrarCerrados()"><span class="sr-main"><i data-fi="bell"></i><span><span data-es="Volver a mostrar avisos cerrados" data-en="Show closed notices again">Volver a mostrar avisos cerrados</span>
+            <small id="home-closed-count"></small></span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+      </div>
+
+      <div class="setting-group">
         <h4 data-es="Más" data-en="More">Más</h4>
         <button class="setting-row sr-link" onclick="closePopup('settings-popup'); abrirGuia()"><span class="sr-main"><i data-fi="idea"></i><span data-es="Guía para principiantes" data-en="Beginner's guide">Guía para principiantes</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
         <button class="setting-row sr-link" onclick="closePopup('settings-popup'); abrirMisDescargas()"><span class="sr-main"><i data-fi="download"></i><span data-es="Mis descargas" data-en="My downloads">Mis descargas</span></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
@@ -769,6 +795,91 @@
     </div>
   </div>
 
+  <!-- Admin: editor de bloques del Inicio -->
+  <div id="home-editor-popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup('home-editor-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <h2 class="popup-title" id="he-title">Nuevo bloque</h2>
+      <div class="editor-body">
+        <section class="ed-section">
+          <h4 class="ed-head">¿Qué quieres agregar?</h4>
+          <div class="he-types" id="he-types"></div>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head">Vista previa</h4>
+          <div class="he-preview" id="he-preview"></div>
+        </section>
+
+        <section class="ed-section" data-for="destacado">
+          <h4 class="ed-head">Mod especial</h4>
+          <label class="label" for="he-item">Mod, base o script a destacar</label>
+          <select id="he-item" class="field" onchange="homeEdPreview()"></select>
+          <p class="note"><b>NOTA:</b> si dejas el título, la descripción o la imagen vacíos, se usan los del mod.</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head">Textos</h4>
+          <div class="editor-grid">
+            <div data-for="aviso texto botones cuenta destacado"><label class="label" for="he-emoji">Emoji (opcional)</label><input id="he-emoji" class="field" maxlength="8" placeholder="🔥" oninput="homeEdPreview()"></div>
+            <div data-for="aviso destacado imagen video texto"><label class="label" for="he-tag">Etiqueta (opcional)</label><input id="he-tag" class="field" maxlength="30" placeholder="¡NUEVO!" oninput="homeEdPreview()"></div>
+          </div>
+          <label class="label" for="he-ttl">Título</label>
+          <input id="he-ttl" class="field" maxlength="90" placeholder="Ej: ¡Mi nuevo port ya está aquí!" oninput="homeEdPreview()">
+          <label class="label" for="he-sub">Subtítulo (opcional)</label>
+          <input id="he-sub" class="field" maxlength="120" placeholder="Ej: Optimizado para gama baja" oninput="homeEdPreview()">
+          <label class="label" for="he-text">Descripción (opcional)</label>
+          <textarea id="he-text" class="field" maxlength="1500" placeholder="Escribe lo que quieras. **texto** se ve en negritas." oninput="homeEdPreview()"></textarea>
+        </section>
+
+        <section class="ed-section" data-for="aviso texto imagen destacado">
+          <h4 class="ed-head">Imágenes</h4>
+          <textarea id="he-images" class="field" placeholder="https://...  (una por línea)" oninput="homeEdPreview()"></textarea>
+          <p class="note"><b>NOTA:</b> una por línea (enlace https:// o ruta assets/...). En "Imagen" con varias se hace un carrusel; en "Mod especial" la primera reemplaza la portada.</p>
+        </section>
+
+        <section class="ed-section" data-for="video">
+          <h4 class="ed-head">Video de YouTube</h4>
+          <input id="he-video" class="field" type="url" placeholder="https://youtu.be/..." oninput="homeEdPreview()">
+        </section>
+
+        <section class="ed-section" data-for="cuenta">
+          <h4 class="ed-head">Cuenta regresiva</h4>
+          <label class="label" for="he-date">Fecha y hora objetivo</label>
+          <input id="he-date" class="field" type="datetime-local" oninput="homeEdPreview()">
+          <label class="label" for="he-done">Texto cuando llegue la hora (opcional)</label>
+          <input id="he-done" class="field" maxlength="120" placeholder="¡Ya salió! 🎉" oninput="homeEdPreview()">
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head">Botones y enlaces</h4>
+          <textarea id="he-links" class="field" placeholder="Descargar | https://...&#10;Ver mods | #mods&#10;Abrir mi mod | mod:mod12" oninput="homeEdPreview()"></textarea>
+          <p class="note"><b>NOTA:</b> uno por línea con el formato <i>Texto | enlace</i>. Puedes usar https://..., <i>#mods</i>, <i>#apks</i>, <i>#scripts</i>, <i>#help</i>, <i>#contact</i> para ir a una sección, o <i>mod:ID</i> para abrir un mod.</p>
+        </section>
+
+        <section class="ed-section">
+          <h4 class="ed-head">Estilo y visibilidad</h4>
+          <label class="label">Color</label>
+          <div class="he-tones" id="he-tones"></div>
+          <div class="editor-grid">
+            <div><label class="label" for="he-aud">¿Quién lo ve?</label>
+              <select id="he-aud" class="field" onchange="homeEdPreview()"><option value="todos">Todos</option><option value="usuarios">Solo con sesión iniciada</option><option value="invitados">Solo invitados</option></select></div>
+            <div><label class="label" for="he-size">Tamaño</label>
+              <select id="he-size" class="field" onchange="homeEdPreview()"><option value="normal">Normal</option><option value="grande">Grande (resaltado)</option><option value="compacto">Compacto</option></select></div>
+            <div><label class="label" for="he-from">Mostrar desde (opcional)</label><input id="he-from" class="field" type="datetime-local"></div>
+            <div><label class="label" for="he-until">Ocultar después de (opcional)</label><input id="he-until" class="field" type="datetime-local"></div>
+          </div>
+          <label class="setting-row" style="border:0;padding:4px 0"><span>Los usuarios lo pueden cerrar <small>Les sale una ✕; si lo editas, les vuelve a aparecer</small></span>
+            <span class="switch"><input type="checkbox" id="he-dismiss" onchange="homeEdPreview()"><span></span></span></label>
+          <label class="setting-row" style="border:0;padding:4px 0"><span>Visible <small>Apágalo para guardarlo sin que nadie lo vea</small></span>
+            <span class="switch"><input type="checkbox" id="he-visible" checked><span></span></span></label>
+        </section>
+
+        <button class="btn btn-block" id="btn-guardar-bloque" onclick="homeGuardarBloque()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Admin: baneo -->
   <div id="ban-popup" class="popup">
     <div class="popup-content">
@@ -830,6 +941,7 @@
   <script defer src="js/modules/render.js"></script>
   <script defer src="js/modules/ui-theme.js"></script>
   <script defer src="js/boot.js"></script>
+  <script defer src="js/modules/home.js"></script>
   <script defer src="js/modules/firebase-config.js"></script>
   <script defer src="js/modules/extras.js"></script>
   <!-- 2) Con Firebase: se conectan cuando carga -->
@@ -847,6 +959,7 @@
   <script defer src="js/modules/admin-content.js"></script>
   <script defer src="js/modules/admin-avisos.js"></script>
   <script defer src="js/modules/admin-tools.js"></script>
+  <script defer src="js/modules/admin-home.js"></script>
   <!-- Seguro: si algo falla, la pantalla de carga nunca se queda pegada -->
   <script>setTimeout(function () { document.body.classList.add('loaded'); }, 4000);</script>
 </body>

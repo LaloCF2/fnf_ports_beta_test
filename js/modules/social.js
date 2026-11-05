@@ -45,6 +45,18 @@ async function checkBanStatus() {
 }
 FNF.checkBanStatus = checkBanStatus;
 
+// Versión instantánea (con los baneos que ya llegan en vivo): para likes, votos y calificaciones.
+// Las reglas de Firebase también se lo impiden; esto solo muestra el aviso en vez de un error.
+function avisoBaneo() {
+  const u = window.usuarioActualFirebase;
+  const ban = u && (live().banned || {})[u.uid];
+  if (!ban || !(Date.now() < ban.expiresAt)) return false;
+  window.mostrarMensaje(t('⛔ Acceso restringido', '⛔ Access restricted'),
+    t(`Motivo: ${ban.reason}\nTermina en: ${Math.ceil((ban.expiresAt - Date.now()) / 3600000)} h`, `Reason: ${ban.reason}\nEnds in: ${Math.ceil((ban.expiresAt - Date.now()) / 3600000)} h`));
+  return true;
+}
+FNF.avisoBaneo = avisoBaneo;
+
 window.openBanPanel = (userKey, userName) => {
   if (!isAdmin() || !userKey || userKey === ADMIN_UID) return;
   document.getElementById('ban-target-info').textContent = `Gestionando a: ${userName}`;
@@ -64,7 +76,7 @@ window.openBanPanel = (userKey, userName) => {
 // LIKES DE MODS
 // ==========================================
 window.handleLike = async (id, el) => {
-  if (window.exigirRegistro()) return;
+  if (window.exigirRegistro() || avisoBaneo()) return;
   const uid = window.usuarioActualFirebase.uid;
   if (el) el.disabled = true;
   try {
@@ -195,10 +207,11 @@ window.addModComment = async () => {
       }
     };
     if (!isAdmin()) upd[`comment_cooldown/${u.uid}`] = FB.serverTimestamp();
+    // El LED amarillo ("comentarios nuevos") va en la misma escritura: las reglas solo lo aceptan junto a un comentario
+    upd[`last_comment_time/${currentCommentsId}`] = FB.serverTimestamp();
     await update(ref(db), upd);
     store.set('last_comment_sent', String(Date.now()));
-    set(ref(db, `last_comment_time/${currentCommentsId}`), Date.now()).catch(() => { });
-    store.set(`seen_comments_${currentCommentsId}`, Date.now() + 1000);
+    store.set(`seen_comments_${currentCommentsId}`, Date.now() + 60000);
     box.value = '';
     document.getElementById('mc-charCounter').textContent = '0';
   } catch (err) {
@@ -221,7 +234,7 @@ function tieneGroserias(text) {
 FNF.tieneGroserias = tieneGroserias;
 
 window.likeModComment = async (commentId) => {
-  if (window.exigirRegistro()) return;
+  if (window.exigirRegistro() || avisoBaneo()) return;
   const base = `mod_comments/${currentCommentsId}/${commentId}`;
   try {
     await coupledToggle(`${base}/likes`, `${base}/userLikes/${window.usuarioActualFirebase.uid}`);
@@ -261,7 +274,7 @@ window.loadItemRating = (id) => {
 window.rateAppItem = async (a, b) => {
   const stars = typeof a === 'number' ? a : b;
   const id = window.currentItemRatingId;
-  if (!id || window.exigirRegistro()) return;
+  if (!id || window.exigirRegistro() || avisoBaneo()) return;
   const uid = window.usuarioActualFirebase.uid;
   try {
     await set(ref(db, `ratings/${id}/${uid}`), stars);

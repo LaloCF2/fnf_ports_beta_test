@@ -279,7 +279,8 @@ window.adminRevisarWorker = async () => {
     const acepta = !d.origenes_permitidos.length || d.origenes_permitidos.includes(origen);
     tgResult(d.token_configurado && d.chat_configurado && acepta,
       `Worker funcionando. Token: ${d.token_configurado ? 'sí' : 'FALTA'} · Chat: ${d.chat_configurado ? 'sí' : 'FALTA'} · ` +
-      `Acepta esta página (${origen}): ${acepta ? 'sí' : 'NO — agrégala en ALLOWED_ORIGIN'} · Revisor de links: ${d.revisor_links ? 'sí' : 'no (actualiza el Worker)'}`);
+      `Acepta esta página (${origen}): ${acepta ? 'sí' : 'NO — agrégala en ALLOWED_ORIGIN'} · Revisor de links: ${d.revisor_links ? 'sí' : 'no (actualiza el Worker)'} · ` +
+      `Protegido con sesión: ${d.requiere_sesion ? 'sí' : 'NO — pega el nuevo tools/telegram-worker.js (v4) en Cloudflare'}`);
   } catch (err) {
     tgResult(false, 'No se pudo conectar con el Worker. Revisa la dirección y que esté publicado ("Deploy").');
   }

@@ -105,7 +105,7 @@ window.enviarSolicitudMod = async () => {
 };
 
 window.voteRequest = async (id, el) => {
-  if (window.exigirRegistro()) return;
+  if (window.exigirRegistro() || FNF.avisoBaneo()) return;
   if (el) el.disabled = true;
   try {
     await FNF.coupledToggle(`mod_requests/${id}/votes`, `mod_requests/${id}/voters/${window.usuarioActualFirebase.uid}`);

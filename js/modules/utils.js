@@ -123,6 +123,11 @@ const engineOf = (e) => {
 
 const isAdmin = () => !!window.isSuperUser;
 
+// "LaloCF" está reservado para el admin (también "LaIoCF", "Lal0CF", "Lalo CF"...). Igual que en las reglas de Firebase.
+const nombreReservado = (n) => String(n || '').toLowerCase().replace(/ /g, '').replace(/0/g, 'o').replace(/[1i|]/g, 'l').includes('lalocf');
+// Color de marco del avatar: solo #hex o el acento del tema (así nadie mete CSS raro en tu panel)
+const marcoValido = (v) => typeof v === 'string' && v.length <= 40 && /^(#[0-9a-fA-F]+|var\(--accent\))$/.test(v);
+
 // Iconos de Flaticon (flaticon.com) verificados uno por uno
 const FI = {
   pin: 12483013, led: 14035769, star: 1828884, update: 5278663, edit: 5996831, trash: 1214428, eye: 709612,
@@ -171,6 +176,7 @@ const copyText = (txt, okMsg) => {
 
 window.FNF = {
   store, getProfile, profileName, profilePhoto, t, esc, icon, vibrate, openPopup, closePopup, toast, stringToColor,
-  weekKey, compact, timeAgo, minRam, compatOf, engineOf, isAdmin, fi, fiUrl, dayKey, fmtDateTime, downloadJSON, copyText
+  weekKey, compact, timeAgo, minRam, compatOf, engineOf, isAdmin, fi, fiUrl, dayKey, fmtDateTime, downloadJSON, copyText,
+  nombreReservado, marcoValido
 };
 })();

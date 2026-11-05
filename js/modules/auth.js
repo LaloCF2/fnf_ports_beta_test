@@ -9,12 +9,14 @@ window.usuarioActualFirebase = null;
 const nombreValido = (raw, uid) => {
   let n = String(raw || '').trim().slice(0, 30);
   if (n.length < 3) n = 'Usuario FNF';
-  if (uid !== window.MI_UID_ADMIN && n.toLowerCase().includes('lalocf')) n = 'Usuario FNF';
+  if (uid !== window.MI_UID_ADMIN && FNF.nombreReservado(n)) n = 'Usuario FNF';
   return n;
 };
 
 onAuthStateChanged(auth, async (user) => {
   const overlayAuth = document.getElementById('auth-overlay');
+
+  window.authKnown = true; // ya se sabe si hay sesión (el Inicio lo usa para "solo usuarios / solo invitados")
 
   // El modo admin depende SOLO de la sesión real de Google (las reglas de Firebase lo respaldan)
   window.setAdminMode(!!user && user.uid === window.MI_UID_ADMIN);
@@ -64,6 +66,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   if (window.updateHeaderUser) window.updateHeaderUser();
+  if (window.renderHome) window.renderHome();
 });
 
 window.iniciarSesionConGoogle = async function () {

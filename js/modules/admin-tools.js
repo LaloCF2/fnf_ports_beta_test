@@ -17,7 +17,8 @@ const SUBS = [
 const NODOS = ['usuarios', 'mod_comments', 'mod_requests', 'likes', 'likes_registry', 'downloads', 'downloads_week', 'downloads_day',
   'ratings', 'notificaciones', 'notifications', 'site_config', 'mods_custom', 'apks_custom', 'scripts_custom', 'broken_links',
   'support_tickets', 'verified_users', 'banned_users', 'pinned_mods', 'new_mods_status', 'updates_led', 'scripts_recomendados',
-  'last_comment_time', 'user_notifications', 'request_cooldown', 'ticket_cooldown', 'comment_cooldown', 'admin_log', 'comments', 'reports', 'dev_progress'];
+  'last_comment_time', 'user_notifications', 'request_cooldown', 'ticket_cooldown', 'comment_cooldown', 'admin_log', 'comments', 'reports', 'dev_progress',
+  'broken_reports', 'dl_last'];
 
 let checker = { running: false, results: null, done: 0, total: 0 };
 
@@ -203,12 +204,14 @@ window.adminRevisarLinks = async () => {
     const lote = links.slice(i, i + 15);
     let data = null;
     try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ check: lote.map(l => l.url) }) });
+      const token = await window.tokenSesion();
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ check: lote.map(l => l.url), token }) });
       data = await res.json();
     } catch (err) { data = null; }
     if (!data || !Array.isArray(data.results)) {
       checker.running = false;
       pintarLinks();
+      if (data && data.error) return toast(`El Worker respondió: ${data.error}`, 'alert');
       return toast('Tu Worker no tiene el revisor de links. Pega el nuevo tools/telegram-worker.js en Cloudflare.', 'alert');
     }
     lote.forEach((l, j) => {

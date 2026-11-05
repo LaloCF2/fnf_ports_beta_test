@@ -1,32 +1,3 @@
-// =====================================================================
-// Puente a Telegram + revisor de links (Cloudflare Worker, gratis) — v4
-// ---------------------------------------------------------------------
-// Para qué sirve: recibir en Telegram los reportes y mensajes de soporte
-// SIN poner el token del bot dentro de la página (donde cualquiera lo ve).
-//
-// NUEVO en v4 (seguridad):
-//  · Solo acepta peticiones de usuarios con sesión de Google iniciada en tu página
-//    (el Worker revisa la firma del token de Firebase; un "curl" falso ya no pasa).
-//  · Un usuario solo puede mandar un aviso justo después de crear un ticket real
-//    (Firebase ya limita los tickets a 1 por minuto) y nunca si está baneado.
-//  · El revisor de links solo lo puede usar el admin.
-//  · Cada aviso lleva el UID de quien lo mandó, para que puedas banearlo si abusa.
-//
-// Cómo publicarlo:
-//  1. https://dash.cloudflare.com → Workers & Pages → tu Worker → Edit code.
-//  2. Borra todo, pega ESTE archivo completo y dale "Deploy".
-//  3. En el Worker → Settings → Variables and Secrets:
-//       TELEGRAM_TOKEN   (Secret) = el token de tu bot (BotFather). Sin espacios ni comillas.
-//       TELEGRAM_CHAT_ID (Text)   = 5429172831
-//       ALLOWED_ORIGIN   (Text)   = https://lalocf2.github.io
-//          · Puedes poner varias separadas por coma, por ejemplo para probar con Live Server:
-//            https://lalocf2.github.io,http://127.0.0.1:5500
-//          · Sin "/" al final y sin la ruta (/fnf_ports): solo el dominio.
-//     (Opcionales, ya vienen con tus datos: FIREBASE_PROJECT_ID, FIREBASE_DB_URL, ADMIN_UID)
-//  4. Abre tu bot en Telegram y mándale /start (si nunca lo hiciste).
-//  5. En la página: Panel de admin → Avisos → Telegram → pega la dirección del Worker → Guardar → Probar.
-//  6. El mismo Worker sirve para Panel → Herramientas → Revisar links (no necesita nada extra).
-// =====================================================================
 
 const DEFAULTS = {
   FIREBASE_PROJECT_ID: 'fnf-mobile-lalocf',
@@ -35,9 +6,6 @@ const DEFAULTS = {
 };
 const conf = (env, k) => String(env[k] || DEFAULTS[k]).trim().replace(/\/+$/, '');
 
-// ---------------------------------------------------------------------
-// Verificación del token de Firebase (firma RS256 con las llaves públicas de Google)
-// ---------------------------------------------------------------------
 const JWK_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 let jwkCache = { keys: [], exp: 0 };
 
@@ -57,7 +25,6 @@ const b64urlBytes = (s) => {
 };
 const b64urlJson = (s) => JSON.parse(new TextDecoder().decode(b64urlBytes(s)));
 
-// Devuelve el UID si el token es válido; si no, null
 async function verificarToken(token, projectId) {
   const parts = String(token || '').split('.');
   if (parts.length !== 3) return null;
@@ -77,7 +44,6 @@ async function verificarToken(token, projectId) {
   return ok ? payload.sub : null;
 }
 
-// Lee un dato de tu Realtime Database con los permisos del propio usuario
 async function leerDB(env, path, token) {
   const res = await fetch(`${conf(env, 'FIREBASE_DB_URL')}/${path}.json?auth=${encodeURIComponent(token)}`);
   if (!res.ok) return undefined;

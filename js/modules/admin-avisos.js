@@ -255,7 +255,8 @@ window.adminEnviarToast = async () => {
 window.adminGuardarTelegram = async () => {
   const url = val('adm-tg-url').replace(/\/+$/, '');
   if (url && !/^https:\/\/[^\s]+$/i.test(url)) return toast('La dirección debe empezar con https://', 'alert');
-  await set(ref(db, 'site_config/telegram'), url ? { url } : null);
+  const preview = url ? await tieneVistaPrevia(url) : false;
+  await set(ref(db, 'site_config/telegram'), url ? { url, preview: preview || null } : null);
   A.log('config:telegram', url ? 'Guardó la dirección del Worker de Telegram' : 'Desactivó los avisos de Telegram');
   toast(url ? 'Dirección guardada. Ahora toca "Enviar prueba".' : 'Avisos de Telegram desactivados.', 'telegram');
 };
@@ -267,6 +268,11 @@ window.adminProbarTelegram = async () => {
   const r = await window.enviarAvisoTelegram('✅ Prueba desde el panel de FNF\' Ports. ¡Los avisos funcionan!', url);
   tgResult(r.ok, r.ok ? '¡Listo! Revisa tu bot de Telegram.' : r.ayuda);
 };
+// ¿El Worker ya sabe hacer la vista previa de los links compartidos? (versión 5 o más nueva)
+async function tieneVistaPrevia(url) {
+  try { const d = await (await fetch(url)).json(); return d.vista_previa === true; } catch (err) { return false; }
+}
+
 window.adminRevisarWorker = async () => {
   const url = val('adm-tg-url').replace(/\/+$/, '');
   if (!url) return tgResult(false, 'Primero pega la dirección del Worker.');
@@ -277,10 +283,16 @@ window.adminRevisarWorker = async () => {
     if (d.token_configurado === undefined) return tgResult(false, 'El Worker responde, pero es la versión anterior. Pega el nuevo tools/telegram-worker.js en Cloudflare para ver más detalles.');
     const origen = location.origin;
     const acepta = !d.origenes_permitidos.length || d.origenes_permitidos.includes(origen);
+    // Si es la dirección guardada, se activa (o apaga) la vista previa al compartir
+    const tg = cfg().telegram || {};
+    if (tg.url === url && !!tg.preview !== (d.vista_previa === true)) {
+      await update(ref(db, 'site_config/telegram'), { preview: d.vista_previa === true || null });
+    }
     tgResult(d.token_configurado && d.chat_configurado && acepta,
       `Worker funcionando. Token: ${d.token_configurado ? 'sí' : 'FALTA'} · Chat: ${d.chat_configurado ? 'sí' : 'FALTA'} · ` +
       `Acepta esta página (${origen}): ${acepta ? 'sí' : 'NO — agrégala en ALLOWED_ORIGIN'} · Revisor de links: ${d.revisor_links ? 'sí' : 'no (actualiza el Worker)'} · ` +
-      `Protegido con sesión: ${d.requiere_sesion ? 'sí' : 'NO — pega el nuevo tools/telegram-worker.js (v4) en Cloudflare'}`);
+      `Protegido con sesión: ${d.requiere_sesion ? 'sí' : 'NO — pega el nuevo tools/telegram-worker.js en Cloudflare'} · ` +
+      `Vista previa al compartir: ${d.vista_previa ? 'sí (activada)' : 'NO — pega el nuevo tools/telegram-worker.js (v5)'}`);
   } catch (err) {
     tgResult(false, 'No se pudo conectar con el Worker. Revisa la dirección y que esté publicado ("Deploy").');
   }

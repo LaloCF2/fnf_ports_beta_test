@@ -12,6 +12,7 @@ const TABS = [
   ['comentarios', 'Comentarios', 'chat'],
   ['usuarios', 'Usuarios', 'users'],
   ['contenido', 'Contenido', 'box'],
+  ['inicio', 'Inicio', 'home'],
   ['avisos', 'Avisos', 'megaphone'],
   ['herramientas', 'Herramientas', 'tools']
 ];
@@ -38,7 +39,7 @@ const A = window.ADMIN = {
   // Avatar de un usuario (foto de su perfil o su inicial)
   avatar: (uid, name, photo, size = 40) => {
     const u = A.userOf(uid) || {};
-    const src = photo || u.foto;
+    const src = FNF.safeAvatar(photo || u.foto);
     const nm = name || u.nombre || '?';
     return src
       ? `<img class="adm-avatar" src="${esc(src)}" alt="" width="${size}" height="${size}" loading="lazy" style="border-color:${esc(FNF.marcoValido(u.marcoAvatar) ? u.marcoAvatar : 'transparent')}">`

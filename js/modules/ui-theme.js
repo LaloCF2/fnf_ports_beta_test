@@ -27,14 +27,41 @@ function markActive(section) {
   placeIndicator(btn);
 }
 
+// Cambio de sección animado: la anterior se desliza y desvanece, la nueva entra desde el lado
+// hacia el que te mueves en el menú (derecha = avanzar, izquierda = regresar).
+let swapTimer = null;
+const sinAnimacion = () => document.body.classList.contains('low-end-mode') ||
+  (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function cambiarSeccion(from, to) {
+  const dir = SECTIONS.indexOf(to) < SECTIONS.indexOf(from) ? 'sec-prev' : 'sec-next';
+  const oldEl = document.getElementById(from);
+  const mostrar = () => {
+    document.querySelectorAll('.section').forEach(s => {
+      s.classList.remove('sec-out', 'sec-prev', 'sec-next');
+      s.classList.toggle('active', s.id === to);
+    });
+    const el = document.getElementById(to);
+    if (el && !sinAnimacion()) el.classList.add(dir);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  };
+  clearTimeout(swapTimer);
+  if (!oldEl || sinAnimacion() || !oldEl.classList.contains('active')) return mostrar();
+  oldEl.classList.remove('sec-prev', 'sec-next');
+  oldEl.classList.add('sec-out', dir);
+  swapTimer = setTimeout(mostrar, 150);
+}
+
 window.selectSection = (id, opts = {}) => {
   if (id === 'more') { openPopup('more-popup'); vibrate(10); return; }
   if (!SECTIONS.includes(id) || (id === 'admin' && !window.isSuperUser)) id = 'home';
 
   if (id !== current) {
-    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === id));
+    cambiarSeccion(current, id);
     current = id;
     if (!opts.fromHistory) history.pushState({ section: id }, '', id === 'home' ? location.pathname + location.search : '#' + id);
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // tocar la misma sección = subir arriba
   }
 
   document.getElementById('searchContainer').classList.toggle('hidden', !LISTS[id]);
@@ -42,7 +69,6 @@ window.selectSection = (id, opts = {}) => {
 
   markActive(id);
   if (id === 'admin' && window.openAdminPanel) window.openAdminPanel();
-  window.scrollTo({ top: 0, behavior: opts.fromHistory ? 'auto' : 'smooth' });
   vibrate(12);
 };
 window.currentSection = () => current;
@@ -114,8 +140,8 @@ indicator.style.transition = 'none';
 // ---- Tema claro / oscuro ----
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  const img = document.getElementById('theme-icon-img');
-  if (img) img.src = FNF.fiUrl(theme === 'dark' ? 'sun' : 'moon');
+  const ic = document.querySelector('#theme-icon use');
+  if (ic) ic.setAttribute('href', theme === 'dark' ? '#i-sun' : '#i-moon');
   const label = document.getElementById('theme-label');
   if (label) label.textContent = theme === 'dark' ? t('Oscuro', 'Dark') : t('Claro', 'Light');
   const toggle = document.getElementById('darkToggle');

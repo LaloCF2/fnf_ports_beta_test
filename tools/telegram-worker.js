@@ -6,6 +6,7 @@ const DEFAULTS = {
 };
 const conf = (env, k) => String(env[k] || DEFAULTS[k]).trim().replace(/\/+$/, '');
 
+
 const JWK_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 let jwkCache = { keys: [], exp: 0 };
 
@@ -50,7 +51,6 @@ async function leerDB(env, path, token) {
   return res.json().catch(() => undefined);
 }
 
-// Cada ticket da derecho a UN aviso (memoria del Worker: evita que reenvíen la misma petición)
 const usados = new Map();
 function yaUsado(clave) {
   const ahora = Date.now();
@@ -60,9 +60,6 @@ function yaUsado(clave) {
   return false;
 }
 
-// ---------------------------------------------------------------------
-// Revisor de links
-// ---------------------------------------------------------------------
 async function revisar(url) {
   try {
     const ctrl = new AbortController();
@@ -99,6 +96,87 @@ async function revisar(url) {
   }
 }
 
+const SITE_DEFAULT = 'https://lalocf2.github.io/fnf_ports/';
+const sitio = (env) => String(env.SITE_URL || SITE_DEFAULT).trim().replace(/\/*$/, '/');
+const escHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function bloqueDe(js, id) {
+  const m = new RegExp(`(^|[\\s,{])["']?${id}["']?\\s*:\\s*\\{`).exec(js);
+  if (!m) return '';
+  let i = m.index + m[0].length - 1, nivel = 0, comilla = null;
+  for (let j = i; j < js.length && j < i + 20000; j++) {
+    const c = js[j];
+    if (comilla) { if (c === '\\') j++; else if (c === comilla) comilla = null; continue; }
+    if (c === '"' || c === "'" || c === '`') comilla = c;
+    else if (c === '{') nivel++;
+    else if (c === '}' && --nivel === 0) return js.slice(i, j + 1);
+  }
+  return '';
+}
+const campo = (bloque, k) => {
+  const m = new RegExp(`\\b${k}\\s*:\\s*(["'\`])((?:\\\\.|(?!\\1)[\\s\\S])*)\\1`).exec(bloque);
+  return m ? m[2].replace(/\\(.)/g, '$1') : '';
+};
+
+async function datosItem(env, id) {
+  const tipo = id.startsWith('apk') ? ['apks_custom', 'data-apks.js'] : id.startsWith('script') ? ['scripts_custom', 'data-scripts.js'] : ['mods_custom', 'data-mods.js'];
+  const db = conf(env, 'FIREBASE_DB_URL');
+  const [js, custom, dl, ratings] = await Promise.all([
+    fetch(`${sitio(env)}js/modules/${tipo[1]}`, { cf: { cacheTtl: 600 } }).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(`${db}/${tipo[0]}/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${db}/downloads/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${db}/ratings/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+  ]);
+  const b = bloqueDe(js, id);
+  let d = b ? { title: campo(b, 'title'), img: campo(b, 'img'), desc: campo(b, 'desc'), hidden: /\bhidden\s*:\s*true/.test(b), draft: /\bdraft\s*:\s*true/.test(b) } : {};
+  if (custom) {
+    if (custom.removed) return null;
+    d = { ...d, ...['title', 'img', 'desc', 'hidden', 'draft'].reduce((o, k) => (custom[k] != null ? { ...o, [k]: custom[k] } : o), {}) };
+    if (!d.img && Array.isArray(custom.images)) d.img = custom.images[0];
+  }
+  if (!d.title || d.hidden || d.draft) return null; // secretos y borradores no se muestran
+  const votos = Object.values(ratings || {}).filter(v => typeof v === 'number');
+  return {
+    ...d,
+    descargas: Number(dl) || 0,
+    estrellas: votos.length ? (votos.reduce((a, v) => a + v, 0) / votos.length).toFixed(1) : null
+  };
+}
+
+async function vistaPrevia(env, id, url) {
+  const site = sitio(env);
+  const destino = `${site}?share=${encodeURIComponent(id)}`;
+  const d = /^[\w-]{1,60}$/.test(id) ? await datosItem(env, id).catch(() => null) : null;
+  const titulo = d ? d.title : "FNF' Ports Mobile";
+  const datos = d ? [d.descargas ? `📥 ${d.descargas.toLocaleString('en-US')} descargas` : '', d.estrellas ? `⭐ ${d.estrellas}` : ''].filter(Boolean).join(' · ') : '';
+  const texto = String(d && d.desc ? d.desc : 'Los mejores ports de Friday Night Funkin\' para móvil: bases, mods y scripts optimizados.').replace(/\/n|\s+/g, ' ').trim().slice(0, 180);
+  const descripcion = datos ? `${datos} — ${texto}` : texto;
+  const img = d && d.img ? (/^https?:\/\//i.test(d.img) ? d.img : site + d.img.replace(/^\.?\//, '')) : `${site}assets/icons/logo512.png`;
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escHTML(titulo)} · FNF' Ports</title>
+<meta name="description" content="${escHTML(descripcion)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FNF' Ports Mobile">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="${escHTML(titulo)}">
+<meta property="og:description" content="${escHTML(descripcion)}">
+<meta property="og:image" content="${escHTML(img)}">
+<meta property="og:url" content="${escHTML(url)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escHTML(titulo)}">
+<meta name="twitter:description" content="${escHTML(descripcion)}">
+<meta name="twitter:image" content="${escHTML(img)}">
+<meta name="theme-color" content="#b14fe0">
+<link rel="canonical" href="${escHTML(destino)}">
+<meta http-equiv="refresh" content="0;url=${escHTML(destino)}">
+</head><body style="font-family:system-ui,sans-serif;text-align:center;padding:48px 20px;background:#fbd9f1;color:#2a2140">
+<p>Abriendo <b>${escHTML(titulo)}</b>…</p><p><a href="${escHTML(destino)}" style="color:#8a3fd0">Toca aquí si no se abre solo</a></p>
+<script>location.replace(${JSON.stringify(destino).replace(/</g, '\\u003c')})</script>
+</body></html>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=600' } });
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -106,7 +184,6 @@ export default {
       .split(',').map(s => s.trim().replace(/\/+$/, '')).filter(Boolean);
     const permitido = !allowed.length || allowed.includes(origin);
 
-    // Se responde con el origen de quien pregunta para que la página pueda leer el error y explicarlo
     const cors = {
       'Access-Control-Allow-Origin': origin || '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -117,8 +194,15 @@ export default {
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
     if (request.method === 'GET') {
+      const ruta = new URL(request.url).pathname;
+      const share = ruta.match(/^\/m\/([^/]+)\/?$/);
+      if (share) {
+        let id = '';
+        try { id = decodeURIComponent(share[1]); } catch (e) { /* enlace mal escrito */ }
+        return vistaPrevia(env, id, request.url);
+      }
       return reply(200, {
-        ok: true, mensaje: 'El Worker está funcionando ✅', version: 4, revisor_links: true, requiere_sesion: true,
+        ok: true, mensaje: 'El Worker está funcionando ✅', version: 5, revisor_links: true, requiere_sesion: true, vista_previa: true,
         token_configurado: !!env.TELEGRAM_TOKEN, chat_configurado: !!env.TELEGRAM_CHAT_ID, origenes_permitidos: allowed
       });
     }
@@ -128,13 +212,11 @@ export default {
     let body = {};
     try { body = JSON.parse(await request.text()) || {}; } catch (e) { /* cuerpo inválido */ }
 
-    // ---- ¿Quién es? (sesión de Google en tu página) ----
     const token = String(body.token || '');
     const uid = await verificarToken(token, conf(env, 'FIREBASE_PROJECT_ID')).catch(() => null);
     if (!uid) return reply(401, { ok: false, error: 'Sesión no válida: inicia sesión con Google en la página' });
     const esAdmin = uid === conf(env, 'ADMIN_UID');
 
-    // ---- Revisor de links: { check: ["https://...", ...] } (máximo 20 por vez, solo el admin) ----
     if (Array.isArray(body.check)) {
       if (!esAdmin) return reply(403, { ok: false, error: 'Solo el admin puede revisar links' });
       const urls = body.check.filter(u => /^https?:\/\//i.test(String(u))).slice(0, 20);
@@ -142,16 +224,13 @@ export default {
       return reply(200, { ok: true, results });
     }
 
-    // ---- Aviso a Telegram: { text: "...", token } ----
     if (!env.TELEGRAM_TOKEN || !env.TELEGRAM_CHAT_ID) return reply(500, { ok: false, error: 'Faltan las variables TELEGRAM_TOKEN o TELEGRAM_CHAT_ID en el Worker' });
     let text = String(body.text || '').slice(0, 1000);
     if (!text.trim()) return reply(400, { ok: false, error: 'Falta el texto del mensaje' });
 
     if (!esAdmin) {
-      // Baneado = sin avisos
       const ban = await leerDB(env, `banned_users/${uid}`, token);
       if (ban && Number(ban.expiresAt) > Date.now()) return reply(403, { ok: false, error: 'Usuario baneado' });
-      // Debe haber creado un ticket hace menos de 2 minutos (Firebase limita los tickets a 1 por minuto)
       const ultimoTicket = Number(await leerDB(env, `ticket_cooldown/${uid}`, token)) || 0;
       if (Date.now() - ultimoTicket > 120000) return reply(429, { ok: false, error: 'No hay un ticket reciente: el aviso se manda solo al crear un reporte o mensaje' });
       if (yaUsado(`${uid}:${ultimoTicket}`)) return reply(429, { ok: false, error: 'Ese ticket ya envió su aviso' });

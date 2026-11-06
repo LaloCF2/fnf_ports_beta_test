@@ -27,7 +27,7 @@ onAuthStateChanged(auth, async (user) => {
     if (overlayAuth) overlayAuth.style.display = 'none';
 
     const nombreSeguro = nombreValido(user.displayName, user.uid);
-    const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+    const fotoSegura = user.photoURL || ''; // sin foto: se muestra la inicial del nombre
 
     try {
       const userRef = ref(db, 'usuarios/' + user.uid);

@@ -71,9 +71,10 @@ A.TAB.comentarios = {
         <div class="rep-item" role="button" onclick="openModComments('${mod}', '${A.jsStr(A.allTitle(c.modId))}')">
           <img src="${esc(A.itemThumb(c.modId))}" alt="" loading="lazy"><span class="grow"><b>${esc(A.allTitle(c.modId))}</b><small>Toca para ver la conversación</small></span>
         </div>
+        ${c.replyTo ? `<p class="adm-count" style="margin:0">${fi('reply', 14)} Respuesta a ${esc(((A.cache.comments || []).find(x => x.id === c.replyTo) || {}).user || 'un comentario borrado')}</p>` : ''}
         <p class="rep-text">${esc(c.text)}</p>
         <div class="adm-actions">
-          ${A.btn('send', 'Responder', `adminResponderComentario('${mod}', '${jsName}')`, 'btn-soft')}
+          ${A.btn('send', 'Responder', `adminResponderComentario('${mod}', '${jsName}', '${id}')`, 'btn-soft')}
           ${A.btn('pin', c.isPinned ? 'Desfijar' : 'Fijar', `adminPinComentario('${mod}', '${id}', ${!!c.isPinned})`)}
           ${A.btn('mail', 'Mensaje privado', `adminResponder('${uid}', '${jsName}')`)}
           ${A.btn('chat', 'Sus comentarios', `adminComentariosUsuario('${uid}')`)}
@@ -118,14 +119,17 @@ window.adminBorrarComentario = async (modId, id) => {
   A.TAB.comentarios.list();
 };
 // Responde en público dentro del hilo del mod (como admin)
-window.adminResponderComentario = async (modId, name) => {
-  const txt = prompt(`Respuesta pública para ${name} (se publica en los comentarios del mod):`, `@${name} `);
+window.adminResponderComentario = async (modId, name, commentId) => {
+  const txt = prompt(`Respuesta pública para ${name} (se publica debajo de su comentario):`, `@${name} `);
   if (!txt || !txt.trim()) return;
   const p = FNF.getProfile() || {};
   const data = {
     ownerKey: window.usuarioActualFirebase.uid, user: FNF.profileName(p).slice(0, 40), link: '#', avatar: FNF.profilePhoto(p),
     text: txt.trim().slice(0, 300), date: new Date().toLocaleString().slice(0, 40), likes: 0, isPinned: false
   };
+  // Va dentro del hilo de ese comentario (si era una respuesta, en el hilo de su comentario principal)
+  const c = (A.cache.comments || []).find(x => x.id === commentId);
+  if (c) data.replyTo = c.replyTo || c.id;
   const r = await push(ref(db, `mod_comments/${modId}`), data);
   set(ref(db, `last_comment_time/${modId}`), Date.now()).catch(() => { });
   (A.cache.comments || []).unshift({ modId, id: r.key, ...data });

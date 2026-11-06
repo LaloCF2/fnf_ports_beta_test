@@ -97,14 +97,191 @@ window.handleLike = async (id, el) => {
 // ==========================================
 // COMENTARIOS
 // ==========================================
+const MAX_COMENTARIO = 150;
 let currentCommentsId = null;
 let commentsUnsub = null;
-const safeUrl = (u) => /^https?:\/\//i.test(u || '') ? u : '#';
+let comentarios = {};            // los del mod abierto
+let ordenComentarios = 'recientes';
+let nombresHilo = new Set();     // para pintar las @menciones en azul
+let primeraVez = true;           // la animación de entrada solo al abrir
+let respondiendo = null;         // { hilo, id, name }: a quién le estás respondiendo
+let hilosAbiertos = new Set();   // hilos con más de 2 respuestas que el usuario abrió
+let recienEnviado = null;        // para resaltar y mostrar tu comentario recién publicado
+const HILO_PLEGADO = 2;          // con más de 2 respuestas, el hilo empieza plegado
+const $ = (id) => document.getElementById(id);
+
+// La clave que crea Firebase (push) trae escondida la hora exacta en que se escribió
+const PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+const pushTime = (key) => {
+  let ts = 0;
+  for (let i = 0; i < 8; i++) {
+    const v = PUSH_CHARS.indexOf(String(key).charAt(i));
+    if (v < 0) return 0;
+    ts = ts * 64 + v;
+  }
+  return ts > 1.4e12 && ts < Date.now() + 864e5 ? ts : 0;
+};
+
+// Texto con las @menciones en azul (reconoce nombres con espacios si son de alguien del hilo)
+function conMenciones(raw) {
+  const s = String(raw || '');
+  const nombres = [...nombresHilo].filter(Boolean).sort((a, b) => b.length - a.length);
+  let out = '';
+  let i = 0;
+  while (i < s.length) {
+    const at = s.indexOf('@', i);
+    if (at < 0) { out += esc(s.slice(i)); break; }
+    out += esc(s.slice(i, at));
+    const resto = s.slice(at + 1);
+    const low = resto.toLowerCase();
+    let largo = 0;
+    const conocido = nombres.find(n => low.startsWith(n.toLowerCase()) && !/[\p{L}\p{N}_]/u.test(resto.charAt(n.length)));
+    if (conocido) largo = conocido.length;
+    else { const m = resto.match(/^[\p{L}\p{N}_.\-]{1,30}/u); largo = m ? m[0].length : 0; }
+    if (largo) {
+      out += `<span class="mc-mention">@${esc(resto.slice(0, largo))}</span>`;
+      i = at + 1 + largo;
+    } else {
+      out += '@';
+      i = at + 1;
+    }
+  }
+  return out;
+}
+FNF.conMenciones = conMenciones;
+
+const avatarHTML = (name, foto, extra = '') => {
+  const src = FNF.safeAvatar(foto);
+  return `<div class="mc-avatar${extra}" style="background:${stringToColor(name)}"><span>${esc(String(name).charAt(0).toUpperCase())}</span>${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>`;
+};
+
+function pintarComentarios() {
+  const list = $('mc-commentList');
+  if (!list) return;
+  const myUid = window.usuarioActualFirebase && window.usuarioActualFirebase.uid;
+  const yo = profileName(getProfile()).toLowerCase();
+  const all = Object.entries(comentarios || {}).filter(([, c]) => c && c.text != null).map(([id, c]) => ({ id, ...c, ts: pushTime(id) }));
+  $('mc-count').textContent = all.length;
+  nombresHilo = new Set(all.map(c => c.user).filter(Boolean));
+  actualizarEspejo();
+
+  if (!all.length) {
+    list.innerHTML = `<div class="mc-empty">${FNF.fi('chat', 44)}<b>${t('Aún no hay comentarios', 'No comments yet')}</b><span>${t('¡Sé el primero en opinar sobre este mod!', 'Be the first to share your thoughts!')}</span></div>`;
+    return;
+  }
+  // Hilos: cada respuesta va debajo de su comentario (si ese comentario se borró, la respuesta queda suelta)
+  const porId = Object.fromEntries(all.map(c => [c.id, c]));
+  const respuestas = {};
+  const principales = [];
+  all.forEach(c => {
+    if (c.replyTo && porId[c.replyTo] && !porId[c.replyTo].replyTo && c.replyTo !== c.id) (respuestas[c.replyTo] = respuestas[c.replyTo] || []).push(c);
+    else principales.push(c);
+  });
+  Object.values(respuestas).forEach(l => l.sort((a, b) => (a.ts - b.ts) || a.id.localeCompare(b.id))); // en orden de conversación
+  const porFecha = (a, b) => (b.ts - a.ts) || b.id.localeCompare(a.id);
+  principales.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) ||
+    (ordenComentarios === 'populares'
+      ? ((Number(b.likes) || 0) + (respuestas[b.id] || []).length) - ((Number(a.likes) || 0) + (respuestas[a.id] || []).length) || porFecha(a, b)
+      : porFecha(a, b)));
+
+  const item = (c, i, hilo, esRespuesta) => {
+    const name = c.user || 'Usuario';
+    const byAdmin = c.ownerKey === ADMIN_UID;
+    const verified = !!(live().verified || {})[c.ownerKey];
+    const mine = !!myUid && c.ownerKey === myUid;
+    const liked = !!(c.userLikes && myUid && c.userLikes[myUid]);
+    const likes = Number(c.likes) || 0;
+    const padre = esRespuesta ? porId[hilo] : null;
+    const meRespondio = !mine && padre && myUid && padre.ownerKey === myUid;
+    const paraMi = !mine && !meRespondio && yo.length >= 3 && String(c.text || '').toLowerCase().includes('@' + yo);
+    const huerfano = !esRespuesta && c.replyTo && !porId[c.replyTo];
+    const cuando = c.ts ? FNF.timeAgo(c.ts) : esc(c.date || '');
+    const fecha = c.ts ? FNF.fmtDateTime(c.ts) : esc(c.date || '');
+    const cls = ['mc-item', esRespuesta && 'mc-reply', c.isPinned && !esRespuesta && 'is-pinned', mine && 'is-mine', (paraMi || meRespondio) && 'is-for-me', c.id === recienEnviado && 'mc-new'].filter(Boolean).join(' ');
+
+    // Respuestas de este comentario (plegadas si son muchas)
+    let hiloHTML = '';
+    const rs = esRespuesta ? [] : (respuestas[c.id] || []);
+    if (rs.length) {
+      const abierto = rs.length <= HILO_PLEGADO || hilosAbiertos.has(c.id);
+      const minis = [...new Map(rs.map(r => [r.ownerKey, r])).values()].slice(0, 3)
+        .map(r => avatarHTML(r.user || '?', r.avatar)).join('');
+      hiloHTML = `
+        <div class="mc-thread">
+          ${rs.length > HILO_PLEGADO ? `<button class="mc-thread-toggle" data-act="thread">
+            ${abierto ? FNF.icon('up', 'icon icon-sm') + t('Ocultar respuestas', 'Hide replies')
+              : `<span class="mc-mini-avs">${minis}</span>${FNF.icon('down', 'icon icon-sm')}${t(`Ver ${rs.length} respuestas`, `View ${rs.length} replies`)}`}
+          </button>` : ''}
+          ${abierto ? `<div class="mc-replies">${rs.map(r => item(r, 0, c.id, true)).join('')}</div>` : ''}
+        </div>`;
+    }
+
+    return `
+      <article class="${cls}" data-id="${esc(c.id)}" data-thread="${esc(esRespuesta ? hilo : c.id)}" style="--d:${Math.min(i, 8) * 35}ms">
+        ${avatarHTML(name, c.avatar, byAdmin ? ' ring-admin' : verified ? ' ring-verified' : '')}
+        <div class="mc-body">
+          <div class="mc-bubble">
+            ${c.isPinned && !esRespuesta ? `<span class="mc-pin">${FNF.icon('pin', 'icon icon-sm')} ${t('Fijado por el admin', 'Pinned by admin')}</span>` : ''}
+            ${meRespondio ? `<span class="mc-pin mc-pin-me">${FNF.icon('reply', 'icon icon-sm')} ${t('Te respondió', 'Replied to you')}</span>` : ''}
+            ${paraMi ? `<span class="mc-pin mc-pin-me">${FNF.icon('bell', 'icon icon-sm')} ${t('Te mencionaron', 'You were mentioned')}</span>` : ''}
+            ${huerfano ? `<span class="mc-orphan">${FNF.icon('reply', 'icon icon-sm')} ${t('Respuesta a un comentario que se borró', 'Reply to a deleted comment')}</span>` : ''}
+            <div class="mc-meta">
+              <button class="mc-name${byAdmin ? ' is-admin' : ''}" data-act="name" data-uid="${esc(c.ownerKey)}" data-name="${esc(name)}">${esc(name)}</button>
+              ${byAdmin ? '<span class="admin-tag">ADMIN</span>' : verified ? FNF.fi('verified', 15) : ''}
+              <span class="mc-time" title="${fecha}">· ${cuando}</span>
+            </div>
+            <p class="mc-text">${conMenciones(c.text)}</p>
+          </div>
+          <div class="mc-actions">
+            <button class="mc-act mc-like${liked ? ' on' : ''}" data-act="like" aria-label="Like">${FNF.icon('heart', 'icon icon-sm')}<span>${likes || ''}</span></button>
+            <button class="mc-act" data-act="reply" data-name="${esc(name)}">${FNF.icon('reply', 'icon icon-sm')}<span>${t('Responder', 'Reply')}</span></button>
+            ${!esRespuesta && rs.length && rs.length <= HILO_PLEGADO ? `<span class="mc-count-replies">${rs.length} ${rs.length === 1 ? t('respuesta', 'reply') : t('respuestas', 'replies')}</span>` : ''}
+            <span class="grow"></span>
+            ${isAdmin() && !esRespuesta ? `<button class="mc-act" data-act="pin" data-pinned="${c.isPinned ? 1 : 0}" aria-label="${c.isPinned ? 'Desfijar' : 'Fijar'}">${FNF.icon('pin', 'icon icon-sm')}<span>${c.isPinned ? 'Desfijar' : 'Fijar'}</span></button>` : ''}
+            ${isAdmin() || mine ? `<button class="mc-act danger" data-act="del" aria-label="${t('Borrar', 'Delete')}">${FNF.icon('trash', 'icon icon-sm')}</button>` : ''}
+          </div>
+          ${hiloHTML}
+        </div>
+      </article>`;
+  };
+
+  list.classList.toggle('mc-anim', primeraVez);
+  primeraVez = false;
+  list.innerHTML = principales.map((c, i) => item(c, i, c.id, false)).join('');
+
+  // Tu comentario recién publicado: se muestra y se resalta un momento
+  if (recienEnviado) {
+    const nuevo = list.querySelector(`.mc-item[data-id="${CSS.escape(recienEnviado)}"]`);
+    if (nuevo) {
+      nuevo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      recienEnviado = null;
+    }
+  }
+}
+
+// Cuántas respuestas tiene un comentario (para avisar antes de borrarlo)
+const respuestasDe = (id) => Object.entries(comentarios || {}).filter(([, c]) => c && c.replyTo === id).map(([k]) => k);
+
+window.mcOrdenar = (modo) => {
+  ordenComentarios = modo;
+  document.querySelectorAll('.mc-sort button').forEach(b => b.classList.toggle('active', b.dataset.sort === modo));
+  primeraVez = true;
+  pintarComentarios();
+  vibrate(10);
+};
 
 window.openModComments = (id, title) => {
   if (window.exigirRegistro()) return;
   currentCommentsId = id;
-  document.getElementById('mc-title').textContent = t('Comentarios: ', 'Comments: ') + title;
+  comentarios = {};
+  primeraVez = true;
+  respondiendo = null;
+  hilosAbiertos = new Set();
+  recienEnviado = null;
+  pintarRespondiendo();
+  $('mc-title').textContent = title || '';
+  $('mc-count').textContent = '…';
+  $('mc-commentList').innerHTML = `<div class="mc-skeleton"><span></span><span></span><span></span></div>`;
 
   store.set(`seen_comments_${id}`, Date.now());
   const led = document.getElementById('led-yellow-' + id);
@@ -112,63 +289,17 @@ window.openModComments = (id, title) => {
 
   const user = getProfile();
   const nombre = profileName(user);
-  const foto = profilePhoto(user);
-  const display = document.getElementById('mc-displayMyName');
-  display.textContent = t('Comentando como: ', 'Commenting as: ') + nombre;
-  display.classList.toggle('admin-name', isAdmin());
-
-  const avatar = document.getElementById('mc-myAvatar');
-  avatar.innerHTML = foto ? `<img src="${esc(foto)}" alt="">` : esc(nombre.charAt(0).toUpperCase());
-  avatar.style.background = foto ? 'transparent' : stringToColor(nombre);
+  $('mc-displayMyName').innerHTML = `${t('Comentando como', 'Commenting as')} <b class="${isAdmin() ? 'admin-name' : ''}">${esc(nombre)}</b>`;
+  $('mc-myAvatar').outerHTML = avatarHTML(nombre, profilePhoto(user), isAdmin() ? ' ring-admin' : '').replace('<div class="mc-avatar', '<div id="mc-myAvatar" class="mc-avatar');
+  $('mc-commentText').placeholder = t('Escribe un comentario… (usa @ para mencionar)', 'Write a comment… (use @ to mention)');
+  actualizarEspejo();
 
   openPopup('mod-comments-popup');
 
   if (commentsUnsub) commentsUnsub();
   commentsUnsub = onValue(ref(db, `mod_comments/${id}`), (snapshot) => {
-    const list = document.getElementById('mc-commentList');
-    const data = snapshot.val();
-    if (!data) {
-      list.innerHTML = `<p class="empty">${t('Sé el primero en comentar aquí.', 'Be the first to comment.')}</p>`;
-      return;
-    }
-    const myUid = window.usuarioActualFirebase && window.usuarioActualFirebase.uid;
-    const comments = Object.keys(data).map(k => ({ id: k, ...data[k] }))
-      .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) || b.id.localeCompare(a.id));
-
-    list.innerHTML = comments.map(c => {
-      const name = c.user || 'Usuario';
-      const jsName = esc(name.replace(/['"\\]/g, ''));
-      const byAdmin = c.ownerKey === ADMIN_UID;
-      const verified = live().verified && live().verified[c.ownerKey];
-      const liked = !!(c.userLikes && myUid && c.userLikes[myUid]);
-      let actions = '';
-      if (isAdmin()) {
-        actions = `<span class="gold-link" onclick="togglePinModComment('${esc(c.id)}', ${!!c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span>
-                   <span class="danger-link" onclick="deleteModComment('${esc(c.id)}')">Eliminar</span>`;
-      } else if (myUid && c.ownerKey === myUid) {
-        actions = `<span class="danger-link" onclick="deleteModComment('${esc(c.id)}')">${t('Eliminar', 'Delete')}</span>`;
-      }
-      const av = c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : esc(name.charAt(0).toUpperCase());
-      return `
-        <div class="yt-comment-container ${c.isPinned ? 'pinned' : ''}">
-          <div class="yt-avatar" style="background:${c.avatar ? 'transparent' : stringToColor(name)}">${av}</div>
-          <div class="yt-content">
-            ${c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : ''}
-            <div class="yt-header">
-              <span class="yt-name ${byAdmin ? 'admin-name' : ''}" onclick="openBanPanel('${esc(c.ownerKey)}', '${jsName}')">
-                <a href="${esc(safeUrl(c.link))}" target="_blank" rel="noopener">${esc(name)}</a>${byAdmin ? ' <span class="admin-tag">ADMIN</span>' : verified ? ' ☑️' : ''}
-              </span>
-              <span class="yt-date">${esc(c.date)}</span>
-            </div>
-            <div class="yt-text">${esc(c.text)}</div>
-            <div class="yt-actions">
-              <span class="yt-action-btn ${liked ? 'active' : ''}" onclick="likeModComment('${esc(c.id)}')">👍 ${Number(c.likes) || 0}</span>
-              <span class="yt-action-btn" onclick="replyModComment('${jsName}')">${t('Responder', 'Reply')}</span>
-              ${actions}
-            </div>
-          </div>
-        </div>`;
-    }).join('');
+    comentarios = snapshot.val() || {};
+    pintarComentarios();
   });
 };
 
@@ -177,13 +308,37 @@ window.closeModComments = () => {
   if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
 };
 
+// Botones de cada comentario (un solo escuchador para toda la lista)
+$('mc-commentList').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const item = btn.closest('.mc-item');
+  const id = item && item.dataset.id;
+  const act = btn.dataset.act;
+  if (act === 'like') {
+    btn.classList.add('pop');
+    setTimeout(() => btn.classList.remove('pop'), 400);
+    window.likeModComment(id);
+  } else if (act === 'reply') window.replyModComment(btn.dataset.name, item.dataset.thread, id);
+  else if (act === 'thread') {
+    // Abrir / cerrar un hilo con muchas respuestas
+    if (hilosAbiertos.has(id)) hilosAbiertos.delete(id); else hilosAbiertos.add(id);
+    pintarComentarios();
+    vibrate(10);
+  } else if (act === 'name') {
+    if (isAdmin() && btn.dataset.uid !== ADMIN_UID) window.openBanPanel(btn.dataset.uid, btn.dataset.name);
+    else window.replyModComment(btn.dataset.name, item.dataset.thread, id);
+  } else if (act === 'pin') window.togglePinModComment(id, btn.dataset.pinned === '1');
+  else if (act === 'del') window.deleteModComment(id);
+});
+
 window.addModComment = async () => {
   if (window.exigirRegistro()) return;
   if (await checkBanStatus()) return;
   const u = window.usuarioActualFirebase;
   const p = getProfile();
   const box = document.getElementById('mc-commentText');
-  const text = box.value.trim();
+  const text = box.value.trim().slice(0, MAX_COMENTARIO);
   if (!text) return toast(t('Escribe algo...', 'Write something...'), 'chat');
 
   // Palabras bloqueadas (se editan en Panel → Herramientas → Moderación)
@@ -200,12 +355,14 @@ window.addModComment = async () => {
 
   try {
     const key = push(ref(db, `mod_comments/${currentCommentsId}`)).key;
-    const upd = {
-      [`mod_comments/${currentCommentsId}/${key}`]: {
-        ownerKey: u.uid, user: profileName(p).slice(0, 40), link: '#', avatar: profilePhoto(p),
-        text: text.slice(0, 300), date: new Date().toLocaleString().slice(0, 40), likes: 0, isPinned: false
-      }
+    const nuevo = {
+      ownerKey: u.uid, user: profileName(p).slice(0, 40), link: '#', avatar: profilePhoto(p),
+      text, date: new Date().toLocaleString().slice(0, 40), likes: 0, isPinned: false
     };
+    // Si es una respuesta, se guarda a qué comentario (hilo) pertenece
+    const hilo = respondiendo && comentarios[respondiendo.hilo] ? respondiendo.hilo : null;
+    if (hilo) nuevo.replyTo = hilo;
+    const upd = { [`mod_comments/${currentCommentsId}/${key}`]: nuevo };
     if (!isAdmin()) upd[`comment_cooldown/${u.uid}`] = FB.serverTimestamp();
     // El LED amarillo ("comentarios nuevos") va en la misma escritura: las reglas solo lo aceptan junto a un comentario
     upd[`last_comment_time/${currentCommentsId}`] = FB.serverTimestamp();
@@ -213,7 +370,20 @@ window.addModComment = async () => {
     store.set('last_comment_sent', String(Date.now()));
     store.set(`seen_comments_${currentCommentsId}`, Date.now() + 60000);
     box.value = '';
-    document.getElementById('mc-charCounter').textContent = '0';
+    respondiendo = null;
+    pintarRespondiendo();
+    actualizarEspejo();
+    recienEnviado = key;
+    if (hilo) {
+      // Respuesta: se abre su hilo y se lleva la vista hasta ella
+      hilosAbiertos.add(hilo);
+      pintarComentarios();
+    } else {
+      // Comentario nuevo: arriba de la lista (en "Recientes")
+      if (ordenComentarios !== 'recientes') window.mcOrdenar('recientes');
+      $('mc-commentList').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    vibrate(20);
   } catch (err) {
     console.error('Comentario:', err);
     toast(String(err && err.message).includes('PERMISSION')
@@ -244,14 +414,72 @@ window.likeModComment = async (commentId) => {
   }
 };
 
+// Borrar: el admin borra también las respuestas del hilo; los demás solo su propio comentario
 window.deleteModComment = (id) => {
-  if (confirm(t('¿Borrar comentario?', 'Delete comment?'))) remove(ref(db, `mod_comments/${currentCommentsId}/${id}`));
+  const hijas = isAdmin() ? respuestasDe(id) : [];
+  const msg = hijas.length
+    ? `¿Borrar este comentario y sus ${hijas.length} respuesta(s)?`
+    : t('¿Borrar comentario?', 'Delete comment?');
+  if (!confirm(msg)) return;
+  if (!hijas.length) return remove(ref(db, `mod_comments/${currentCommentsId}/${id}`));
+  update(ref(db), Object.fromEntries([id, ...hijas].map(k => [`mod_comments/${currentCommentsId}/${k}`, null])));
 };
 window.togglePinModComment = (id, state) => update(ref(db, `mod_comments/${currentCommentsId}/${id}`), { isPinned: !state });
-window.replyModComment = (name) => { const tx = document.getElementById('mc-commentText'); tx.value = `@${name} `; tx.focus(); };
 
-document.getElementById('mc-commentText').addEventListener('input', function () {
-  document.getElementById('mc-charCounter').textContent = this.value.length;
+// Responder: tu mensaje queda debajo de ese comentario (en su hilo) y empieza con @Nombre
+window.replyModComment = (name, hilo, id) => {
+  const tx = $('mc-commentText');
+  const raiz = hilo && comentarios[hilo] && !comentarios[hilo].replyTo ? hilo : (comentarios[hilo] || {}).replyTo || null;
+  respondiendo = raiz && comentarios[raiz] ? { hilo: raiz, id: id || raiz, name } : null;
+  const yo = profileName(getProfile());
+  const tag = `@${name} `;
+  // Si ya respondías a otra persona del hilo, se cambia esa mención por la nueva
+  const previo = [...nombresHilo].find(n => tx.value.startsWith(`@${n} `));
+  const resto = previo ? tx.value.slice(previo.length + 2) : tx.value;
+  tx.value = (name === yo ? resto : tag + resto).slice(0, MAX_COMENTARIO); // a ti mismo no te mencionas
+  pintarRespondiendo();
+  actualizarEspejo();
+  tx.focus();
+  tx.setSelectionRange(tx.value.length, tx.value.length);
+  vibrate(10);
+};
+
+// "Respondiendo a @Nombre: «inicio del comentario…»" arriba de la caja de texto
+function pintarRespondiendo() {
+  const el = $('mc-replying');
+  if (!el) return;
+  if (!respondiendo) { el.hidden = true; el.innerHTML = ''; return; }
+  const c = comentarios[respondiendo.id] || comentarios[respondiendo.hilo] || {};
+  el.hidden = false;
+  el.innerHTML = `${FNF.icon('reply', 'icon icon-sm')}
+    <span><span>${t('Respondiendo a', 'Replying to')} <b>@${esc(respondiendo.name)}</b></span>${c.text ? `<small>«${esc(String(c.text).slice(0, 70))}${String(c.text).length > 70 ? '…' : ''}»</small>` : ''}</span>
+    <button type="button" onclick="mcCancelarRespuesta()" aria-label="${t('Cancelar respuesta', 'Cancel reply')}">${FNF.icon('x', 'icon icon-sm')}</button>`;
+}
+window.mcCancelarRespuesta = () => {
+  const tx = $('mc-commentText');
+  if (respondiendo && tx.value.startsWith(`@${respondiendo.name} `)) tx.value = tx.value.slice(respondiendo.name.length + 2);
+  respondiendo = null;
+  pintarRespondiendo();
+  actualizarEspejo();
+  tx.focus();
+};
+
+// La caja de texto: contador, botón de enviar y las @menciones en azul mientras escribes
+function actualizarEspejo() {
+  const tx = $('mc-commentText');
+  if (!tx) return;
+  const n = tx.value.length;
+  $('mc-mirror').innerHTML = conMenciones(tx.value) + '​';
+  $('mc-charCounter').textContent = n;
+  $('mc-counter').classList.toggle('warn', n >= MAX_COMENTARIO - 20);
+  $('mc-counter').classList.toggle('full', n >= MAX_COMENTARIO);
+  $('mc-send').disabled = !tx.value.trim();
+}
+$('mc-commentText').addEventListener('input', actualizarEspejo);
+$('mc-commentText').addEventListener('scroll', function () { $('mc-mirror').scrollTop = this.scrollTop; });
+// Ctrl/Cmd + Enter = enviar (en compu)
+$('mc-commentText').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.addModComment(); }
 });
 
 // ==========================================

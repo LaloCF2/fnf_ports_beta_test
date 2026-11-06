@@ -1,7 +1,7 @@
 // Todo lo que NO necesita Firebase: ajustes, partículas, compartir, galerías, RAM del celular, PWA.
 (() => {
 const { store, t, esc, vibrate, openPopup, closePopup, toast } = FNF;
-const APP_VERSION = window.APP_VERSION || 'v7.2.0';
+const APP_VERSION = window.APP_VERSION || 'v7.3.0';
 const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
 setText('footer-version', APP_VERSION);
@@ -51,23 +51,54 @@ paintRamLabel();
 // ==========================================
 let shareLink = '';
 let shareText = '';
+let shareTitle = '';
+
+// Si el Worker de Cloudflare tiene la vista previa, el link sale con la imagen y el título del mod
+// (en WhatsApp, Telegram, Facebook y X). Si no, se usa el link normal de la página.
+const linkCompartir = (id) => {
+  const tg = (((window.live || {}).config || {}).telegram) || {};
+  if (tg.url && tg.preview) return `${String(tg.url).replace(/\/+$/, '')}/m/${encodeURIComponent(id)}`;
+  return `${location.origin}${location.pathname}?share=${encodeURIComponent(id)}`;
+};
 
 window.abrirMenuCompartir = (id, nombre) => {
-  shareLink = `${location.origin}${location.pathname}?share=${id}`;
-  shareText = `¡Mira esto: *${nombre}*! Descárgalo aquí:\n`;
-  if (navigator.share) {
-    navigator.share({ title: nombre, text: shareText.replace(/\*/g, ''), url: shareLink }).catch(() => { });
-    return;
-  }
+  const d = (FNF.itemOf && FNF.itemOf(id)) || {};
+  shareTitle = d.title || nombre || "FNF' Ports";
+  shareLink = linkCompartir(id);
+  const extra = FNF.kindOf(id) === 'mod' ? [d.engine, d.ram].filter(Boolean).join(' · ') : '';
+  shareText = t(`🎮 ¡Mira *${shareTitle}* en FNF' Ports!${extra ? ` (${extra})` : ''} Descárgalo aquí:`,
+    `🎮 Check out *${shareTitle}* on FNF' Ports!${extra ? ` (${extra})` : ''} Get it here:`);
+
+  // Tarjeta de vista previa dentro del popup
+  const L = window.live || {};
+  const r = window.ratingOf ? window.ratingOf(id) : { n: 0, avg: 0 };
+  const img = d.img || (d.images || [])[0] || '';
+  const stats = [
+    `${FNF.icon('download', 'icon icon-sm')} ${FNF.compact((L.downloads || {})[id])}`,
+    `${FNF.icon('heart', 'icon icon-sm')} ${FNF.compact((L.likes || {})[id])}`,
+    r.n ? `★ ${r.avg.toFixed(1)}` : ''
+  ].filter(Boolean).map(s => `<span>${s}</span>`).join('');
+  document.getElementById('share-card').innerHTML = `
+    ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ''}
+    <div class="share-card-body"><b>${esc(shareTitle)}</b><div class="share-card-stats">${stats}</div><small>${esc(shareLink.replace(/^https?:\/\//, ''))}</small></div>`;
+  document.getElementById('share-native').hidden = !navigator.share;
   openPopup('share-modal');
+  vibrate(12);
 };
-window.enviarWhatsApp = () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + shareLink)}`, '_blank');
-window.enviarTelegram = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`, '_blank');
+
+const abrirApp = (url) => { window.open(url, '_blank', 'noopener'); closePopup('share-modal'); };
+const textoPlano = () => shareText.replace(/\*/g, '');
+window.enviarWhatsApp = () => abrirApp(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + shareLink)}`);
+window.enviarTelegram = () => abrirApp(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(textoPlano())}`);
+window.compartirFacebook = () => abrirApp(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareLink)}`);
+window.compartirX = () => abrirApp(`https://twitter.com/intent/tweet?text=${encodeURIComponent(textoPlano())}&url=${encodeURIComponent(shareLink)}`);
+window.compartirNativo = () => {
+  if (!navigator.share) return;
+  navigator.share({ title: shareTitle, text: textoPlano(), url: shareLink }).then(() => closePopup('share-modal')).catch(() => { });
+};
 window.copiarEnlace = () => {
-  navigator.clipboard.writeText(shareText + shareLink).then(() => {
-    toast(t('¡Enlace copiado!', 'Link copied!'), 'share');
-    closePopup('share-modal');
-  });
+  FNF.copyText(shareLink, t('¡Enlace copiado!', 'Link copied!'));
+  closePopup('share-modal');
 };
 
 // ==========================================

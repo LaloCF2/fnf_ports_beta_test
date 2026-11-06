@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 
 <head>
@@ -6,6 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>FNF' Ports Mobile</title>
   <meta name="description" content="Los mejores ports de Friday Night Funkin' para móvil: bases, mods y scripts.">
+
+  <!-- Vista previa al compartir el link de la página (WhatsApp, Telegram, Facebook, X) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FNF' Ports Mobile">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="FNF' Ports Mobile">
+  <meta property="og:description" content="Los mejores ports de Friday Night Funkin' para móvil: bases, mods y scripts optimizados para todas las gamas.">
+  <meta property="og:url" content="https://lalocf2.github.io/fnf_ports/">
+  <meta property="og:image" content="https://lalocf2.github.io/fnf_ports/assets/icons/logo512.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="FNF' Ports Mobile">
+  <meta name="twitter:description" content="Los mejores ports de Friday Night Funkin' para móvil.">
+  <meta name="twitter:image" content="https://lalocf2.github.io/fnf_ports/assets/icons/logo512.png">
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
@@ -20,7 +33,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <!-- Preferencias antes de pintar (evita parpadeo) -->
+
   <script>
     (function () {
       var s = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -37,43 +50,8 @@
 </head>
 
 <body>
-  <!-- Sprite de iconos SVG -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
-    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
-    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
-    <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
-    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
-    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
-    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></symbol>
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
-    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
-    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></symbol>
-    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-    <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></symbol>
-    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
-    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
-    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol>
-    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><path d="M12 10v4M12 18h.01"/></symbol>
-    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
-  </svg>
+  <!-- Iconos propios (assets/iconos/ → tools/generar-iconos.ps1 → js/modules/icons.js) -->
+  <script src="js/modules/icons.js"></script>
 
   <div id="global-loader"><div class="spinner"></div><p>Cargando</p></div>
 
@@ -103,7 +81,6 @@
       </div>
     </header>
 
-    <!-- Banner global (se controla desde Panel de admin → Avisos) -->
     <div id="site-banner" class="site-banner glass hidden" role="status">
       <svg class="icon icon-sm"><use href="#i-bell"/></svg>
       <span id="site-banner-text"></span>
@@ -112,9 +89,7 @@
     <div id="maintenance-admin-note" class="site-banner banner-warn glass hidden">🚧 Modo mantenimiento activo: solo tú ves la página.</div>
 
     <main>
-      <!-- ---------- INICIO ---------- -->
       <section id="home" class="section active">
-        <!-- Barra para editar el Inicio (solo la ve el admin) -->
         <div id="home-admin-bar" class="home-admin-bar glass admin-only hidden">
           <label class="hab-switch"><span class="switch"><input type="checkbox" id="homeEditToggle" onchange="homeModoEdicion(this.checked)"><span></span></span>
             <span><b>Editar inicio</b><small>Agrega, mueve u oculta lo que ven todos</small></span></label>
@@ -182,7 +157,7 @@
         </div>
 
         <button class="card glass promo promo-guide" data-home="sys_guia" onclick="abrirGuia()">
-          <img class="fi" src="https://cdn-icons-png.flaticon.com/128/7978/7978351.png" alt="" width="52" height="52">
+          <svg class="icon ic" style="width:52px;height:52px" aria-hidden="true"><use href="#i-idea"/></svg>
           <div>
             <h3 data-es="¿Primera vez aquí?" data-en="First time here?">¿Primera vez aquí?</h3>
             <p style="color:var(--text-2);font-size:13px" data-es="La guía te dice qué base instalar y qué mods corren en tu celular." data-en="The guide tells you which engine to install and which mods run on your phone.">La guía te dice qué base instalar y qué mods corren en tu celular.</p>
@@ -200,7 +175,7 @@
         </div>
       </section>
 
-      <!-- Búsqueda compartida (Bases / MODs / Scripts) -->
+      <!-- Búsqueda compartida -->
       <div id="searchContainer" class="search glass hidden">
         <svg class="icon"><use href="#i-search"/></svg>
         <input type="search" id="globalSearch" placeholder="Buscar..." oninput="filterContent()" autocomplete="off">
@@ -242,7 +217,7 @@
         <div class="grid stagger" id="modsContainer"></div>
       </section>
 
-      <!-- ---------- PANEL DE ADMIN (solo con la sesión del admin) ---------- -->
+      <!-- ---------- PANEL DE ADMIN ---------- -->
       <section id="admin" class="section">
         <div class="section-head"><h2>Panel de admin</h2></div>
         <div class="seg" id="admin-tabs"></div>
@@ -323,7 +298,7 @@
     </main>
 
     <footer>
-      <div>© <span id="year"></span> LaloCF · <span id="footer-version">v7.2.0</span></div>
+      <div>© <span id="year"></span> LaloCF · <span id="footer-version">v7.3.0</span></div>
       <nav class="footer-links" aria-label="Legal">
         <a href="privacidad.html" data-es="Política de privacidad" data-en="Privacy Policy">Política de privacidad</a>
         <a href="terminos.html" data-es="Términos de uso" data-en="Terms of Use">Términos de uso</a>
@@ -393,7 +368,7 @@
       <div class="more-section">
         <h4 data-es="Preferencias" data-en="Preferences">Preferencias</h4>
         <div class="more-grid2">
-          <button class="more-item" onclick="toggleTheme()"><span class="more-ic"><img class="fi" id="theme-icon-img" src="https://cdn-icons-png.flaticon.com/128/6714/6714978.png" alt="" width="30" height="30"></span><span class="more-txt"><b data-es="Tema" data-en="Theme">Tema</b><small id="theme-label">Claro</small></span></button>
+          <button class="more-item" onclick="toggleTheme()"><span class="more-ic"><svg class="icon ic" id="theme-icon" style="width:30px;height:30px" aria-hidden="true"><use href="#i-moon"/></svg></span><span class="more-txt"><b data-es="Tema" data-en="Theme">Tema</b><small id="theme-label">Claro</small></span></button>
           <button class="more-item" onclick="toggleLanguage()"><span class="more-ic"><i data-fi="globe" data-size="30"></i></span><span class="more-txt"><b data-es="Idioma" data-en="Language">Idioma</b><small id="langBtn">English</small></span></button>
           <button class="more-item" onclick="closePopup('more-popup'); abrirSelectorRam()"><span class="more-ic"><i data-fi="phone" data-size="30"></i></span><span class="more-txt"><b>RAM</b><small data-es="La de tu celular" data-en="Your phone's">La de tu celular</small></span></button>
           <button class="more-item" onclick="closePopup('more-popup'); openPopup('settings-popup')"><span class="more-ic"><i data-fi="settings" data-size="30"></i></span><span class="more-txt"><b data-es="Ajustes" data-en="Settings">Ajustes</b><small data-es="Apariencia y rendimiento" data-en="Look and performance">Apariencia y rendimiento</small></span></button>
@@ -410,10 +385,11 @@
     </div>
   </div>
 
-  <!-- Detalle (mods / bases / scripts) -->
+  <!-- Detalle -->
   <div id="detail-popup" class="popup">
     <div class="popup-content">
       <button class="popup-close" onclick="closeDetail()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <p class="detail-preview-flag" id="detail-preview-flag" hidden>👁️ Vista previa: así lo verán los usuarios (todavía no está guardado)</p>
       <h2 class="popup-title" id="detail-title"></h2>
       <div id="detail-admin" class="detail-admin" hidden></div>
       <div class="detail-media" id="detail-media">
@@ -424,12 +400,15 @@
       </div>
       <span class="detail-version" id="detail-version"></span>
       <div class="detail-meta" id="detail-meta" hidden></div>
+      <div class="detail-tags" id="detail-tags" hidden></div>
+      <div class="detail-note" id="detail-note" hidden></div>
       <p class="detail-compat" id="detail-compat" hidden></p>
       <details class="detail-changelog" id="detail-changelog" hidden>
         <summary><span data-es="Qué cambió en esta versión" data-en="What's new in this version">Qué cambió en esta versión</span></summary>
         <p id="detail-changelog-text"></p>
       </details>
       <p class="detail-desc" id="detail-desc"></p>
+      <div class="detail-trailer" id="detail-trailer" hidden></div>
       <div class="rating" id="detail-rating">
         <div class="stars">
           <button onclick="rateAppItem(1)">★</button><button onclick="rateAppItem(2)">★</button><button onclick="rateAppItem(3)">★</button><button onclick="rateAppItem(4)">★</button><button onclick="rateAppItem(5)">★</button>
@@ -442,21 +421,36 @@
 
   <!-- Comentarios -->
   <div id="mod-comments-popup" class="popup">
-    <div class="popup-content">
+    <div class="popup-content mc-sheet">
       <button class="popup-close" onclick="closeModComments()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
-      <h2 id="mc-title" class="popup-title">Comentarios</h2>
-      <div class="comment-box" style="margin-top:12px">
-        <div id="mc-myAvatar" class="yt-avatar" style="background:#b14fe0">?</div>
-        <div style="flex:1;min-width:0">
-          <div id="mc-displayMyName" style="font-size:13px;font-weight:600;margin-bottom:6px">Cargando...</div>
-          <textarea id="mc-commentText" class="field" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100"></textarea>
-          <div class="comment-meta">
-            <span><span id="mc-charCounter">0</span> / 100</span>
-            <button class="btn btn-sm" onclick="addModComment()" data-es="Comentar" data-en="Post">Comentar</button>
+      <header class="mc-head">
+        <h2 class="popup-title"><span data-es="Comentarios" data-en="Comments">Comentarios</span> <span class="count-pill" id="mc-count">0</span></h2>
+        <p class="mc-sub" id="mc-title"></p>
+        <div class="mc-sort" role="tablist">
+          <button class="active" data-sort="recientes" onclick="mcOrdenar('recientes')" data-es="Recientes" data-en="Newest">Recientes</button>
+          <button data-sort="populares" onclick="mcOrdenar('populares')" data-es="Populares" data-en="Top">Populares</button>
+        </div>
+      </header>
+
+      <div id="mc-commentList" class="mc-list"></div>
+
+      <div class="mc-composer">
+        <!-- "Respondiendo a @Nombre" (aparece al tocar Responder) -->
+        <div class="mc-replying" id="mc-replying" hidden></div>
+        <div class="mc-input-row">
+          <div id="mc-myAvatar" class="mc-avatar">?</div>
+          <div class="mc-input">
+            <!-- El texto se pinta detrás (con las @menciones en azul) y el textarea va encima, transparente -->
+            <div class="mc-mirror" id="mc-mirror" aria-hidden="true"></div>
+            <textarea id="mc-commentText" class="mc-textarea" rows="1" maxlength="150" placeholder="Escribe un comentario…" data-ph-es="Escribe un comentario…" data-ph-en="Write a comment…"></textarea>
           </div>
+          <button class="mc-send" id="mc-send" onclick="addModComment()" aria-label="Enviar" disabled><svg class="icon"><use href="#i-send"/></svg></button>
+        </div>
+        <div class="mc-foot">
+          <span id="mc-displayMyName"></span>
+          <span class="mc-counter" id="mc-counter"><span id="mc-charCounter">0</span>/150</span>
         </div>
       </div>
-      <div id="mc-commentList"></div>
     </div>
   </div>
 
@@ -578,24 +572,29 @@
       </div>
 
       <button class="btn btn-ghost btn-block" onclick="resetSettings()"><i data-fi="refresh" data-size="18"></i> <span data-es="Restablecer por defecto" data-en="Reset to default">Restablecer por defecto</span></button>
-      <p class="auth-legal" style="text-align:center">FNF' Ports Mobile · <span class="app-version">v7.2.0</span></p>
+      <p class="auth-legal" style="text-align:center">FNF' Ports Mobile · <span class="app-version">v7.3.0</span></p>
     </div>
   </div>
 
   <!-- Compartir -->
   <div id="share-modal" class="popup">
-    <div class="popup-content popup-center">
+    <div class="popup-content">
       <button class="popup-close" onclick="closePopup('share-modal')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
-      <h2 class="popup-title" data-es="¡Comparte esto!" data-en="Share this!">¡Comparte esto!</h2>
-      <div class="stack" style="margin-top:16px">
-        <button class="btn btn-block" style="background:#25d366;box-shadow:none" onclick="enviarWhatsApp()">WhatsApp</button>
-        <button class="btn btn-block" style="background:#2aa3e0;box-shadow:none" onclick="enviarTelegram()">Telegram</button>
-        <button class="btn btn-ghost btn-block" onclick="copiarEnlace()" data-es="Copiar enlace" data-en="Copy link">Copiar enlace</button>
+      <h2 class="popup-title" data-es="Compartir" data-en="Share">Compartir</h2>
+      <!-- Así se verá el link (se llena al abrir) -->
+      <div class="share-card" id="share-card"></div>
+      <div class="share-grid">
+        <button class="share-app" style="--c:#25d366" onclick="enviarWhatsApp()"><span><svg class="icon"><use href="#i-whatsapp"/></svg></span>WhatsApp</button>
+        <button class="share-app" style="--c:#2aa3e0" onclick="enviarTelegram()"><span><svg class="icon"><use href="#i-telegram"/></svg></span>Telegram</button>
+        <button class="share-app" style="--c:#1877f2" onclick="compartirFacebook()"><span><svg class="icon"><use href="#i-facebook"/></svg></span>Facebook</button>
+        <button class="share-app" style="--c:#111" onclick="compartirX()"><span><svg class="icon"><use href="#i-xtwitter"/></svg></span>X</button>
+        <button class="share-app" style="--c:var(--accent)" onclick="copiarEnlace()"><span><svg class="icon"><use href="#i-link"/></svg></span><span data-es="Copiar" data-en="Copy">Copiar</span></button>
+        <button class="share-app" id="share-native" style="--c:#8a7f99" onclick="compartirNativo()"><span><svg class="icon"><use href="#i-more"/></svg></span><span data-es="Más" data-en="More">Más</span></button>
       </div>
     </div>
   </div>
 
-  <!-- Novedades de una base/script -->
+  <!-- Novedades -->
   <div id="modal-novedades-ios" class="popup">
     <div class="popup-content">
       <button class="popup-close" onclick="cerrarModalNovedades()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
@@ -608,19 +607,19 @@
   <div id="update-popup" class="popup">
     <div class="popup-content popup-center">
       <span class="tile-icon" style="width:64px;height:64px;margin:6px auto 12px;background:var(--accent-grad);color:#fff;border-radius:20px"><svg class="icon icon-lg"><use href="#i-sparkle"/></svg></span>
-      <h2 class="popup-title" id="update-title">Versión 7.2.0</h2>
+      <h2 class="popup-title" id="update-title">Versión 7.3.0</h2>
       <p class="popup-sub" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta versión:</p>
       <ul class="feature-list" style="text-align:left;margin-bottom:20px">
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-user"/></svg></span>
-          <span data-es="<b>Perfil nuevo</b> con estadísticas e <b>insignias</b> que puedes ganar." data-en="<b>New profile</b> with stats and <b>badges</b> you can earn."><b>Perfil nuevo</b> con estadísticas e <b>insignias</b> que puedes ganar.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-chat"/></svg></span>
+          <span data-es="<b>Comentarios nuevos:</b> estilo chat, likes con corazón y <b>@menciones en azul</b> (hasta 150 letras)." data-en="<b>New comments:</b> chat style, heart likes and <b>blue @mentions</b> (up to 150 characters)."><b>Comentarios nuevos:</b> estilo chat, likes con corazón y <b>@menciones en azul</b> (hasta 150 letras).</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-home"/></svg></span>
+          <span data-es="<b>Inicio renovado</b> con anuncios, mods especiales, videos y cuentas regresivas." data-en="<b>Refreshed home</b> with announcements, featured mods, videos and countdowns."><b>Inicio renovado</b> con anuncios, mods especiales, videos y cuentas regresivas.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-share"/></svg></span>
+          <span data-es="<b>Compartir mejorado:</b> el link sale con la imagen del mod en WhatsApp, Telegram y más." data-en="<b>Better sharing:</b> links show the mod's picture on WhatsApp, Telegram and more."><b>Compartir mejorado:</b> el link sale con la imagen del mod en WhatsApp, Telegram y más.</span></li>
         <li><span class="fi"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg></span>
-          <span data-es="<b>Guía para principiantes:</b> te dice qué base instalar y qué mods corren en tu celular." data-en="<b>Beginner's guide:</b> tells you which engine to install and which mods run on your phone."><b>Guía para principiantes:</b> te dice qué base instalar y qué mods corren en tu celular.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-download"/></svg></span>
-          <span data-es="<b>Mis descargas:</b> tu historial para volver a bajar algo rápido." data-en="<b>My downloads:</b> your history to grab something again quickly."><b>Mis descargas:</b> tu historial para volver a bajar algo rápido.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-info"/></svg></span>
-          <span data-es="Cada mod muestra su <b>creador original</b>, su <b>idioma</b> y <b>qué cambió</b> en la versión." data-en="Each mod shows its <b>original creator</b>, <b>language</b> and <b>what changed</b>.">Cada mod muestra su <b>creador original</b>, su <b>idioma</b> y <b>qué cambió</b> en la versión.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-shield"/></svg></span>
-          <span data-es="<b>Términos de uso</b>, comunidad más segura y la opción de <b>descargar tus datos</b>." data-en="<b>Terms of Use</b>, a safer community and the option to <b>download your data</b>."><b>Términos de uso</b>, comunidad más segura y la opción de <b>descargar tus datos</b>.</span></li>
+          <span data-es="<b>Iconos nuevos</b> y <b>animaciones suaves</b> al cambiar de sección." data-en="<b>New icons</b> and <b>smooth animations</b> between sections."><b>Iconos nuevos</b> y <b>animaciones suaves</b> al cambiar de sección.</span></li>
+        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-zap"/></svg></span>
+          <span data-es="<b>Más rápida:</b> el perfil abre al instante y la página carga mejor con mala señal." data-en="<b>Faster:</b> the profile opens instantly and the page loads better on weak signal."><b>Más rápida:</b> el perfil abre al instante y la página carga mejor con mala señal.</span></li>
       </ul>
       <button class="btn btn-block" onclick="closeUpdatePopup()" data-es="¡Aceptar!" data-en="OK!">¡Aceptar!</button>
     </div>
@@ -718,164 +717,311 @@
     </div>
   </div>
 
-  <!-- Admin: editor de mods -->
+  <!-- Admin: editor de mods, bases y scripts -->
   <div id="mod-editor-popup" class="popup">
-    <div class="popup-content">
-      <button class="popup-close" onclick="closePopup('mod-editor-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    <div class="popup-content ed-sheet">
+      <button class="popup-close" onclick="cerrarEditorMod()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
       <h2 class="popup-title" id="editor-title">Nuevo mod</h2>
-      <div class="editor-body">
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/2875/2875878.png" alt="" width="18" height="18"> Información básica</h4>
-          <label class="label" for="ed-title">Título</label>
-          <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
-          <label class="label" for="ed-desc">Descripción</label>
-          <textarea id="ed-desc" class="field" placeholder="De qué trata y para qué celulares está optimizado"></textarea>
-          <label class="label" for="ed-version">Compatibilidad / versión</label>
-          <input id="ed-version" class="field" placeholder="Compatible: Psych Engine (Pc/Android/iOS)">
-          <label class="label" for="ed-lang">Idioma</label>
-          <select id="ed-lang" class="field">
-            <option value="">— Sin indicar —</option><option value="es">Español</option><option value="en">Inglés</option>
-            <option value="es-en">Español / Inglés</option><option value="otro">Otro idioma</option>
-          </select>
+      <p class="ed-status" id="ed-status"></p>
+      <!-- Atajos a cada parte del formulario -->
+      <nav class="ed-jump" id="ed-jump">
+        <button type="button" data-ir="ed-s-preview">👁️ Vista previa</button>
+        <button type="button" data-ir="ed-s-info">📝 Info</button>
+        <button type="button" data-ir="ed-mod-fields">🎮 Requisitos</button>
+        <button type="button" data-ir="ed-s-media">🖼️ Imágenes</button>
+        <button type="button" data-ir="ed-s-dl">⬇️ Descargas</button>
+        <button type="button" data-ir="ed-s-extra">✨ Extras</button>
+        <button type="button" data-ir="ed-s-pub">🚀 Publicar</button>
+      </nav>
+
+      <div class="editor-body" id="ed-body">
+        <section class="ed-section" id="ed-s-preview">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-eye"/></svg> Vista previa de la tarjeta</h4>
+          <div class="ed-card-preview" id="ed-card-preview"></div>
+          <button type="button" class="btn btn-soft btn-sm" onclick="edVerPopup()"><svg class="icon icon-sm"><use href="#i-eye"/></svg> Ver el popup completo</button>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/1077/1077114.png" alt="" width="18" height="18"> Créditos</h4>
+        <section class="ed-section" id="ed-s-info">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-box"/></svg> Información básica</h4>
+          <label class="label" for="ed-title">Título <span class="ed-count" id="ed-title-n"></span></label>
+          <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
+          <label class="label" for="ed-desc">Descripción <span class="ed-count" id="ed-desc-n"></span></label>
+          <textarea id="ed-desc" class="field ed-tall" maxlength="1500" placeholder="De qué trata, qué trae y para qué celulares está optimizado"></textarea>
+          <div class="editor-grid">
+            <div><label class="label" for="ed-version">Compatibilidad / versión</label><input id="ed-version" class="field" placeholder="Psych Engine 0.7.3 (Android/iOS)"></div>
+            <div><label class="label" for="ed-lang">Idioma</label>
+              <select id="ed-lang" class="field">
+                <option value="">— Sin indicar —</option><option value="es">Español</option><option value="en">Inglés</option>
+                <option value="es-en">Español / Inglés</option><option value="otro">Otro idioma</option>
+              </select></div>
+          </div>
+          <label class="label" for="ed-tags">Etiquetas (opcional, separadas por coma)</label>
+          <input id="ed-tags" class="field" maxlength="120" placeholder="Terror, Mod corto, Con historia">
+          <div class="ed-chips" id="ed-tags-chips"></div>
+          <p class="note"><b>NOTA:</b> salen en la tarjeta y en el popup, y sirven para el buscador. Máximo 4.</p>
+        </section>
+
+        <section class="ed-section" id="ed-mod-fields">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-gamepad"/></svg> Requisitos del mod</h4>
+          <div class="editor-grid">
+            <div><label class="label" for="ed-gama">Gama</label>
+              <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
+            <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" list="ed-engines" placeholder="Psych Engine"></div>
+            <div><label class="label" for="ed-ram">RAM</label><input id="ed-ram" class="field" list="ed-rams" placeholder="2GB RAM"></div>
+            <div><label class="label" for="ed-size">Tamaño</label><input id="ed-size" class="field" placeholder="56 MB"></div>
+          </div>
+          <datalist id="ed-engines"><option value="Psych Engine"><option value="Psych Engine Opt"><option value="P-Slice Engine"><option value="CodeName Engine"><option value="Kade Engine"></datalist>
+          <datalist id="ed-rams"><option value="1GB RAM"><option value="2GB RAM"><option value="2-3GB RAM"><option value="3-4GB RAM"><option value="4GB RAM"><option value="6GB RAM"><option value="8GB RAM"></datalist>
+          <p class="note"><b>NOTA:</b> la RAM le dice a cada usuario si el mod corre en su celular. Escribe el mínimo primero (ej: "2-3GB RAM").</p>
+        </section>
+
+        <section class="ed-section" id="ed-s-credits">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-user"/></svg> Créditos</h4>
           <div class="editor-grid">
             <div><label class="label" for="ed-creator">Creador original</label><input id="ed-creator" class="field" maxlength="60" placeholder="Ej: Bumfuzzle Team"></div>
             <div><label class="label" for="ed-creator-link">Enlace del creador</label><input id="ed-creator-link" class="field" type="url" placeholder="https://gamebanana.com/..."></div>
           </div>
-          <p class="note"><b>NOTA:</b> aparece en el popup como "Creado por…". Dar crédito al autor original da confianza y evita reclamos.</p>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/1001/1001371.png" alt="" width="18" height="18"> Qué cambió en esta versión</h4>
-          <textarea id="ed-changelog" class="field" maxlength="1200" placeholder="- Se optimizaron las canciones&#10;- Se arregló el crasheo en la semana 2"></textarea>
-          <p class="note"><b>NOTA:</b> los usuarios lo ven en el popup. Úsalo junto con el botón "Marcar actualizado" para avisar a quienes siguen este contenido.</p>
+        <section class="ed-section" id="ed-s-media">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-image"/></svg> Imágenes</h4>
+          <div id="ed-images-list"></div>
+          <p class="note"><b>NOTA:</b> la primera es la portada (con ⭐ cambias cuál es). Las demás salen como capturas en el popup.</p>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/2195/2195700.png" alt="" width="18" height="18"> Imágenes</h4>
-          <label class="label" for="ed-img">Imagen principal (URL o ruta assets/...)</label>
-          <input id="ed-img" class="field" placeholder="assets/images/mods/miMod.webp" oninput="previewEditorImg()">
-          <img id="ed-preview" class="editor-preview" alt="" hidden>
-          <label class="label" for="ed-images">Capturas extra (una por línea, opcional)</label>
-          <textarea id="ed-images" class="field" placeholder="https://..."></textarea>
-        </section>
-
-        <section class="ed-section" id="ed-mod-fields">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/8176/8176146.png" alt="" width="18" height="18"> Requisitos del mod</h4>
-          <div class="editor-grid">
-            <div><label class="label" for="ed-gama">Gama</label>
-              <select id="ed-gama" class="field"><option value="low">Baja</option><option value="mid">Media</option><option value="mid-high">Media-Alta</option><option value="high">Alta</option></select></div>
-            <div><label class="label" for="ed-engine">Motor</label><input id="ed-engine" class="field" placeholder="Psych Engine"></div>
-            <div><label class="label" for="ed-ram">RAM</label><input id="ed-ram" class="field" placeholder="2GB RAM"></div>
-            <div><label class="label" for="ed-size">Tamaño</label><input id="ed-size" class="field" placeholder="56 MB"></div>
+        <section class="ed-section" id="ed-s-dl">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-download"/></svg> Descargas</h4>
+          <div id="ed-downloads-list"></div>
+          <div class="ed-quick">
+            <span>Agregar rápido:</span>
+            <button type="button" onclick="edDescargaRapida('MediaFire')">+ MediaFire</button>
+            <button type="button" onclick="edDescargaRapida('Google Drive')">+ Drive</button>
+            <button type="button" onclick="edDescargaRapida('MEGA')">+ MEGA</button>
+            <button type="button" onclick="edDescargaRapida('GameBanana')">+ GameBanana</button>
           </div>
-          <p class="note"><b>NOTA:</b> la RAM se usa para decirle a cada usuario si el mod corre en su celular. Escribe el mínimo primero (ej: "2-3GB RAM").</p>
+          <p class="note"><b>NOTA:</b> cada descarga en su caja: el texto del botón y su enlace. Con 🔗 lo abres para probar que funcione.</p>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="" width="18" height="18"> Descargas</h4>
-          <textarea id="ed-downloads" class="field" placeholder="Descarga (MediaFire) | https://www.mediafire.com/..."></textarea>
-          <p class="note"><b>NOTA:</b> una por línea con el formato <i>Nombre | enlace</i>. Solo se aceptan enlaces https:// o rutas assets/.</p>
+        <section class="ed-section" id="ed-s-extra">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-sparkle"/></svg> Extras</h4>
+          <label class="label" for="ed-trailer">Tráiler de YouTube (opcional)</label>
+          <input id="ed-trailer" class="field" type="url" placeholder="https://youtu.be/...">
+          <label class="label" for="ed-note">Nota importante (opcional)</label>
+          <textarea id="ed-note" class="field" maxlength="300" placeholder="Ej: Solo funciona en Android de 64 bits"></textarea>
+          <div class="ed-seg" id="ed-note-type">
+            <button type="button" data-v="info">ℹ️ Info</button><button type="button" data-v="warn">⚠️ Cuidado</button>
+            <button type="button" data-v="danger">⛔ Importante</button><button type="button" data-v="ok">✅ Buena noticia</button>
+          </div>
+          <label class="label" for="ed-changelog">Qué cambió en esta versión (opcional)</label>
+          <textarea id="ed-changelog" class="field" maxlength="1200" placeholder="- Se optimizaron las canciones&#10;- Se arregló el crasheo en la semana 2"></textarea>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/6195/6195700.png" alt="" width="18" height="18"> Visibilidad</h4>
+        <section class="ed-section" id="ed-s-pub">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-lock"/></svg> Publicar</h4>
           <label class="setting-row" style="border:0;padding:4px 0"><span>Borrador <small>Guardado pero sin publicar: solo tú lo ves</small></span>
             <span class="switch"><input type="checkbox" id="ed-draft"><span></span></span></label>
           <label class="setting-row" style="border:0;padding:4px 0"><span>Secreto <small>Solo se ve con el enlace de desbloqueo</small></span>
             <span class="switch"><input type="checkbox" id="ed-hidden"><span></span></span></label>
-          <p class="note"><b>NOTA:</b> usa Borrador mientras preparas un mod; cuando esté listo, desactívalo y guarda para publicarlo.</p>
-        </section>
+          <label class="label" for="ed-publish-at">Publicar automáticamente el… (opcional)</label>
+          <input id="ed-publish-at" class="field" type="datetime-local">
+          <div class="ed-quick">
+            <button type="button" onclick="edFechaRapida(1)">En 1 hora</button>
+            <button type="button" onclick="edFechaRapida('manana')">Mañana 6 pm</button>
+            <button type="button" onclick="edFechaRapida('finde')">Sábado 12 pm</button>
+            <button type="button" onclick="edFechaRapida(0)">Quitar fecha</button>
+          </div>
+          <p class="note"><b>NOTA:</b> hasta esa hora los usuarios no lo ven (tú sí). Si lo pones como "Mod especial" en el Inicio, sale con su cuenta regresiva y al llegar la hora aparece el botón de descarga solo.</p>
 
-        <button class="btn btn-block" id="btn-guardar-mod" onclick="guardarMod()"><img class="fi" src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="" width="18" height="18"> Guardar</button>
+          <h4 class="ed-head" style="margin-top:8px">Al guardar…</h4>
+          <label class="ed-check"><input type="checkbox" id="ed-opt-new"> Marcar como <b>NUEVO</b></label>
+          <label class="ed-check"><input type="checkbox" id="ed-opt-led"> Marcar como <b>actualizado</b> (avisa a quien lo sigue)</label>
+          <label class="ed-check"><input type="checkbox" id="ed-opt-bell"> Publicar un aviso en la <b>campana</b></label>
+          <label class="ed-check"><input type="checkbox" id="ed-opt-pin"> <b>Fijarlo</b> arriba de la lista</label>
+        </section>
+      </div>
+
+      <!-- Botones fijos abajo -->
+      <div class="ed-footer">
+        <button type="button" class="btn btn-ghost" onclick="edVerPopup()"><svg class="icon icon-sm"><use href="#i-eye"/></svg> Vista previa</button>
+        <button type="button" class="btn btn-soft" id="btn-guardar-borrador" onclick="guardarMod(true)">Borrador</button>
+        <button type="button" class="btn" id="btn-guardar-mod" onclick="guardarMod()"><svg class="icon icon-sm"><use href="#i-check"/></svg> Guardar</button>
       </div>
     </div>
   </div>
 
   <!-- Admin: editor de bloques del Inicio -->
   <div id="home-editor-popup" class="popup">
-    <div class="popup-content">
-      <button class="popup-close" onclick="closePopup('home-editor-popup')" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    <div class="popup-content ed-sheet">
+      <button class="popup-close" onclick="homeCerrarEditor()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
       <h2 class="popup-title" id="he-title">Nuevo bloque</h2>
-      <div class="editor-body">
-        <section class="ed-section">
+      <p class="ed-status" id="he-status"></p>
+      <nav class="ed-jump" id="he-jump">
+        <button type="button" data-ir="he-s-tipo">🧩 Tipo</button>
+        <button type="button" data-ir="he-s-preview">👁️ Vista previa</button>
+        <button type="button" data-ir="he-s-textos">📝 Textos</button>
+        <button type="button" data-ir="he-s-launch" data-for="cuenta destacado">🚀 Lanzamiento</button>
+        <button type="button" data-ir="he-s-media" data-for="aviso texto imagen destacado">🖼️ Imágenes</button>
+        <button type="button" data-ir="he-s-links">🔗 Botones</button>
+        <button type="button" data-ir="he-s-style">🎨 Estilo</button>
+        <button type="button" data-ir="he-s-vis">👀 Quién lo ve</button>
+      </nav>
+
+      <div class="editor-body" id="he-body">
+        <section class="ed-section" id="he-s-tipo">
           <h4 class="ed-head">¿Qué quieres agregar?</h4>
           <div class="he-types" id="he-types"></div>
+          <h4 class="ed-head" style="margin-top:6px">⚡ O empieza con una plantilla</h4>
+          <div class="he-tpls" id="he-tpls"></div>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head">Vista previa</h4>
+        <section class="ed-section" id="he-s-preview">
+          <h4 class="ed-head">👁️ Vista previa</h4>
+          <div class="ed-seg he-fase" id="he-fase" hidden>
+            <button type="button" data-fase="" class="on">Ahora</button>
+            <button type="button" data-fase="antes">⏳ Antes</button>
+            <button type="button" data-fase="despues">🎉 Al terminar</button>
+          </div>
           <div class="he-preview" id="he-preview"></div>
         </section>
 
-        <section class="ed-section" data-for="destacado">
-          <h4 class="ed-head">Mod especial</h4>
+        <section class="ed-section" data-for="destacado" id="he-s-item">
+          <h4 class="ed-head">⭐ Mod especial</h4>
           <label class="label" for="he-item">Mod, base o script a destacar</label>
-          <select id="he-item" class="field" onchange="homeEdPreview()"></select>
-          <p class="note"><b>NOTA:</b> si dejas el título, la descripción o la imagen vacíos, se usan los del mod.</p>
-        </section>
-
-        <section class="ed-section">
-          <h4 class="ed-head">Textos</h4>
+          <select id="he-item" class="field"></select>
           <div class="editor-grid">
-            <div data-for="aviso texto botones cuenta destacado"><label class="label" for="he-emoji">Emoji (opcional)</label><input id="he-emoji" class="field" maxlength="8" placeholder="🔥" oninput="homeEdPreview()"></div>
-            <div data-for="aviso destacado imagen video texto"><label class="label" for="he-tag">Etiqueta (opcional)</label><input id="he-tag" class="field" maxlength="30" placeholder="¡NUEVO!" oninput="homeEdPreview()"></div>
+            <div><label class="label" for="he-btn-text">Texto del botón</label><input id="he-btn-text" class="field" maxlength="30" placeholder="Ver y descargar"></div>
+            <div><label class="label" for="he-wait-text">Texto mientras espera</label><input id="he-wait-text" class="field" maxlength="30" placeholder="Muy pronto"></div>
           </div>
-          <label class="label" for="he-ttl">Título</label>
-          <input id="he-ttl" class="field" maxlength="90" placeholder="Ej: ¡Mi nuevo port ya está aquí!" oninput="homeEdPreview()">
-          <label class="label" for="he-sub">Subtítulo (opcional)</label>
-          <input id="he-sub" class="field" maxlength="120" placeholder="Ej: Optimizado para gama baja" oninput="homeEdPreview()">
-          <label class="label" for="he-text">Descripción (opcional)</label>
-          <textarea id="he-text" class="field" maxlength="1500" placeholder="Escribe lo que quieras. **texto** se ve en negritas." oninput="homeEdPreview()"></textarea>
+          <label class="ed-check"><input type="checkbox" id="he-hide-stats"> Ocultar descargas, likes y estrellas</label>
+          <label class="ed-check"><input type="checkbox" id="he-hide-desc"> Ocultar la descripción</label>
+          <p class="note"><b>NOTA:</b> si dejas el título, la descripción o la imagen vacíos, se usan los del mod. Si el mod está <b>programado</b>, aquí sale solo con su cuenta regresiva.</p>
         </section>
 
-        <section class="ed-section" data-for="aviso texto imagen destacado">
-          <h4 class="ed-head">Imágenes</h4>
-          <textarea id="he-images" class="field" placeholder="https://...  (una por línea)" oninput="homeEdPreview()"></textarea>
-          <p class="note"><b>NOTA:</b> una por línea (enlace https:// o ruta assets/...). En "Imagen" con varias se hace un carrusel; en "Mod especial" la primera reemplaza la portada.</p>
+        <section class="ed-section" id="he-s-textos">
+          <h4 class="ed-head">📝 Textos</h4>
+          <div class="editor-grid">
+            <div data-for="aviso texto botones cuenta destacado video"><label class="label" for="he-emoji">Emoji</label><input id="he-emoji" class="field" maxlength="8" placeholder="🔥"></div>
+            <div data-for="aviso destacado imagen video texto cuenta"><label class="label" for="he-tag">Etiqueta</label><input id="he-tag" class="field" maxlength="30" placeholder="¡NUEVO!"></div>
+          </div>
+          <div class="ed-quick" data-for="aviso texto botones cuenta destacado video">
+            <span>Emojis:</span>
+            <button type="button" data-emoji="🔥">🔥</button><button type="button" data-emoji="🚀">🚀</button><button type="button" data-emoji="⭐">⭐</button>
+            <button type="button" data-emoji="📢">📢</button><button type="button" data-emoji="🎉">🎉</button><button type="button" data-emoji="⚠️">⚠️</button>
+            <button type="button" data-emoji="🎮">🎮</button><button type="button" data-emoji="🎵">🎵</button><button type="button" data-emoji="💜">💜</button>
+          </div>
+          <label class="label" for="he-ttl">Título <span class="ed-count" id="he-ttl-n"></span></label>
+          <input id="he-ttl" class="field" maxlength="90" placeholder="Ej: ¡Mi nuevo port llega pronto!">
+          <label class="label" for="he-sub">Subtítulo</label>
+          <input id="he-sub" class="field" maxlength="120" placeholder="Ej: Optimizado para gama baja">
+          <label class="label" for="he-text">Descripción <span class="ed-count" id="he-text-n"></span></label>
+          <textarea id="he-text" class="field ed-tall" maxlength="1500" placeholder="Escribe lo que quieras."></textarea>
+          <div class="ed-quick"><span>Formato:</span><button type="button" onclick="homeEdNegrita()"><b>B</b> Negrita</button><span class="ed-hint">o escribe **así**</span></div>
         </section>
 
-        <section class="ed-section" data-for="video">
-          <h4 class="ed-head">Video de YouTube</h4>
-          <input id="he-video" class="field" type="url" placeholder="https://youtu.be/..." oninput="homeEdPreview()">
+        <section class="ed-section" data-for="cuenta destacado" id="he-s-launch">
+          <h4 class="ed-head">🚀 Lanzamiento</h4>
+          <label class="label" for="he-date">Fecha y hora <span data-for="destacado">(opcional: si el mod está programado, se usa su fecha)</span></label>
+          <input id="he-date" class="field" type="datetime-local">
+          <div class="ed-quick">
+            <button type="button" data-fecha="1h">En 1 hora</button><button type="button" data-fecha="manana">Mañana 6 pm</button>
+            <button type="button" data-fecha="finde">Sábado 12 pm</button><button type="button" data-fecha="semana">En 7 días</button><button type="button" data-fecha="">Quitar</button>
+          </div>
+          <div class="editor-grid">
+            <div><label class="label" for="he-cd-style">Cuenta regresiva</label>
+              <select id="he-cd-style" class="field"><option value="">Cajitas (días, horas…)</option><option value="linea">Una sola línea</option></select></div>
+            <div><label class="label" for="he-after-mode">Al llegar la hora…</label>
+              <select id="he-after-mode" class="field"><option value="">Cambiar el contenido</option><option value="ocultar">Ocultar el bloque</option></select></div>
+          </div>
+          <label class="ed-check"><input type="checkbox" id="he-no-seconds"> No mostrar segundos</label>
+
+          <div class="he-after" id="he-after-box">
+            <h4 class="ed-head">🎉 Lo que se ve al terminar</h4>
+            <p class="note"><b>NOTA:</b> lo que llenes aquí reemplaza a lo de arriba cuando llegue la hora. Lo que dejes vacío se queda igual.</p>
+            <div class="editor-grid">
+              <div><label class="label" for="he-a-emoji">Emoji</label><input id="he-a-emoji" class="field" maxlength="8" placeholder="🎉"></div>
+              <div><label class="label" for="he-a-tag">Etiqueta</label><input id="he-a-tag" class="field" maxlength="30" placeholder="¡Ya disponible!"></div>
+            </div>
+            <label class="label" for="he-a-ttl">Título nuevo</label>
+            <input id="he-a-ttl" class="field" maxlength="90" placeholder="¡Ya salió!">
+            <label class="label" for="he-a-sub">Subtítulo nuevo</label>
+            <input id="he-a-sub" class="field" maxlength="120" placeholder="Descárgalo gratis">
+            <label class="label" for="he-a-text">Descripción nueva</label>
+            <textarea id="he-a-text" class="field" maxlength="1500" placeholder="Ya puedes descargarlo. ¡Cuéntame qué te pareció!"></textarea>
+            <label class="label">Botones que aparecen al terminar</label>
+            <div id="he-a-links"></div>
+            <label class="ed-check"><input type="checkbox" id="he-a-replace"> Quitar los botones de antes</label>
+            <div data-for="cuenta">
+              <label class="label" for="he-done">Mensaje grande al terminar (si no llenas nada de lo de arriba)</label>
+              <input id="he-done" class="field" maxlength="120" placeholder="¡Ya salió! 🎉">
+            </div>
+            <p class="note"><b>OJO:</b> estos botones se guardan desde ahora. Alguien que sepa programar podría encontrarlos antes de la hora; si el link es muy secreto, pégalo justo cuando termine la cuenta.</p>
+          </div>
         </section>
 
-        <section class="ed-section" data-for="cuenta">
-          <h4 class="ed-head">Cuenta regresiva</h4>
-          <label class="label" for="he-date">Fecha y hora objetivo</label>
-          <input id="he-date" class="field" type="datetime-local" oninput="homeEdPreview()">
-          <label class="label" for="he-done">Texto cuando llegue la hora (opcional)</label>
-          <input id="he-done" class="field" maxlength="120" placeholder="¡Ya salió! 🎉" oninput="homeEdPreview()">
+        <section class="ed-section" data-for="aviso texto imagen destacado" id="he-s-media">
+          <h4 class="ed-head">🖼️ Imágenes</h4>
+          <div id="he-images"></div>
+          <div class="editor-grid">
+            <div data-for="aviso texto"><label class="label" for="he-img-pos">Dónde va la imagen</label>
+              <select id="he-img-pos" class="field"><option value="">Arriba (grande)</option><option value="lado">Al lado (pequeña)</option></select></div>
+            <div data-for="imagen"><label class="label" for="he-ratio">Forma</label>
+              <select id="he-ratio" class="field"><option value="">Según el tamaño</option><option value="16:9">16:9 (ancha)</option><option value="4:3">4:3</option><option value="1:1">1:1 (cuadrada)</option><option value="21:9">21:9 (banner)</option><option value="3:4">3:4 (vertical)</option></select></div>
+            <div data-for="imagen"><label class="label" for="he-interval">Cambiar de imagen cada</label>
+              <select id="he-interval" class="field"><option value="">5 segundos</option><option value="3">3 segundos</option><option value="8">8 segundos</option><option value="12">12 segundos</option><option value="-1">No pasar sola</option></select></div>
+          </div>
+          <label class="ed-check" data-for="imagen"><input type="checkbox" id="he-no-dots"> Ocultar los puntitos</label>
+          <p class="note"><b>NOTA:</b> en "Imagen" con varias se hace un carrusel (al tocarla se abre en grande, o va al primer botón). En "Mod especial" la primera reemplaza la portada.</p>
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head">Botones y enlaces</h4>
-          <textarea id="he-links" class="field" placeholder="Descargar | https://...&#10;Ver mods | #mods&#10;Abrir mi mod | mod:mod12" oninput="homeEdPreview()"></textarea>
-          <p class="note"><b>NOTA:</b> uno por línea con el formato <i>Texto | enlace</i>. Puedes usar https://..., <i>#mods</i>, <i>#apks</i>, <i>#scripts</i>, <i>#help</i>, <i>#contact</i> para ir a una sección, o <i>mod:ID</i> para abrir un mod.</p>
+        <section class="ed-section" data-for="video" id="he-s-video">
+          <h4 class="ed-head">▶️ Video de YouTube</h4>
+          <input id="he-video" class="field" type="url" placeholder="https://youtu.be/...">
+          <label class="label" for="he-start">Empezar en el segundo (opcional)</label>
+          <input id="he-start" class="field" type="number" min="0" step="1" placeholder="0">
         </section>
 
-        <section class="ed-section">
-          <h4 class="ed-head">Estilo y visibilidad</h4>
+        <section class="ed-section" id="he-s-links">
+          <h4 class="ed-head">🔗 Botones</h4>
+          <div id="he-links"></div>
+          <div data-for="botones"><label class="label" for="he-layout">Acomodo</label>
+            <select id="he-layout" class="field"><option value="">Cuadrícula</option><option value="lista">Lista (uno debajo del otro)</option><option value="fila">En fila (pequeños)</option></select></div>
+        </section>
+
+        <section class="ed-section" id="he-s-style">
+          <h4 class="ed-head">🎨 Estilo</h4>
           <label class="label">Color</label>
           <div class="he-tones" id="he-tones"></div>
           <div class="editor-grid">
-            <div><label class="label" for="he-aud">¿Quién lo ve?</label>
-              <select id="he-aud" class="field" onchange="homeEdPreview()"><option value="todos">Todos</option><option value="usuarios">Solo con sesión iniciada</option><option value="invitados">Solo invitados</option></select></div>
+            <div><label class="label" for="he-bg">Fondo</label>
+              <select id="he-bg" class="field"><option value="">Cristal</option><option value="color">Del color elegido</option><option value="grad">Degradado</option></select></div>
             <div><label class="label" for="he-size">Tamaño</label>
-              <select id="he-size" class="field" onchange="homeEdPreview()"><option value="normal">Normal</option><option value="grande">Grande (resaltado)</option><option value="compacto">Compacto</option></select></div>
-            <div><label class="label" for="he-from">Mostrar desde (opcional)</label><input id="he-from" class="field" type="datetime-local"></div>
-            <div><label class="label" for="he-until">Ocultar después de (opcional)</label><input id="he-until" class="field" type="datetime-local"></div>
+              <select id="he-size" class="field"><option value="normal">Normal</option><option value="grande">Grande (resaltado)</option><option value="compacto">Compacto</option></select></div>
+            <div><label class="label" for="he-align">Texto</label>
+              <select id="he-align" class="field"><option value="">A la izquierda</option><option value="center">Centrado</option></select></div>
+            <div><label class="label" for="he-effect">Efecto</label>
+              <select id="he-effect" class="field"><option value="">Ninguno</option><option value="pulse">Pulso (llama la atención)</option><option value="shine">Brillo que pasa</option></select></div>
+          </div>
+        </section>
+
+        <section class="ed-section" id="he-s-vis">
+          <h4 class="ed-head">👀 Quién lo ve y cuándo</h4>
+          <label class="label" for="he-aud">¿Quién lo ve?</label>
+          <select id="he-aud" class="field"><option value="todos">Todos</option><option value="usuarios">Solo con sesión iniciada</option><option value="invitados">Solo invitados</option></select>
+          <div class="editor-grid">
+            <div><label class="label" for="he-from">Mostrar desde</label><input id="he-from" class="field" type="datetime-local"></div>
+            <div><label class="label" for="he-until">Ocultar después de</label><input id="he-until" class="field" type="datetime-local"></div>
           </div>
           <label class="setting-row" style="border:0;padding:4px 0"><span>Los usuarios lo pueden cerrar <small>Les sale una ✕; si lo editas, les vuelve a aparecer</small></span>
-            <span class="switch"><input type="checkbox" id="he-dismiss" onchange="homeEdPreview()"><span></span></span></label>
+            <span class="switch"><input type="checkbox" id="he-dismiss"><span></span></span></label>
           <label class="setting-row" style="border:0;padding:4px 0"><span>Visible <small>Apágalo para guardarlo sin que nadie lo vea</small></span>
             <span class="switch"><input type="checkbox" id="he-visible" checked><span></span></span></label>
         </section>
+      </div>
 
-        <button class="btn btn-block" id="btn-guardar-bloque" onclick="homeGuardarBloque()">Guardar</button>
+      <div class="ed-footer">
+        <button type="button" class="btn btn-ghost" onclick="homeEdIrVista()"><svg class="icon icon-sm"><use href="#i-eye"/></svg> Vista previa</button>
+        <button type="button" class="btn btn-soft" onclick="homeGuardarBloque(true)">Guardar oculto</button>
+        <button type="button" class="btn" id="btn-guardar-bloque" onclick="homeGuardarBloque()"><svg class="icon icon-sm"><use href="#i-check"/></svg> Guardar</button>
       </div>
     </div>
   </div>
@@ -932,8 +1078,6 @@
     </div>
   </div>
 
-  <!-- Scripts normales (no módulos) para que la página funcione también abriendo el archivo con doble clic -->
-  <!-- 1) Sin Firebase: pintan la página al instante -->
   <script defer src="js/modules/utils.js"></script>
   <script defer src="js/modules/data-apks.js"></script>
   <script defer src="js/modules/data-mods.js"></script>
@@ -944,7 +1088,6 @@
   <script defer src="js/modules/home.js"></script>
   <script defer src="js/modules/firebase-config.js"></script>
   <script defer src="js/modules/extras.js"></script>
-  <!-- 2) Con Firebase: se conectan cuando carga -->
   <script defer src="js/modules/auth.js"></script>
   <script defer src="js/modules/profile.js"></script>
   <script defer src="js/modules/live.js"></script>
@@ -957,10 +1100,10 @@
   <script defer src="js/modules/admin.js"></script>
   <script defer src="js/modules/admin-users.js"></script>
   <script defer src="js/modules/admin-content.js"></script>
+  <script defer src="js/modules/admin-forms.js"></script>
   <script defer src="js/modules/admin-avisos.js"></script>
   <script defer src="js/modules/admin-tools.js"></script>
   <script defer src="js/modules/admin-home.js"></script>
-  <!-- Seguro: si algo falla, la pantalla de carga nunca se queda pegada -->
   <script>setTimeout(function () { document.body.classList.add('loaded'); }, 4000);</script>
 </body>
 

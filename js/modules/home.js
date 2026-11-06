@@ -69,7 +69,49 @@ const dismissed = () => store.json('fnf_home_dismissed', {});
 // ==========================================
 // HTML DE CADA BLOQUE
 // ==========================================
-function blockHTML(b, id, opts = {}) {
+// ---- Lanzamientos (cuenta regresiva y mod especial) ----
+// La fecha es la del bloque; en "Mod especial", si no tiene, se usa la fecha de publicación del mod.
+const fechaLanzamiento = (b) => {
+  if (Number(b.date)) return Number(b.date);
+  if (b.type === 'destacado' && FNF.itemOf) {
+    const it = FNF.itemOf(b.itemId);
+    if (it && Number(it.publishAt) > 0) return Number(it.publishAt);
+  }
+  return 0;
+};
+// opts.fase = 'antes' | 'despues' fuerza el estado (vista previa del editor)
+const yaLanzado = (b, opts = {}) => {
+  if (opts.fase) return opts.fase === 'despues';
+  const f = fechaLanzamiento(b);
+  return !f || Date.now() >= f;
+};
+const tieneDespues = (a) => !!(a && (a.title || a.subtitle || a.text || a.tag || a.emoji || (a.links || []).length));
+// Lo que se llenó en "Al terminar" reemplaza a lo de antes; sus botones se agregan (o reemplazan)
+function contenidoDespues(b) {
+  const a = b.after || {};
+  const out = { ...b };
+  ['title', 'subtitle', 'text', 'tag', 'emoji'].forEach(k => { if (a[k]) out[k] = a[k]; });
+  const nuevos = a.links || [];
+  out.links = a.replaceLinks ? nuevos : [...nuevos, ...(b.links || [])];
+  return out;
+}
+
+// Cuenta regresiva: cajitas (días, horas, min, seg) o una sola línea
+const cdHTML = (target, b) => {
+  if (b.cdStyle === 'linea') return `<p class="hb-cdline" data-cd="${target}">${icon('clock', 'icon icon-sm')}<span>${t('Faltan', 'Starts in')} <b data-line>--</b></span></p>`;
+  const parts = [['d', t('días', 'days')], ['h', t('horas', 'hours')], ['m', 'min']];
+  if (!b.noSeconds) parts.push(['s', t('seg', 'sec')]);
+  return `<div class="hb-cd${b.noSeconds ? ' no-s' : ''}" data-cd="${target}">${parts.map(([k, label]) => `<span><b data-u="${k}">--</b><small>${label}</small></span>`).join('')}</div>`;
+};
+
+// Clases de estilo de un botón: Principal / Suave / Contorno (o automático: el primero resalta)
+const BTN = { primary: 'btn', soft: 'btn btn-soft', outline: 'btn btn-ghost hb-outline' };
+const claseBoton = (l, i, sm = true) => (BTN[l.style] || (i ? 'btn btn-soft' : 'btn')) + (sm ? ' btn-sm' : '');
+
+function blockHTML(bOriginal, id, opts = {}) {
+  const fecha = fechaLanzamiento(bOriginal);
+  const lanzado = yaLanzado(bOriginal, opts);
+  const b = fecha && lanzado ? contenidoDespues(bOriginal) : bOriginal;
   const type = TYPES[b.type] ? b.type : 'aviso';
   const tone = TONES[b.tone] ? b.tone : 'accent';
   const size = ['grande', 'compacto'].includes(b.size) ? b.size : 'normal';
@@ -85,50 +127,63 @@ function blockHTML(b, id, opts = {}) {
       <div class="grow">${conTag ? tag(b.tag) : ''}${title ? `<h3 class="hb-title">${esc(title)}</h3>` : ''}${sub ? `<p class="hb-sub">${esc(sub)}</p>` : ''}</div>
     </div>` : '';
   const text = (s) => s ? `<p class="hb-text">${fmt(s)}</p>` : '';
-  const btns = (list, first = 'btn btn-sm') => list.length ? `<div class="hb-links">${list.map((l, i) => linkHTML(l, i ? 'btn btn-sm btn-soft' : first)).join('')}</div>` : '';
-  const wrap = (inner, extra = '') => `<div class="card glass hblock hb-${type} hb-${size}${extra}" data-tone="${tone}" style="--tone:${TONES[tone][1]}">${close}${inner}</div>`;
+  const btns = (list, sm = true) => list.length ? `<div class="hb-links">${list.map((l, i) => linkHTML(l, claseBoton(l, i, sm))).join('')}</div>` : '';
+  const clases = [
+    `hb-${type}`, `hb-${size}`,
+    b.bg === 'color' ? 'hb-bg-color' : b.bg === 'grad' ? 'hb-bg-grad' : '',
+    b.align === 'center' ? 'hb-center' : '',
+    b.effect === 'pulse' ? 'hb-fx-pulse' : b.effect === 'shine' ? 'hb-fx-shine' : '',
+    fecha ? (lanzado ? 'hb-launched' : 'hb-waiting') : ''
+  ].filter(Boolean).join(' ');
+  const wrap = (inner, extra = '') => `<div class="card glass hblock ${clases}${extra}" data-tone="${tone}" style="--tone:${TONES[tone][1]}">${close}${inner}</div>`;
 
   if (type === 'aviso' || type === 'texto') {
-    return wrap(`${imgs[0] ? `<img class="hb-img" src="${esc(imgs[0])}" alt="" loading="lazy">` : ''}${head(b.title, b.subtitle)}${text(b.text)}${btns(links)}`);
+    const lado = imgs[0] && b.imgPos === 'lado';
+    const img = imgs[0] ? `<img class="${lado ? 'hb-side-img' : 'hb-img'}" src="${esc(imgs[0])}" alt="" loading="lazy">` : '';
+    const cuerpo = `${head(b.title, b.subtitle)}${text(b.text)}${btns(links)}`;
+    return lado ? wrap(`<div class="hb-side">${img}<div class="grow">${cuerpo}</div></div>`) : wrap(img + cuerpo);
   }
 
   if (type === 'botones') {
-    return wrap(`${head(b.title, b.subtitle)}${text(b.text)}${links.length ? `<div class="hb-btngrid">${links.map((l, i) => linkHTML(l, i ? 'btn btn-soft' : 'btn')).join('')}</div>` : ''}`);
+    const layout = ['lista', 'fila'].includes(b.layout) ? b.layout : 'grid';
+    return wrap(`${head(b.title, b.subtitle)}${text(b.text)}${links.length ? `<div class="hb-btngrid hb-lay-${layout}">${links.map((l, i) => linkHTML(l, claseBoton(l, i, layout === 'fila'))).join('')}</div>` : ''}`);
   }
 
   if (type === 'imagen') {
     if (!imgs.length) return wrap(`<p class="empty">${t('Sin imágenes', 'No images')}</p>`);
     const link = links[0] && parseLink(links[0].url);
+    const ratio = { '16:9': '16 / 9', '4:3': '4 / 3', '1:1': '1 / 1', '21:9': '21 / 9', '3:4': '3 / 4' }[b.ratio] || '';
     const slide = (src, i) => {
       const img = `<img src="${esc(src)}" alt="" loading="lazy">`;
       if (link) return link.ext ? `<a class="hb-slide" href="${esc(link.href)}" target="_blank" rel="noopener">${img}</a>` : `<a class="hb-slide" href="${esc(link.href)}" data-hl="${esc(link.act)}">${img}</a>`;
       return `<button class="hb-slide" type="button" onclick="homeGaleria('${sid}', ${i})">${img}</button>`;
     };
     return wrap(`
-      <div class="hb-media">
-        <div class="hb-car" data-car>${imgs.map(slide).join('')}</div>
+      <div class="hb-media"${ratio ? ` style="--ratio:${ratio}"` : ''}>
+        <div class="hb-car" data-car data-interval="${Math.max(0, Number(b.interval) || 0)}">${imgs.map(slide).join('')}</div>
         ${b.tag ? `<span class="hb-badge">${esc(b.tag)}</span>` : ''}
-        ${imgs.length > 1 ? `<div class="hb-dots">${imgs.map((_, i) => `<span class="${i ? '' : 'on'}"></span>`).join('')}</div>` : ''}
+        ${imgs.length > 1 && !b.noDots ? `<div class="hb-dots">${imgs.map((_, i) => `<span class="${i ? '' : 'on'}"></span>`).join('')}</div>` : ''}
       </div>
-      ${(b.title || b.subtitle || b.text || b.emoji || links.length > 1) ? `<div class="hb-body">${head(b.title, b.subtitle, false)}${text(b.text)}${btns(links.slice(1))}</div>` : ''}`, ' hb-flush');
+      ${(b.title || b.subtitle || b.text || b.emoji || links.length > 1) ? `<div class="hb-body">${head(b.title, b.subtitle, false)}${text(b.text)}${btns(links.slice(1))}</div>` : ''}`, ' hb-flush' + (ratio ? ' hb-ratio' : ''));
   }
 
   if (type === 'video') {
     const vid = ytId(b.video);
+    const start = Math.max(0, Math.floor(Number(b.start) || 0));
     const media = vid
-      ? `<button class="hb-yt" type="button" onclick="homeVideo(this, '${vid}')" aria-label="${t('Reproducir video', 'Play video')}">
+      ? `<button class="hb-yt" type="button" onclick="homeVideo(this, '${vid}', ${start})" aria-label="${t('Reproducir video', 'Play video')}">
            <img src="https://i.ytimg.com/vi/${vid}/hqdefault.jpg" alt="" loading="lazy"><span class="hb-play">${icon('play', 'icon')}</span></button>`
       : `<p class="empty">${t('Video no disponible', 'Video unavailable')}</p>`;
     return wrap(`${head(b.title, b.subtitle)}${media}${text(b.text)}${btns(links)}`);
   }
 
   if (type === 'cuenta') {
-    const target = Number(b.date) || 0;
-    const parts = [['d', t('días', 'days')], ['h', t('horas', 'hours')], ['m', 'min'], ['s', t('seg', 'sec')]];
-    return wrap(`${head(b.title, b.subtitle)}
-      <div class="hb-cd" data-cd="${target}" data-done="${esc(b.doneText || t('¡Ya llegó la hora! 🎉', "It's time! 🎉"))}">
-        ${parts.map(([k, label]) => `<span><b data-u="${k}">--</b><small>${label}</small></span>`).join('')}
-      </div>${text(b.text)}${btns(links)}`);
+    if (lanzado && fecha) {
+      // Ya llegó la hora: el contenido de "Al terminar" (o el mensaje de siempre)
+      const extra = tieneDespues(bOriginal.after) ? '' : `<p class="hb-done">${esc(bOriginal.doneText || t('¡Ya llegó la hora! 🎉', "It's time! 🎉"))}</p>`;
+      return wrap(`${head(b.title, b.subtitle)}${extra}${text(b.text)}${btns(links, false)}`);
+    }
+    return wrap(`${head(b.title, b.subtitle)}${fecha ? cdHTML(fecha, b) : ''}${text(b.text)}${btns(links)}`);
   }
 
   // ---- Mod especial ----
@@ -137,20 +192,24 @@ function blockHTML(b, id, opts = {}) {
   const cover = imgs[0] || item.img || (item.images || [])[0] || '';
   const title = b.title || item.title;
   const sub = b.subtitle || (FNF.kindOf(b.itemId) === 'mod' ? [item.engine, item.ram, item.size].filter(Boolean).join(' · ') : (item.version || '').split('\n')[0]);
-  const desc = b.text || String(item.desc || '').replace(/\/n/g, '\n').slice(0, 260);
+  const desc = b.hideDesc ? '' : (b.text || String(item.desc || '').replace(/\/n/g, '\n').slice(0, 260));
   const iid = esc(b.itemId);
+  const esperando = fecha && !lanzado;
+  const principal = esperando
+    ? `<span class="btn btn-disabled">${icon('clock', 'icon icon-sm')} ${esc(b.waitText || t('Muy pronto', 'Coming soon'))}</span>`
+    : `<a class="btn" href="#" data-hl="item:${iid}">${icon('download', 'icon icon-sm')} ${esc(b.btnText || t('Ver y descargar', 'View & download'))}</a>`;
   return wrap(`
-    <a class="hb-cover" href="#" data-hl="item:${iid}">
+    <${esperando ? 'div' : 'a href="#" data-hl="item:' + iid + '"'} class="hb-cover">
       ${cover ? `<img src="${esc(cover)}" alt="" loading="lazy">` : ''}
-      <span class="hb-badge">${esc(b.tag || t('⭐ Destacado', '⭐ Featured'))}</span>
-    </a>
+      <span class="hb-badge">${esc(b.tag || (esperando ? t('⏳ Próximamente', '⏳ Coming soon') : t('⭐ Destacado', '⭐ Featured')))}</span>
+    </${esperando ? 'div' : 'a'}>
     <div class="hb-body">
       ${head(title, sub, false)}
-      <div class="hb-stats" data-hs="${iid}"></div>
+      ${esperando ? cdHTML(fecha, b) : b.hideStats ? '' : `<div class="hb-stats" data-hs="${iid}"></div>`}
       ${text(desc)}
       <div class="hb-links">
-        <a class="btn" href="#" data-hl="item:${iid}">${icon('download', 'icon icon-sm')} ${t('Ver y descargar', 'View & download')}</a>
-        ${links.map(l => linkHTML(l, 'btn btn-soft')).join('')}
+        ${principal}
+        ${links.map((l, i) => linkHTML(l, claseBoton({ ...l, style: l.style || 'soft' }, i + 1, false))).join('')}
       </div>
     </div>`, ' hb-flush');
 }
@@ -169,7 +228,11 @@ function whyHidden(key, b) {
   if (b.type === 'destacado') {
     const it = FNF.itemOf ? FNF.itemOf(b.itemId) : null;
     if (!it) return 'El mod no existe';
+    // Borradores y secretos no se anuncian (los programados sí: salen con su cuenta regresiva)
+    if (FNF.puedeVer && !FNF.puedeVer(b.itemId, { ignorarFecha: true })) return 'El mod está oculto o es borrador';
   }
+  const f = fechaLanzamiento(b);
+  if (f && now >= f && b.afterMode === 'ocultar') return 'Terminó su cuenta regresiva';
   if (b.dismissible && dismissed()[key] && dismissed()[key] === (b.updatedAt || 1)) return 'Lo cerraste';
   return '';
 }
@@ -294,18 +357,29 @@ function paintHomeStats(root = document) {
   });
 }
 
-// Cuentas regresivas
+// Cuentas regresivas. Al llegar a cero, el Inicio se vuelve a pintar solo
+// (así aparece el texto y los botones de "Al terminar" sin recargar la página).
+let repintarPendiente = false;
 function tickCountdowns(root = document) {
-  root.querySelectorAll('.hb-cd[data-cd]').forEach(el => {
-    const left = Number(el.dataset.cd) - Date.now();
-    if (!Number(el.dataset.cd)) return;
-    if (left <= 0) {
-      el.outerHTML = `<p class="hb-done">${esc(el.dataset.done)}</p>`;
-      return;
+  root.querySelectorAll('[data-cd]').forEach(el => {
+    const fin = Number(el.dataset.cd);
+    if (!fin) return;
+    const left = Math.max(0, fin - Date.now());
+    if (left === 0 && root.id === 'home' && !repintarPendiente) {
+      repintarPendiente = true;
+      setTimeout(() => { repintarPendiente = false; renderHome(); vibrate([30, 40, 30]); }, 400);
     }
     const s = Math.floor(left / 1000);
     const v = { d: Math.floor(s / 86400), h: Math.floor(s / 3600) % 24, m: Math.floor(s / 60) % 60, s: s % 60 };
-    el.querySelectorAll('[data-u]').forEach(b => { b.textContent = String(v[b.dataset.u]).padStart(2, '0'); });
+    // Sin segundos: se cuenta en minutos redondeando hacia arriba (no marca 00:00 antes de tiempo)
+    const tm = Math.ceil(left / 60000);
+    const vm = { d: Math.floor(tm / 1440), h: Math.floor(tm / 60) % 24, m: tm % 60 };
+    const usar = el.classList.contains('no-s') ? vm : v;
+    el.querySelectorAll('[data-u]').forEach(b => { b.textContent = String(usar[b.dataset.u]).padStart(2, '0'); });
+    const line = el.querySelector('[data-line]');
+    if (line) {
+      line.textContent = v.d ? `${v.d} d ${v.h} h` : v.h ? `${v.h} h ${v.m} min` : left > 0 ? `${v.m} min ${v.s} s` : '0 s';
+    }
   });
 }
 
@@ -329,16 +403,23 @@ document.addEventListener('scroll', (e) => {
 let touching = false;
 document.addEventListener('touchstart', (e) => { if (e.target.closest && e.target.closest('.hb-car')) touching = true; }, { passive: true });
 document.addEventListener('touchend', () => { setTimeout(() => { touching = false; }, 4000); }, { passive: true });
+// Cada carrusel avanza a su propio ritmo (lo elige el admin; -1 = no pasa solo)
 setInterval(() => {
   if (document.hidden || touching || store.get('homeAutoCarousel', 'true') !== 'true') return;
-  if (!window.currentSection || window.currentSection() !== 'home') return;
-  document.querySelectorAll('#home .hb-car').forEach(car => {
-    if (car.children.length < 2) return;
+  const enInicio = window.currentSection && window.currentSection() === 'home';
+  const prev = document.getElementById('he-preview');
+  const cars = [...(enInicio ? document.querySelectorAll('#home .hb-car') : []), ...(prev && prev.offsetParent ? prev.querySelectorAll('.hb-car') : [])];
+  const now = Date.now();
+  cars.forEach(car => {
+    const cada = Number(car.dataset.interval) || 5;
+    if (cada < 0 || car.children.length < 2) return;
+    if (!car._last) car._last = now;
+    if (now - car._last < cada * 1000) return;
+    car._last = now;
     const i = Math.round(car.scrollLeft / Math.max(1, car.clientWidth));
-    const next = (i + 1) % car.children.length;
-    car.scrollTo({ left: next * car.clientWidth, behavior: 'smooth' });
+    car.scrollTo({ left: ((i + 1) % car.children.length) * car.clientWidth, behavior: 'smooth' });
   });
-}, 5000);
+}, 1000);
 
 // ==========================================
 // ACCIONES DE LOS USUARIOS
@@ -377,10 +458,10 @@ window.homeGaleria = (id, i) => {
   if (imgs.length && window.abrirGaleria) window.abrirGaleria(imgs, i);
 };
 // El video de YouTube solo se carga cuando lo tocan (más ligero para celulares de gama baja)
-window.homeVideo = (btn, vid) => {
+window.homeVideo = (btn, vid, start = 0) => {
   if (!/^[\w-]{11}$/.test(vid)) return;
   const f = document.createElement('iframe');
-  f.src = `https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0`;
+  f.src = `https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0${Number(start) > 0 ? '&start=' + Math.floor(start) : ''}`;
   f.title = 'YouTube';
   f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
   f.allowFullscreen = true;
@@ -409,13 +490,14 @@ window.setHomeData = (h) => {
   data = h || null;
   store.setJson('fnf_home_cache', data);
   renderHome();
+  if (window.renderAdminTab) window.renderAdminTab('inicio', true); // pestaña Inicio del panel
 };
 window.homeModoEdicion = (on) => {
   editing = !!on && !!window.isSuperUser;
   renderHome();
   if (editing) toast('Modo edición: usa los botones de cada bloque. Lo que ves con borde punteado no lo ven los usuarios.', 'edit');
 };
-FNF.home = { SYS, SYS_ORDER, TYPES, TONES, blockHTML, parseLink, okImg, ytId, computeOrder, data: homeData, paintExtras, previewBlock: null };
+FNF.home = { SYS, SYS_ORDER, TYPES, TONES, blockHTML, parseLink, okImg, ytId, computeOrder, whyHidden, fechaLanzamiento, data: homeData, paintExtras, previewBlock: null };
 
 renderHome();
 })();

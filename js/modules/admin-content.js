@@ -10,7 +10,12 @@ const NOMBRE = { mod: 'mod', apk: 'base', script: 'script' };
 const pathOf = (id) => `${FNF.KINDS[A.kindOf(id)].path}/${id}`;
 
 // Datos combinados (archivo data + cambios del panel) de un elemento
-const fullItem = (kind, id) => ({ ...(A.baseOf(kind)[id] || {}), ...(A.customOf(kind)[id] || {}) });
+// (si los datos en vivo todavía no llegan, se usa la copia guardada en el celular)
+const fullItem = (kind, id) => {
+  const custom = A.customOf(kind)[id];
+  if (!custom && !A.baseOf(kind)[id] && FNF.itemOf(id)) return { ...FNF.itemOf(id) };
+  return { ...(A.baseOf(kind)[id] || {}), ...(custom || {}) };
+};
 
 A.TAB.contenido = {
   shell: () => {
@@ -51,10 +56,11 @@ A.TAB.contenido = {
     const rows = ids.map(st).filter(x => x.d.title);
     const F = {
       todos: () => true, fijados: x => x.pinned, nuevos: x => x.isNew, led: x => x.led, caidos: x => !!x.broken,
-      ocultos: x => x.d.removed, borradores: x => x.d.draft, secretos: x => x.d.hidden, editados: x => !!x.c
+      ocultos: x => x.d.removed, borradores: x => x.d.draft, secretos: x => x.d.hidden, editados: x => !!x.c,
+      programados: x => Number(x.d.publishAt) > Date.now()
     };
     const labels = [['todos', 'Todos', 'filter'], ['fijados', 'Fijados', 'pin'], ['nuevos', 'Nuevos', 'star'], ['led', 'Con LED', 'led'], ['caidos', 'Link caído', 'link'],
-      ['borradores', 'Borradores', 'notes'], ['ocultos', 'Ocultos', 'hide'], ['secretos', 'Secretos', 'lock'], ['editados', 'Editados en panel', 'edit']];
+      ['programados', 'Programados', 'clock'], ['borradores', 'Borradores', 'notes'], ['ocultos', 'Ocultos', 'hide'], ['secretos', 'Secretos', 'lock'], ['editados', 'Editados en panel', 'edit']];
     document.getElementById('ct-chips').innerHTML = labels.map(([k, label, ic]) => {
       const n = rows.filter(F[k]).length;
       return (k === 'todos' || n) ? `<button class="chip${A.ui.cFilter === k ? ' active' : ''}" onclick="adminFiltrarContenido('${k}')">${fi(ic, 16)} ${label} <span class="chip-n">${n}</span></button>` : '';
@@ -76,6 +82,7 @@ A.TAB.contenido = {
         !base[id] ? A.pill('Creado en el panel', 'var(--accent)') : '',
         base[id] && c && !c.removed ? A.pill('Editado', '#3d8bff') : '',
         d.draft ? A.pill('Borrador', '#8a7f99') : '',
+        Number(d.publishAt) > Date.now() ? A.pill(`⏰ Se publica ${FNF.fmtDateTime(d.publishAt)}`, 'var(--warn)') : '',
         d.removed ? A.pill('Oculto', '#777') : '',
         d.hidden ? A.pill('Secreto', '#2c2347') : '',
         x.broken ? A.pill('Link caído', 'var(--danger)') : '',
@@ -156,12 +163,85 @@ window.adminRestaurarMod = window.adminRestaurarItem;
 window.adminBorrarMod = window.adminBorrarItem;
 
 // ==========================================
-// EDITOR
+// EDITOR (mods, bases y scripts)
 // ==========================================
 let editingId = null;
 let editingKind = 'mod';
 let duplicando = null;
-const val = (id) => document.getElementById(id).value.trim();
+let cambios = false;           // hay algo sin guardar
+let listaImgs = null;          // filas de imágenes (admin-forms.js)
+let listaDls = null;           // filas de descargas
+let tipoNota = 'warn';
+let previewTimer = null;
+const $ = (id) => document.getElementById(id);
+const val = (id) => $(id).value.trim();
+const toInput = (ts) => ts ? new Date(ts - new Date(ts).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+const fromInput = (s) => { const n = s ? new Date(s).getTime() : NaN; return isNaN(n) ? null : n; };
+const tagsDe = (s) => [...new Set(String(s || '').split(',').map(x => x.trim()).filter(Boolean))].slice(0, 4).map(x => x.slice(0, 24));
+
+// El formulario como un mod (sirve para guardar y para la vista previa)
+function leerFormulario() {
+  const imgs = listaImgs ? listaImgs.get().map(r => r.url) : [];
+  const isMod = editingKind === 'mod';
+  const tags = tagsDe(val('ed-tags'));
+  return {
+    title: val('ed-title'), img: imgs[0] || '', desc: val('ed-desc'), version: val('ed-version'),
+    gama: isMod ? $('ed-gama').value : null,
+    engine: isMod ? val('ed-engine') : null, ram: isMod ? val('ed-ram') : null, size: isMod ? val('ed-size') : null,
+    creator: val('ed-creator') || null, creatorLink: val('ed-creator-link') || null,
+    changelog: val('ed-changelog') || null, lang: $('ed-lang').value || null,
+    // La galería del popup: portada + capturas
+    images: imgs.length > 1 || (editingKind === 'script' && imgs.length) ? imgs : null,
+    downloads: listaDls ? listaDls.get().filter(r => r.link).map(r => ({ name: r.name || 'Descarga', link: r.link })) : [],
+    tags: tags.length ? tags : null,
+    trailer: val('ed-trailer') || null,
+    note: val('ed-note') || null, noteType: val('ed-note') ? tipoNota : null,
+    publishAt: fromInput(val('ed-publish-at')),
+    hidden: $('ed-hidden').checked || null, draft: $('ed-draft').checked || null
+  };
+}
+
+// Vista previa de la tarjeta + contadores + estado (se actualiza mientras escribes)
+function pintarVistaPrevia() {
+  const d = leerFormulario();
+  $('ed-card-preview').innerHTML = FNF.cardFor(editingKind, 'preview', { ...d, title: d.title || 'Sin título' }, 0);
+  $('ed-title-n').textContent = `${val('ed-title').length}/80`;
+  $('ed-desc-n').textContent = `${val('ed-desc').length}/1500`;
+  $('ed-tags-chips').innerHTML = (d.tags || []).map(x => `<span class="tag">${esc(x)}</span>`).join('');
+  const estado = [];
+  if (d.draft) estado.push('📝 Borrador (solo tú lo ves)');
+  else if (d.publishAt && d.publishAt > Date.now()) estado.push(`⏰ Se publica el ${FNF.fmtDateTime(d.publishAt)}`);
+  else estado.push(editingId ? '✅ Publicado' : '🆕 Se publicará al guardar');
+  if (d.hidden) estado.push('🔒 Secreto');
+  if (cambios) estado.push('<b>● Cambios sin guardar</b>');
+  $('ed-status').innerHTML = estado.join(' · ');
+}
+const avisarCambio = () => {
+  cambios = true;
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(pintarVistaPrevia, 150);
+};
+
+// Escuchas del editor (una sola vez)
+(() => {
+  const pop = $('mod-editor-popup');
+  pop.addEventListener('input', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list')) avisarCambio(); });
+  pop.addEventListener('change', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list')) avisarCambio(); });
+  // Atajos: llevan a cada parte del formulario
+  $('ed-jump').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ir]');
+    const destino = b && $(b.dataset.ir);
+    if (destino && !destino.hidden) destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  // Tipo de nota (Info / Cuidado / Importante / Buena noticia)
+  $('ed-note-type').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-v]');
+    if (!b) return;
+    tipoNota = b.dataset.v;
+    $('ed-note-type').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    avisarCambio();
+  });
+})();
 
 window.abrirEditorMod = (id, kind, origen) => {
   if (!isAdmin()) return;
@@ -170,75 +250,116 @@ window.abrirEditorMod = (id, kind, origen) => {
   const src = id || origen;
   const d = src ? fullItem(editingKind, src) : {};
   duplicando = origen || null;
-  const mainImg = d.img || (d.images || [])[0] || '';
-  document.getElementById('editor-title').textContent = id ? `Editar: ${d.title || id}` : origen ? `Duplicar: ${d.title}` : `Nuevo ${NOMBRE[editingKind]}`;
-  document.getElementById('ed-mod-fields').hidden = editingKind !== 'mod';
-  const setV = (k, v) => { document.getElementById(k).value = v || ''; };
+  const nombre = { mod: 'mod', apk: 'base', script: 'script' }[editingKind];
+  $('editor-title').textContent = id ? `Editar: ${d.title || id}` : origen ? `Duplicar: ${d.title}` : `Nuevo ${nombre}`;
+  $('ed-mod-fields').hidden = editingKind !== 'mod';
+  document.querySelector('#ed-jump [data-ir="ed-mod-fields"]').hidden = editingKind !== 'mod';
+
+  const setV = (k, v) => { $(k).value = v || ''; };
   setV('ed-title', origen ? `${d.title} (copia)` : d.title);
-  setV('ed-img', mainImg); setV('ed-desc', d.desc); setV('ed-version', d.version);
+  setV('ed-desc', d.desc); setV('ed-version', d.version);
   setV('ed-engine', d.engine); setV('ed-ram', d.ram); setV('ed-size', d.size);
   setV('ed-creator', d.creator); setV('ed-creator-link', d.creatorLink); setV('ed-changelog', d.changelog);
-  document.getElementById('ed-lang').value = d.lang || '';
-  document.getElementById('ed-gama').value = d.gama || 'low';
-  setV('ed-images', (d.images || []).filter(x => x !== mainImg).join('\n'));
-  setV('ed-downloads', (d.downloads || []).map(x => `${x.name} | ${x.link}`).join('\n'));
-  document.getElementById('ed-hidden').checked = !!d.hidden;
-  document.getElementById('ed-draft').checked = origen ? true : !!d.draft;
-  window.previewEditorImg();
+  setV('ed-tags', (d.tags || []).join(', ')); setV('ed-trailer', d.trailer); setV('ed-note', d.note);
+  $('ed-publish-at').value = origen ? '' : toInput(d.publishAt);
+  $('ed-lang').value = d.lang || '';
+  $('ed-gama').value = d.gama || 'low';
+  $('ed-hidden').checked = !!d.hidden;
+  $('ed-draft').checked = origen ? true : !!d.draft;
+  tipoNota = d.noteType || 'warn';
+  $('ed-note-type').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === tipoNota));
+  ['ed-opt-led', 'ed-opt-bell', 'ed-opt-pin'].forEach(k => { $(k).checked = false; });
+  $('ed-opt-new').checked = !id; // lo nuevo se marca como NUEVO (puedes quitarlo)
+
+  // Imágenes y descargas: cada una en su caja
+  const portada = d.img || (d.images || [])[0] || '';
+  const imgs = [portada, ...(d.images || []).filter(x => x && x !== portada)].filter(Boolean).map(url => ({ url }));
+  const dls = (d.downloads || []).map(x => ({ name: x.name, link: x.link }));
+  if (!listaImgs) listaImgs = FNF.Filas($('ed-images-list'), 'imagen', imgs, avisarCambio, { vacio: 'Sin imágenes. Agrega al menos la portada.', max: 12 });
+  else listaImgs.set(imgs);
+  if (!listaDls) listaDls = FNF.Filas($('ed-downloads-list'), 'descarga', dls, avisarCambio, { vacio: 'Sin descargas todavía.', max: 10 });
+  else listaDls.set(dls.length ? dls : []);
+  if (!dls.length) listaDls.set([{ name: 'Descarga', link: '' }]);
+
+  cambios = false;
+  pintarVistaPrevia();
+  $('ed-body').scrollTop = 0;
   openPopup('mod-editor-popup');
+  setTimeout(() => { const pc = document.querySelector('#mod-editor-popup .popup-content'); if (pc) pc.scrollTop = 0; }, 50);
 };
 window.adminDuplicarItem = (id) => window.abrirEditorMod(null, A.kindOf(id), id);
 
-window.previewEditorImg = () => {
-  const img = document.getElementById('ed-preview');
-  const src = val('ed-img');
-  img.removeAttribute('data-fallback');
-  img.hidden = !src;
-  if (src) img.src = src;
+// Cerrar: si hay cambios sin guardar, pregunta antes
+window.cerrarEditorMod = () => {
+  if (cambios && !confirm('Tienes cambios sin guardar. ¿Salir de todas formas?')) return;
+  cambios = false;
+  closePopup('mod-editor-popup');
 };
 
-window.guardarMod = async () => {
-  const title = val('ed-title');
-  const downloads = val('ed-downloads').split('\n').map(l => l.trim()).filter(Boolean).map(l => {
-    const i = l.lastIndexOf('|');
-    return i > 0 ? { name: l.slice(0, i).trim(), link: l.slice(i + 1).trim() } : { name: 'Descarga', link: l };
-  });
-  const bad = downloads.find(x => !/^(https?:\/\/|assets\/)/i.test(x.link));
-  const creatorLink = val('ed-creator-link');
-  if (title.length < 2) return toast('Ponle un título.', 'alert');
-  if (!val('ed-img')) return toast('Falta la imagen.', 'alert');
-  if (!downloads.length) return toast('Agrega al menos un enlace de descarga.', 'alert');
-  if (bad) return toast(`Enlace inválido: ${bad.link}`, 'alert');
-  if (creatorLink && !/^https?:\/\//i.test(creatorLink)) return toast('El enlace del creador debe empezar con https://', 'alert');
+// Ver el popup completo tal como lo verán los usuarios (sin guardar)
+window.edVerPopup = () => {
+  const d = leerFormulario();
+  window.previewDetalle(editingKind, { ...d, title: d.title || 'Sin título', images: d.images || (d.img ? [d.img] : []) });
+};
 
-  const extras = val('ed-images').split('\n').map(s => s.trim()).filter(Boolean);
-  const isMod = editingKind === 'mod';
-  const draft = document.getElementById('ed-draft').checked;
-  const data = {
-    title, img: val('ed-img'), desc: val('ed-desc'), version: val('ed-version'),
-    gama: isMod ? document.getElementById('ed-gama').value : null,
-    engine: isMod ? val('ed-engine') : null, ram: isMod ? val('ed-ram') : null, size: isMod ? val('ed-size') : null,
-    creator: val('ed-creator') || null, creatorLink: creatorLink || null,
-    changelog: val('ed-changelog') || null, lang: document.getElementById('ed-lang').value || null,
-    // La galería del popup: imagen principal + capturas extra
-    images: (extras.length || editingKind === 'script') ? [val('ed-img'), ...extras] : null,
-    downloads, hidden: document.getElementById('ed-hidden').checked || null, draft: draft || null,
-    updatedAt: Date.now()
-  };
+window.edDescargaRapida = (servidor) => listaDls.agregar({ name: `Descarga (${servidor})`, link: '' });
+
+// Fechas rápidas para publicar
+window.edFechaRapida = (cual) => {
+  const d = new Date();
+  if (cual === 0) { $('ed-publish-at').value = ''; avisarCambio(); return; }
+  if (cual === 1) d.setHours(d.getHours() + 1, d.getMinutes(), 0, 0);
+  if (cual === 'manana') { d.setDate(d.getDate() + 1); d.setHours(18, 0, 0, 0); }
+  if (cual === 'finde') { d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7)); d.setHours(12, 0, 0, 0); }
+  $('ed-publish-at').value = toInput(d.getTime());
+  avisarCambio();
+};
+
+window.guardarMod = async (comoBorrador) => {
+  if (comoBorrador === true) $('ed-draft').checked = true;
+  const d = leerFormulario();
+  const malDl = listaDls.invalidas()[0];
+  const malImg = listaImgs.invalidas()[0];
+  if (d.title.length < 2) { $('ed-title').focus(); return toast('Ponle un título.', 'alert'); }
+  if (!d.img) { $('ed-s-media').scrollIntoView({ behavior: 'smooth' }); return toast('Falta la imagen de portada.', 'alert'); }
+  if (malImg) return toast(`Imagen inválida: ${malImg.url}`, 'alert');
+  if (malDl) { $('ed-s-dl').scrollIntoView({ behavior: 'smooth' }); return toast(`Enlace inválido: ${malDl.link}. Debe empezar con https:// o assets/`, 'alert'); }
+  if (!d.downloads.length && !d.draft) { $('ed-s-dl').scrollIntoView({ behavior: 'smooth' }); return toast('Agrega al menos un enlace de descarga (o guárdalo como borrador).', 'alert'); }
+  if (d.creatorLink && !/^https?:\/\//i.test(d.creatorLink)) return toast('El enlace del creador debe empezar con https://', 'alert');
+  if (d.trailer && !(FNF.home && FNF.home.ytId(d.trailer))) return toast('El tráiler debe ser un enlace de YouTube.', 'alert');
+  if (d.publishAt && d.publishAt <= Date.now()) d.publishAt = null; // fecha que ya pasó = publicar ya
+
+  const data = { ...d, updatedAt: Date.now() };
   const id = editingId || (editingKind + Date.now().toString(36));
   if (!editingId) data.createdAt = Date.now();
 
-  const btn = document.getElementById('btn-guardar-mod');
+  const btn = $('btn-guardar-mod');
   btn.disabled = true;
   try {
     await update(ref(db, `${FNF.KINDS[editingKind].path}/${id}`), data);
+    // Opciones de "Al guardar…"
+    const extras = [];
+    if ($('ed-opt-new').checked) extras.push(set(ref(db, `new_mods_status/card-${id}`), true));
+    if ($('ed-opt-led').checked) extras.push(set(ref(db, `updates_led/${id}`), Date.now()));
+    if ($('ed-opt-pin').checked) extras.push(set(ref(db, `pinned_mods/${id}`), true));
+    if ($('ed-opt-bell').checked && !d.draft) {
+      const nid = 'notif_' + Date.now();
+      const cuando = d.publishAt || Date.now();
+      const aviso = { id: nid, modId: id, texto: editingId ? `¡${d.title} se actualizó! Toca para verlo.` : `¡${d.title} ya está disponible! Toca para verlo.`,
+        fecha: new Date(cuando).toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) };
+      if (d.publishAt) aviso.publishAt = d.publishAt; // sale en la campana a la misma hora que se publica
+      extras.push(set(ref(db, 'notificaciones/' + nid), aviso));
+    }
+    await Promise.all(extras);
+    cambios = false;
     closePopup('mod-editor-popup');
-    A.log('content:save', `${editingId ? 'Editó' : duplicando ? 'Duplicó' : 'Creó'} "${title}"${draft ? ' (borrador)' : ''}`, id);
-    toast(editingId ? 'Cambios guardados.' : draft ? 'Guardado como borrador (solo tú lo ves).' : '¡Publicado! Ya aparece en la lista.', 'check');
-    if (!editingId && !draft && confirm('¿Marcarlo también como NUEVO?')) set(ref(db, `new_mods_status/card-${id}`), true);
+    A.log('content:save', `${editingId ? 'Editó' : duplicando ? 'Duplicó' : 'Creó'} "${d.title}"${d.draft ? ' (borrador)' : d.publishAt ? ` (programado para ${FNF.fmtDateTime(d.publishAt)})` : ''}`, id);
+    toast(d.draft ? 'Guardado como borrador (solo tú lo ves).'
+      : d.publishAt ? `Programado: se publica el ${FNF.fmtDateTime(d.publishAt)}.`
+        : editingId ? 'Cambios guardados.' : '¡Publicado! Ya aparece en la lista.', 'check');
   } catch (err) {
     console.error(err);
-    toast('No se pudo guardar. ¿Publicaste las reglas nuevas y tienes la sesión de admin abierta?', 'alert');
+    toast('No se pudo guardar. ¿Tienes la sesión de admin abierta?', 'alert');
   } finally {
     btn.disabled = false;
   }

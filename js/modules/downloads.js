@@ -68,10 +68,40 @@ window.carouselStep = (dir) => {
   setImage();
 };
 
-function showDetail(type, id, d) {
+// Nombre del servidor de una descarga (MediaFire, Google Drive...) para mostrarlo debajo del botón
+const servidorDe = (u) => {
+  try {
+    const h = new URL(u).hostname.replace(/^www\./, '');
+    const conocidos = { 'mediafire.com': 'MediaFire', 'drive.google.com': 'Google Drive', 'mega.nz': 'MEGA', 'github.com': 'GitHub', 'gamebanana.com': 'GameBanana', 'dropbox.com': 'Dropbox', 'gamejolt.com': 'Game Jolt', 'itch.io': 'itch.io', 'pixeldrain.com': 'Pixeldrain' };
+    const k = Object.keys(conocidos).find(s => h === s || h.endsWith('.' + s));
+    return k ? conocidos[k] : h;
+  } catch (e) { return ''; }
+};
+const NOTA_ICONO = { info: 'info', warn: 'alert', danger: 'ban', ok: 'check' };
+
+function showDetail(type, id, d, opts = {}) {
   if (!d) return;
-  window.currentItemRatingId = id;
+  const preview = !!opts.preview;
+  window.currentItemRatingId = preview ? null : id;
   window.currentItemType = type;
+  document.getElementById('detail-preview-flag').hidden = !preview;
+  document.getElementById('detail-popup').classList.toggle('popup-top', preview);
+  document.getElementById('detail-rating').hidden = preview;
+
+  // Etiquetas propias, nota importante y tráiler
+  const tagsEl = document.getElementById('detail-tags');
+  tagsEl.innerHTML = (d.tags || []).map(x => `<span class="tag">${esc(x)}</span>`).join('');
+  tagsEl.hidden = !(d.tags || []).length;
+  const nota = document.getElementById('detail-note');
+  const tipoNota = NOTA_ICONO[d.noteType] ? d.noteType : 'warn';
+  nota.className = 'detail-note note-' + tipoNota;
+  nota.innerHTML = d.note ? `${icon(NOTA_ICONO[tipoNota], 'icon icon-sm')}<span>${esc(d.note)}</span>` : '';
+  nota.hidden = !d.note;
+  const trailer = document.getElementById('detail-trailer');
+  const vid = FNF.home && FNF.home.ytId(d.trailer);
+  trailer.innerHTML = vid ? `<button class="hb-yt" type="button" onclick="homeVideo(this, '${vid}')" aria-label="${t('Ver tráiler', 'Watch trailer')}">
+      <img src="https://i.ytimg.com/vi/${vid}/hqdefault.jpg" alt="" loading="lazy"><span class="hb-play">${icon('play', 'icon')}</span></button>` : '';
+  trailer.hidden = !vid;
 
   document.getElementById('detail-title').textContent = d.title;
   document.getElementById('detail-desc').textContent = (d.desc || '').replace(/\/n/g, '\n');
@@ -114,18 +144,24 @@ function showDetail(type, id, d) {
   compatEl.hidden = !compat;
 
   const safeLink = (u) => /^(https?:\/\/|assets\/)/i.test(u || '') ? u : '#';
-  let h = (d.downloads || []).map(dl => `
-    <a class="dl-link" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener" onclick="trackDownload('${id}')">
-      <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span>${esc(dl.name)}</span>
-    </a>`).join('');
-  h += `<button class="btn btn-ghost btn-block" style="margin-top:6px;color:var(--danger)" onclick="abrirReporte('${id}')">${icon('alert', 'icon icon-sm')} ${t('Reportar un problema', 'Report a problem')}</button>`;
+  let h = (d.downloads || []).map(dl => {
+    const srv = servidorDe(dl.link);
+    return `
+    <a class="dl-link" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}')"`}>
+      <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span class="dl-txt">${esc(dl.name)}${srv ? `<small>${esc(srv)}</small>` : ''}</span>
+    </a>`;
+  }).join('');
+  if (!preview) h += `<button class="btn btn-ghost btn-block" style="margin-top:6px;color:var(--danger)" onclick="abrirReporte('${id}')">${icon('alert', 'icon icon-sm')} ${t('Reportar un problema', 'Report a problem')}</button>`;
   document.getElementById('detail-downloads').innerHTML = h;
 
-  current = { id, type };
+  current = preview ? null : { id, type };
   window.refreshDetailAdmin();
-  if (window.loadItemRating) window.loadItemRating(id);
+  if (!preview && window.loadItemRating) window.loadItemRating(id);
   openPopup('detail-popup');
 }
+
+// Vista previa desde el editor del panel (se abre encima del editor, sin guardar nada)
+window.previewDetalle = (type, d) => showDetail(type, 'preview', d, { preview: true });
 
 // ---- Panel de admin dentro del popup (mods, bases y scripts) ----
 let current = null;
@@ -176,6 +212,13 @@ const guard = () => window.exigirRegistro && window.exigirRegistro();
 function openItem(type, id) {
   if (guard()) return;
   const d = FNF.itemOf(id);
+  // Borradores, secretos sin enlace y programados que aún no llegan a su hora
+  if (d && FNF.puedeVer && !FNF.puedeVer(id)) {
+    if (!d.draft && Number(d.publishAt) > Date.now()) {
+      return toast(t(`⏳ "${d.title}" se publica el ${FNF.fmtDateTime(d.publishAt)}. ¡Ya casi!`, `⏳ "${d.title}" goes live on ${FNF.fmtDateTime(d.publishAt)}. Almost there!`), 'clock');
+    }
+    return toast(t('Este contenido no está disponible.', 'This content is not available.'), 'info');
+  }
   if (window.brokenLinksData && window.brokenLinksData[id] && !window.isSuperUser) {
     document.getElementById('maintenance-mod-name').textContent = d ? d.title : '';
     openPopup('maintenance-popup');
@@ -193,6 +236,7 @@ document.getElementById('detail-img').addEventListener('click', () => window.abr
 
 window.closeDetail = () => {
   closePopup('detail-popup');
+  setTimeout(() => document.getElementById('detail-popup').classList.remove('popup-top'), 400);
   window.currentItemRatingId = null;
   current = null;
 };

@@ -3,7 +3,7 @@ window.fbReady.then((FB) => {
 const { db, ref, get, update } = FB;
 const { store, t, esc, fi, openPopup, closePopup, toast, getProfile, timeAgo, fmtDateTime, downloadJSON } = FNF;
 
-const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/128/149/149071.png';
+const DEFAULT_AVATAR = 'assets/iconos/avatar-default.svg';
 const FRAMES = [
   ['var(--accent)', 'Acento del tema', 'Theme accent'],
   ['#ff4fa8', 'Rosa', 'Pink'],
@@ -50,8 +50,52 @@ async function actividad(uid) {
   };
 }
 
+// Resumen de la actividad (solo números) guardado 10 minutos en el celular.
+// Así el perfil abre al instante y no descarga toda la base de datos cada vez que lo abres.
+const ACT_TTL = 10 * 60000;
+const resumir = (act) => ({
+  comments: act.comments.length,
+  likesReceived: act.comments.reduce((a, c) => a + (Number(c.likes) || 0), 0),
+  likesGiven: act.likes.length,
+  ratings: act.ratings.length,
+  votes: act.voted.length,
+  requestsDone: act.requests.filter(r => r.status === 'Completado').length
+});
+const resumenGuardado = (uid) => {
+  const c = store.json('fnf_act_' + uid, null);
+  return c && c.r ? { r: c.r, fresco: Date.now() - c.ts < ACT_TTL } : null;
+};
+async function resumenNuevo(uid) {
+  const r = resumir(await actividad(uid));
+  store.setJson('fnf_act_' + uid, { ts: Date.now(), r });
+  return r;
+}
+
 const statBox = (ic, value, label, onclick) =>
   `<div class="pf-stat"${onclick ? ` role="button" onclick="${onclick}"` : ''}>${fi(ic, 22)}<strong>${value}</strong><small>${label}</small></div>`;
+
+// Estadísticas + insignias (se repintan solas cuando llega el resumen nuevo)
+function statsHTML(s) {
+  const v = (n) => (n == null ? '<span class="pf-wait"></span>' : n);
+  return `
+    ${statBox('heart', v(s.favs), t('Favoritos', 'Favorites'), 'abrirFavoritos()')}
+    ${statBox('chat', v(s.comments), t('Comentarios', 'Comments'))}
+    ${statBox('like', v(s.likesGiven), t('Likes dados', 'Likes given'))}
+    ${statBox('star', v(s.ratings), t('Calificaciones', 'Ratings'))}
+    ${statBox('download', v(s.downloads), t('Descargas', 'Downloads'), "closePopup('profile-popup'); abrirMisDescargas()")}
+    ${statBox('calendar', v(s.days), t('Días aquí', 'Days here'))}`;
+}
+function badgesHTML(s) {
+  const listo = s.comments != null;
+  const earned = listo ? BADGES.filter(b => b[6](s)).length : '…';
+  return `
+    <div class="pf-section-head"><h4>${fi('trophy', 20)} ${t('Insignias', 'Badges')}</h4><span class="count-pill">${earned} / ${BADGES.length}</span></div>
+    <div class="pf-badges">${BADGES.map(([id, ic, es, en, howEs, howEn, ok]) => {
+      const got = listo && ok(s);
+      return `<div class="pf-badge${got ? ' got' : ''}" title="${esc(t(howEs, howEn))}">
+        <span class="pf-badge-ic">${fi(ic, 26)}</span><b>${t(es, en)}</b><small>${got ? t('¡Conseguida!', 'Earned!') : t(howEs, howEn)}</small></div>`;
+    }).join('')}</div>`;
+}
 const accountRow = (ic, title, sub, onclick, cls = '') =>
   `<button class="pf-row ${cls}" onclick="${onclick}">${fi(ic, 24)}<span class="grow"><b>${title}</b><small>${sub}</small></span><svg class="icon icon-sm"><use href="#i-right"/></svg></button>`;
 
@@ -88,11 +132,12 @@ window.abrirPerfil = async function () {
   const u = window.usuarioActualFirebase;
 
   try {
-    const [snap, act] = await Promise.all([get(ref(db, 'usuarios/' + u.uid)), actividad(u.uid)]);
+    const snap = await get(ref(db, 'usuarios/' + u.uid));
     const datos = snap.val() || {};
+    const guardado = resumenGuardado(u.uid);
 
     const nombre = datos.nombre || u.displayName || 'Usuario FNF';
-    const foto = datos.foto || u.photoURL || DEFAULT_AVATAR;
+    const foto = FNF.safeAvatar(datos.foto) || u.photoURL || DEFAULT_AVATAR;
     const correo = datos.correo || u.email || '';
     const [user, dom] = correo.split('@');
     const correoOculto = user && dom ? user.slice(0, 3) + '***@' + dom : correo;
@@ -107,19 +152,14 @@ window.abrirPerfil = async function () {
     const diasPasados = Math.floor((Date.now() - ultima) / 86400000);
     const bloqueado = ultima !== 0 && diasPasados < 15;
 
-    const s = {
-      comments: act.comments.length,
-      likesReceived: act.comments.reduce((a, c) => a + (Number(c.likes) || 0), 0),
-      likesGiven: act.likes.length,
-      ratings: act.ratings.length,
+    // Lo que vive en el celular se muestra ya; lo de Firebase llega después (o del resumen guardado)
+    const base = {
       favs: Object.keys(store.json('fnf_favorites', {})).length,
       downloads: store.json('fnf_dl_history', []).length,
-      votes: act.voted.length,
-      requestsDone: act.requests.filter(r => r.status === 'Completado').length,
       days: dias,
       verified
     };
-    const earned = BADGES.filter(b => b[6](s)).length;
+    const s = { ...base, ...(guardado ? guardado.r : {}) };
 
     box.innerHTML = `
       <div class="pf-cover" style="--frame:${esc(marco)}"></div>
@@ -128,23 +168,9 @@ window.abrirPerfil = async function () {
       <p class="rank">${fi('medal', 16)} ${rango}</p>
       <p class="pf-meta">${esc(correoOculto)} · ${t('Miembro desde', 'Member since')} ${fmtDateTime(fechaObj.getTime()).split(' · ')[0]}</p>
 
-      <div class="pf-stats">
-        ${statBox('heart', s.favs, t('Favoritos', 'Favorites'), 'abrirFavoritos()')}
-        ${statBox('chat', s.comments, t('Comentarios', 'Comments'))}
-        ${statBox('like', s.likesGiven, t('Likes dados', 'Likes given'))}
-        ${statBox('star', s.ratings, t('Calificaciones', 'Ratings'))}
-        ${statBox('download', s.downloads, t('Descargas', 'Downloads'), "closePopup('profile-popup'); abrirMisDescargas()")}
-        ${statBox('calendar', s.days, t('Días aquí', 'Days here'))}
-      </div>
+      <div class="pf-stats" id="pf-stats-box">${statsHTML(s)}</div>
 
-      <div class="pf-section">
-        <div class="pf-section-head"><h4>${fi('trophy', 20)} ${t('Insignias', 'Badges')}</h4><span class="count-pill">${earned} / ${BADGES.length}</span></div>
-        <div class="pf-badges">${BADGES.map(([id, ic, es, en, howEs, howEn, ok]) => {
-          const got = ok(s);
-          return `<div class="pf-badge${got ? ' got' : ''}" title="${esc(t(howEs, howEn))}">
-            <span class="pf-badge-ic">${fi(ic, 28)}</span><b>${t(es, en)}</b><small>${got ? t('¡Conseguida!', 'Earned!') : t(howEs, howEn)}</small></div>`;
-        }).join('')}</div>
-      </div>
+      <div class="pf-section" id="pf-badges-box">${badgesHTML(s)}</div>
 
       <details class="pf-section pf-edit">
         <summary>${fi('edit', 20)} <span>${t('Editar perfil', 'Edit profile')}</span></summary>
@@ -172,6 +198,17 @@ window.abrirPerfil = async function () {
         ${accountRow('trash', t('Pedir que borren mi cuenta', 'Request account deletion'), t('Borra tu perfil, comentarios y votos', 'Deletes your profile, comments and votes'), 'solicitarBorrarCuenta()', 'danger')}
         ${accountRow('logout', t('Cerrar sesión', 'Sign out'), 'Google · ' + esc(correoOculto), 'cerrarSesion()', 'danger')}
       </div>`;
+
+    // Estadísticas de Firebase: solo se vuelven a calcular si el resumen tiene más de 10 minutos
+    if (!guardado || !guardado.fresco) {
+      resumenNuevo(u.uid).then(r => {
+        const statsBox = document.getElementById('pf-stats-box');
+        if (!statsBox || window.usuarioActualFirebase !== u) return;
+        const nuevo = { ...base, ...r };
+        statsBox.innerHTML = statsHTML(nuevo);
+        document.getElementById('pf-badges-box').innerHTML = badgesHTML(nuevo);
+      }).catch(err => console.warn('Actividad:', err.message));
+    }
   } catch (error) {
     console.error('Error al cargar el perfil:', error);
     box.innerHTML = `

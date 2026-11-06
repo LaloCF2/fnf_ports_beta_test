@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
 };
 
-window.APP_VERSION = "v7.2.0";
+window.APP_VERSION = "v7.3.0";
 window.MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 window.fbReady = Promise.all([

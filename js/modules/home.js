@@ -15,6 +15,93 @@ const SYS = {
 };
 const SYS_ORDER = Object.keys(SYS);
 
+// Lo que el admin puede cambiar de cada parte fija (y dónde está en la página)
+//   text / textarea: reemplazan el texto · link: a dónde lleva el botón · href: enlace de un <a> · hide: ocultar
+const SYS_CAMPOS = {
+  sys_hero: [
+    { k: 'title', label: 'Título grande', sel: '#fnf-title', tipo: 'text', ph: "Friday Night Funkin'" },
+    { k: 'text', label: 'Descripción', sel: ':scope > p', tipo: 'textarea', ph: 'El mejor lugar para descargar tus mods optimizados para móvil.' },
+    { k: 'btn', label: 'Texto del botón', sel: ':scope > .btn > span', tipo: 'text', ph: 'Explorar MODs' },
+    { k: 'link', label: 'A dónde lleva el botón', sel: ':scope > .btn', tipo: 'link', ph: '#mods' },
+    { k: 'hideBtn', label: 'Ocultar el botón', sel: ':scope > .btn', tipo: 'hide' },
+    { k: 'hideStatus', label: 'Ocultar "Servidor activo"', sel: '.status-chip', tipo: 'hide' }
+  ],
+  sys_explorar: [
+    { k: 'title', label: 'Título de la sección', sel: '.section-head h2', tipo: 'text', ph: 'Explorar' },
+    { k: 'hideFavs', label: 'Ocultar el acceso a Favoritos', sel: '.tile:nth-child(4)', tipo: 'hide' }
+  ],
+  sys_top: [
+    { k: 'title', label: 'Título (vacío = cambia solo entre "Top de la semana" y "Los más descargados")', sel: '#top-week-title', tipo: 'text', ph: '🔥 Top de la semana' }
+  ],
+  sys_about: [
+    { k: 'title', label: 'Título', sel: ':scope > h3', tipo: 'text', ph: '¿De qué trata esta página?' },
+    { k: 'text', label: 'Texto', sel: ':scope > p', tipo: 'textarea', ph: 'Aquí subo la mayoría de MODs, Bases y Scripts para móviles…' },
+    { k: 'hideList', label: 'Ocultar la lista de puntos', sel: '.feature-list', tipo: 'hide' }
+  ],
+  sys_guia: [
+    { k: 'title', label: 'Título', sel: 'h3', tipo: 'text', ph: '¿Primera vez aquí?' },
+    { k: 'text', label: 'Texto', sel: ':scope > div > p', tipo: 'textarea', ph: 'La guía te dice qué base instalar…' },
+    { k: 'btn', label: 'Texto del botón', sel: ':scope > .btn', tipo: 'text', ph: 'Empezar' }
+  ],
+  sys_sprite: [
+    { k: 'title', label: 'Título', sel: 'h3', tipo: 'text', ph: 'Spritesheet Generator FNF' },
+    { k: 'text', label: 'Texto', sel: ':scope > div > p', tipo: 'textarea', ph: 'Crea y edita spritesheets directamente en tu móvil.' },
+    { k: 'btn', label: 'Texto del botón', sel: ':scope > a.btn', tipo: 'text', ph: 'Abrir' },
+    { k: 'href', label: 'Enlace del botón', sel: ':scope > a.btn', tipo: 'href', ph: 'https://...' }
+  ]
+};
+
+// Pone los textos del admin en las partes fijas (o regresa los originales si se borraron)
+function aplicarFijos(override) {
+  const todos = override || (homeData().sys || {});
+  Object.entries(SYS_CAMPOS).forEach(([key, campos]) => {
+    const root = document.querySelector(`[data-home="${key}"]`);
+    if (!root) return;
+    const o = todos[key] || {};
+    campos.forEach(c => {
+      const el = c.sel.startsWith('#') ? document.querySelector(c.sel) : root.querySelector(c.sel);
+      if (!el) return;
+      if (!el._orig) el._orig = { html: el.innerHTML, es: el.getAttribute('data-es'), en: el.getAttribute('data-en'), onclick: el.getAttribute('onclick'), href: el.getAttribute('href'), display: el.style.display };
+      const v = o[c.k];
+      if (c.tipo === 'text' || c.tipo === 'textarea') {
+        if (v) {
+          const html = fmt(v).replace(/\n/g, '<br>');
+          el.innerHTML = html;
+          el.setAttribute('data-es', html); el.setAttribute('data-en', html); // que el cambio de idioma lo respete
+          el._ovr = true;
+        } else if (el._ovr) {
+          el._ovr = false;
+          ['es', 'en'].forEach(l => { if (el._orig[l] === null) el.removeAttribute('data-' + l); else el.setAttribute('data-' + l, el._orig[l]); });
+          el.innerHTML = el._orig[window.currentLang] || el._orig.html;
+        }
+      } else if (c.tipo === 'link') {
+        const p = v && parseLink(v);
+        if (p) {
+          el.removeAttribute('onclick');
+          el.onclick = (e) => { e.preventDefault(); abrirLink(v); };
+        } else if (!el.getAttribute('onclick') && el._orig.onclick) {
+          el.onclick = null;
+          el.setAttribute('onclick', el._orig.onclick);
+        }
+      } else if (c.tipo === 'href') {
+        el.setAttribute('href', v && /^https?:\/\//i.test(v) ? v : el._orig.href);
+      } else if (c.tipo === 'hide') {
+        el.style.display = v ? 'none' : el._orig.display;
+      }
+    });
+  });
+}
+// Abre cualquier enlace del Inicio (web, sección o mod)
+function abrirLink(url) {
+  const p = parseLink(url);
+  if (!p) return;
+  if (p.ext) { window.open(p.href, '_blank', 'noopener'); return; }
+  const [kind, val] = p.act.split(':');
+  if (kind === 'sec') window.selectSection(val);
+  else if (kind === 'item' && FNF.itemOf(val)) window.openItemById(val);
+}
+const textoFijo = (key, k) => ((homeData().sys || {})[key] || {})[k] || '';
+
 // Tipos de bloque: [emoji, nombre, descripción]
 const TYPES = {
   aviso: ['📢', 'Anuncio / aviso', 'Mensaje con color, foto y botones'],
@@ -259,7 +346,8 @@ function toolsHTML(key, why) {
       <button onclick="homeMover('${k}', -1)" aria-label="Subir">${icon('up', 'icon icon-sm')}</button>
       <button onclick="homeMover('${k}', 1)" aria-label="Bajar">${icon('down', 'icon icon-sm')}</button>
       <button onclick="homeOcultar('${k}')">${oculto ? 'Mostrar' : 'Ocultar'}</button>
-      ${b ? `<button onclick="homeEditar('${k}')">Editar</button><button onclick="homeDuplicar('${k}')">Duplicar</button><button class="danger" onclick="homeBorrar('${k}')">Borrar</button>` : ''}
+      ${b ? `<button onclick="homeEditar('${k}')">Editar</button><button onclick="homeDuplicar('${k}')">Duplicar</button><button class="danger" onclick="homeBorrar('${k}')">Borrar</button>`
+        : SYS_CAMPOS[key] ? `<button onclick="homeEditarFijo('${k}')">✏️ Editar textos</button>` : ''}
     </span>`;
 }
 
@@ -339,6 +427,7 @@ function renderHome() {
   home.classList.toggle('home-editing', showAll);
   const toggle = document.getElementById('homeEditToggle');
   if (toggle) toggle.checked = showAll;
+  aplicarFijos();
   paintExtras(home);
   const n = Object.keys(dismissed()).length;
   const lbl = document.getElementById('home-closed-count');
@@ -497,7 +586,7 @@ window.homeModoEdicion = (on) => {
   renderHome();
   if (editing) toast('Modo edición: usa los botones de cada bloque. Lo que ves con borde punteado no lo ven los usuarios.', 'edit');
 };
-FNF.home = { SYS, SYS_ORDER, TYPES, TONES, blockHTML, parseLink, okImg, ytId, computeOrder, whyHidden, fechaLanzamiento, data: homeData, paintExtras, previewBlock: null };
+FNF.home = { SYS, SYS_ORDER, SYS_CAMPOS, TYPES, TONES, blockHTML, parseLink, okImg, ytId, computeOrder, whyHidden, fechaLanzamiento, aplicarFijos, textoFijo, data: homeData, paintExtras, previewBlock: null };
 
 renderHome();
 })();

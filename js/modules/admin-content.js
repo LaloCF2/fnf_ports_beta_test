@@ -146,6 +146,32 @@ window.adminOcultarItem = async (id, hide) => {
   A.log('content:hide', `${hide ? 'Ocultó' : 'Volvió a mostrar'} "${A.allTitle(id)}"`, id);
   toast(hide ? 'Oculto para los usuarios.' : 'Visible otra vez.', hide ? 'hide' : 'eye');
 };
+// Cambia con un toque un campo de sí/no del mod (Borrador, Secreto) desde el popup
+window.adminCampoItem = async (id, campo) => {
+  if (!isAdmin()) return;
+  const d = FNF.itemOf(id) || {};
+  const nuevo = !d[campo];
+  try {
+    await update(ref(db, pathOf(id)), { [campo]: nuevo || null, updatedAt: Date.now() });
+    const nombres = { draft: ['Ahora es borrador (solo tú lo ves).', 'Publicado: ya lo ven todos.'], hidden: ['Ahora es secreto (solo con el enlace).', 'Ya es visible para todos.'] };
+    toast((nombres[campo] || ['Activado.', 'Desactivado.'])[nuevo ? 0 : 1], 'check');
+    A.log('content:save', `${nuevo ? 'Activó' : 'Quitó'} "${campo === 'draft' ? 'borrador' : campo === 'hidden' ? 'secreto' : campo}" en "${A.allTitle(id)}"`, id);
+    setTimeout(() => { if (window.refreshDetailAdmin) window.refreshDetailAdmin(); }, 300);
+  } catch (err) {
+    toast('No se pudo guardar. ¿Tienes la sesión de admin abierta?', 'alert');
+  }
+};
+
+// Abre el editor directo en una parte (Pestañas, Imágenes, Descargas, Publicar...)
+window.abrirEditorEn = (id, kind, seccion) => {
+  window.abrirEditorMod(id, kind);
+  if (!seccion) return;
+  setTimeout(() => {
+    const el = document.getElementById(seccion);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.add('ed-flash'); setTimeout(() => el.classList.remove('ed-flash'), 1600); }
+  }, 450);
+};
+
 window.adminRestaurarItem = async (id) => {
   if (!confirm('¿Volver a la versión original del archivo data? Se pierden los cambios hechos en el panel.')) return;
   await remove(ref(db, pathOf(id)));
@@ -171,7 +197,37 @@ let duplicando = null;
 let cambios = false;           // hay algo sin guardar
 let listaImgs = null;          // filas de imágenes (admin-forms.js)
 let listaDls = null;           // filas de descargas
+let pestanas = null;           // editor de pestañas del popup
 let tipoNota = 'warn';
+
+// ---- ID personalizado (sale en el enlace para compartir) ----
+// Las bases deben empezar con "apk" y los scripts con "script" (así sabe la página qué es cada cosa)
+function idFinal(kind, raw) {
+  let s = String(raw || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9_-]+/g, '-').replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '');
+  if (!s) return '';
+  if (kind === 'apk' && !s.startsWith('apk')) s = 'apk-' + s;
+  if (kind === 'script' && !s.startsWith('script')) s = 'script-' + s;
+  if (kind === 'mod' && (s.startsWith('apk') || s.startsWith('script'))) s = 'mod-' + s;
+  return s.slice(0, 40);
+}
+const idOcupado = (id) => !!(FNF.itemOf(id) || Object.keys(FNF.KINDS).some(k => A.baseOf(k)[id] || A.customOf(k)[id]));
+function revisarId() {
+  const raw = val('ed-id');
+  const id = idFinal(editingKind, raw);
+  const msg = $('ed-id-msg');
+  if (!raw) { msg.textContent = 'Solo letras, números, - y _. Si lo dejas vacío se crea uno solo.'; msg.className = 'ed-hint'; return true; }
+  if (idOcupado(id)) { msg.textContent = `❌ "${id}" ya existe. Prueba con otro.`; msg.className = 'ed-hint bad'; return false; }
+  msg.textContent = `✅ Quedará así: ?share=${id}`;
+  msg.className = 'ed-hint ok';
+  return true;
+}
+window.edIdDesdeTitulo = () => { $('ed-id').value = idFinal(editingKind, val('ed-title')); revisarId(); avisarCambio(); };
+window.edCopiarId = () => FNF.copyText(editingId, 'ID copiado.');
+window.edCopiarEnlace = () => {
+  const d = FNF.itemOf(editingId) || {};
+  FNF.copyText(`${location.origin}${location.pathname}?${d.hidden ? 'unlock' : 'share'}=${editingId}`, 'Enlace copiado.');
+};
 let previewTimer = null;
 const $ = (id) => document.getElementById(id);
 const val = (id) => $(id).value.trim();
@@ -189,7 +245,9 @@ function leerFormulario() {
     gama: isMod ? $('ed-gama').value : null,
     engine: isMod ? val('ed-engine') : null, ram: isMod ? val('ed-ram') : null, size: isMod ? val('ed-size') : null,
     creator: val('ed-creator') || null, creatorLink: val('ed-creator-link') || null,
-    changelog: val('ed-changelog') || null, lang: $('ed-lang').value || null,
+    // "Qué cambió" ahora es la pestaña Cambios (el campo viejo se borra al guardar)
+    changelog: null, lang: $('ed-lang').value || null,
+    tabs: pestanas && pestanas.get().length ? pestanas.get() : null,
     // La galería del popup: portada + capturas
     images: imgs.length > 1 || (editingKind === 'script' && imgs.length) ? imgs : null,
     downloads: listaDls ? listaDls.get().filter(r => r.link).map(r => ({ name: r.name || 'Descarga', link: r.link })) : [],
@@ -225,8 +283,9 @@ const avisarCambio = () => {
 // Escuchas del editor (una sola vez)
 (() => {
   const pop = $('mod-editor-popup');
-  pop.addEventListener('input', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list')) avisarCambio(); });
-  pop.addEventListener('change', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list')) avisarCambio(); });
+  pop.addEventListener('input', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list, #ed-tabs-list')) avisarCambio(); });
+  pop.addEventListener('change', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list, #ed-tabs-list')) avisarCambio(); });
+  $('ed-id').addEventListener('input', revisarId);
   // Atajos: llevan a cada parte del formulario
   $('ed-jump').addEventListener('click', (e) => {
     const b = e.target.closest('[data-ir]');
@@ -259,7 +318,19 @@ window.abrirEditorMod = (id, kind, origen) => {
   setV('ed-title', origen ? `${d.title} (copia)` : d.title);
   setV('ed-desc', d.desc); setV('ed-version', d.version);
   setV('ed-engine', d.engine); setV('ed-ram', d.ram); setV('ed-size', d.size);
-  setV('ed-creator', d.creator); setV('ed-creator-link', d.creatorLink); setV('ed-changelog', d.changelog);
+  setV('ed-creator', d.creator); setV('ed-creator-link', d.creatorLink);
+  // ID: se elige al crear; si ya existe, solo se muestra (cambiarlo rompería sus descargas y comentarios)
+  $('ed-id-new').hidden = !!id;
+  $('ed-id-old').hidden = !id;
+  $('ed-id').value = '';
+  $('ed-id-pre').textContent = '?share=';
+  if (id) $('ed-id-actual').textContent = id;
+  revisarId();
+  // Pestañas del popup (los mods de antes con "Qué cambió" lo traen como pestaña Cambios)
+  let tabs = Array.isArray(d.tabs) ? d.tabs : [];
+  if (!tabs.length && d.changelog) tabs = [{ id: 'cambios', type: 'cambios', on: true, text: d.changelog }];
+  if (!pestanas) pestanas = FNF.EditorPestanas($('ed-tabs-list'), tabs, avisarCambio);
+  else pestanas.set(tabs);
   setV('ed-tags', (d.tags || []).join(', ')); setV('ed-trailer', d.trailer); setV('ed-note', d.note);
   $('ed-publish-at').value = origen ? '' : toInput(d.publishAt);
   $('ed-lang').value = d.lang || '';
@@ -330,7 +401,15 @@ window.guardarMod = async (comoBorrador) => {
   if (d.publishAt && d.publishAt <= Date.now()) d.publishAt = null; // fecha que ya pasó = publicar ya
 
   const data = { ...d, updatedAt: Date.now() };
-  const id = editingId || (editingKind + Date.now().toString(36));
+  // Revisión de las pestañas: si activaste una pero no le escribiste nada, se avisa (no se ve en el popup)
+  const vacias = (d.tabs || []).filter(p => p.on && FNF.pestanaConContenido && !FNF.pestanaConContenido(p));
+  if (vacias.length && !confirm(`La pestaña "${vacias[0].title || (FNF.TIPOS_PESTANA[vacias[0].type] || [, 'Extra'])[1]}" está activada pero vacía, así que no se verá. ¿Guardar de todas formas?`)) {
+    $('ed-s-tabs').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  // ID: el que elegiste (si está libre) o uno automático
+  if (!editingId && val('ed-id') && !revisarId()) { $('ed-id').focus(); return toast('Ese ID ya existe. Elige otro.', 'alert'); }
+  const id = editingId || idFinal(editingKind, val('ed-id')) || (editingKind + Date.now().toString(36));
   if (!editingId) data.createdAt = Date.now();
 
   const btn = $('btn-guardar-mod');

@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Sin zoom: ni al escribir (iPhone), ni pellizcando, ni con doble toque (Android, iOS y la app instalada) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>FNF' Ports Mobile</title>
   <meta name="description" content="Los mejores ports de Friday Night Funkin' para móvil: bases, mods y scripts.">
 
@@ -43,6 +44,11 @@
       if (accent && accent !== '#00eaff') document.documentElement.style.setProperty('--accent', accent);
       var blur = s('glassBlur');
       if (blur) document.documentElement.style.setProperty('--glass-blur', blur + 'px');
+      // Safari (iPhone) ignora user-scalable=no: aquí se bloquea el pellizco y el doble toque
+      var no = function (e) { e.preventDefault(); };
+      document.addEventListener('gesturestart', no, { passive: false });
+      document.addEventListener('gesturechange', no, { passive: false });
+      document.addEventListener('touchmove', function (e) { if (e.scale !== undefined && e.scale !== 1) e.preventDefault(); }, { passive: false });
     })();
   </script>
 
@@ -387,38 +393,32 @@
 
   <!-- Detalle -->
   <div id="detail-popup" class="popup">
-    <div class="popup-content">
-      <button class="popup-close" onclick="closeDetail()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
-      <p class="detail-preview-flag" id="detail-preview-flag" hidden>👁️ Vista previa: así lo verán los usuarios (todavía no está guardado)</p>
-      <h2 class="popup-title" id="detail-title"></h2>
-      <div id="detail-admin" class="detail-admin" hidden></div>
-      <div class="detail-media" id="detail-media">
-        <img id="detail-img" alt="">
-        <button class="carousel-btn carousel-prev hidden" onclick="carouselStep(-1)" aria-label="Anterior"><svg class="icon icon-sm"><use href="#i-left"/></svg></button>
-        <button class="carousel-btn carousel-next hidden" onclick="carouselStep(1)" aria-label="Siguiente"><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
-        <span class="carousel-count hidden" id="carousel-count"></span>
-      </div>
-      <span class="detail-version" id="detail-version"></span>
-      <div class="detail-meta" id="detail-meta" hidden></div>
-      <div class="detail-tags" id="detail-tags" hidden></div>
-      <div class="detail-note" id="detail-note" hidden></div>
-      <p class="detail-compat" id="detail-compat" hidden></p>
-      <details class="detail-changelog" id="detail-changelog" hidden>
-        <summary><span data-es="Qué cambió en esta versión" data-en="What's new in this version">Qué cambió en esta versión</span></summary>
-        <p id="detail-changelog-text"></p>
-      </details>
-      <p class="detail-desc" id="detail-desc"></p>
-      <div class="detail-trailer" id="detail-trailer" hidden></div>
-      <div class="rating" id="detail-rating">
-        <div class="stars">
-          <button onclick="rateAppItem(1)">★</button><button onclick="rateAppItem(2)">★</button><button onclick="rateAppItem(3)">★</button><button onclick="rateAppItem(4)">★</button><button onclick="rateAppItem(5)">★</button>
+    <div class="popup-content dt-sheet">
+      <button class="popup-close dt-close" onclick="closeDetail()" aria-label="Cerrar"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      <div class="dt-scroll" id="dt-scroll">
+        <p class="detail-preview-flag" id="detail-preview-flag" hidden>👁️ Vista previa: así lo verán los usuarios (todavía no está guardado)</p>
+        <!-- Cabecera: portada (mods), logo (bases) o captura (scripts) -->
+        <div class="dt-head" id="dt-head"></div>
+        <div class="dt-pad">
+          <div id="detail-admin" class="detail-admin" hidden></div>
+          <div class="dt-datos" id="dt-datos"></div>
+          <p class="detail-compat" id="detail-compat" hidden></p>
+          <!-- Pestañas en 3D: giran como una rueda al tocar o deslizar -->
+          <div class="dt-ring-wrap">
+            <button type="button" class="dt-ring-arrow prev" onclick="dtPestana(-1)" aria-label="Pestaña anterior"><svg class="icon icon-sm"><use href="#i-left"/></svg></button>
+            <div class="dt-ring" id="dt-ring" role="tablist"></div>
+            <button type="button" class="dt-ring-arrow next" onclick="dtPestana(1)" aria-label="Pestaña siguiente"><svg class="icon icon-sm"><use href="#i-right"/></svg></button>
+          </div>
+          <div class="dt-dots" id="dt-dots"></div>
+          <div class="dt-stage" id="dt-stage"></div>
         </div>
-        <small id="detail-rating-text">Califica este contenido</small>
       </div>
-      <div class="dl-list" id="detail-downloads"></div>
+      <!-- Barra fija abajo -->
+      <div class="dt-foot" id="dt-foot"></div>
+      <!-- Menú "Elige tu descarga" (cuando hay varias) -->
+      <div class="dt-dlmenu" id="dt-dlmenu" hidden></div>
     </div>
   </div>
-
   <!-- Comentarios -->
   <div id="mod-comments-popup" class="popup">
     <div class="popup-content mc-sheet">
@@ -610,16 +610,6 @@
       <h2 class="popup-title" id="update-title">Versión 7.3.0</h2>
       <p class="popup-sub" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta versión:</p>
       <ul class="feature-list" style="text-align:left;margin-bottom:20px">
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-chat"/></svg></span>
-          <span data-es="<b>Comentarios nuevos:</b> estilo chat, likes con corazón y <b>@menciones en azul</b> (hasta 150 letras)." data-en="<b>New comments:</b> chat style, heart likes and <b>blue @mentions</b> (up to 150 characters)."><b>Comentarios nuevos:</b> estilo chat, likes con corazón y <b>@menciones en azul</b> (hasta 150 letras).</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-home"/></svg></span>
-          <span data-es="<b>Inicio renovado</b> con anuncios, mods especiales, videos y cuentas regresivas." data-en="<b>Refreshed home</b> with announcements, featured mods, videos and countdowns."><b>Inicio renovado</b> con anuncios, mods especiales, videos y cuentas regresivas.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-share"/></svg></span>
-          <span data-es="<b>Compartir mejorado:</b> el link sale con la imagen del mod en WhatsApp, Telegram y más." data-en="<b>Better sharing:</b> links show the mod's picture on WhatsApp, Telegram and more."><b>Compartir mejorado:</b> el link sale con la imagen del mod en WhatsApp, Telegram y más.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg></span>
-          <span data-es="<b>Iconos nuevos</b> y <b>animaciones suaves</b> al cambiar de sección." data-en="<b>New icons</b> and <b>smooth animations</b> between sections."><b>Iconos nuevos</b> y <b>animaciones suaves</b> al cambiar de sección.</span></li>
-        <li><span class="fi"><svg class="icon icon-sm"><use href="#i-zap"/></svg></span>
-          <span data-es="<b>Más rápida:</b> el perfil abre al instante y la página carga mejor con mala señal." data-en="<b>Faster:</b> the profile opens instantly and the page loads better on weak signal."><b>Más rápida:</b> el perfil abre al instante y la página carga mejor con mala señal.</span></li>
       </ul>
       <button class="btn btn-block" onclick="closeUpdatePopup()" data-es="¡Aceptar!" data-en="OK!">¡Aceptar!</button>
     </div>
@@ -730,6 +720,7 @@
         <button type="button" data-ir="ed-mod-fields">🎮 Requisitos</button>
         <button type="button" data-ir="ed-s-media">🖼️ Imágenes</button>
         <button type="button" data-ir="ed-s-dl">⬇️ Descargas</button>
+        <button type="button" data-ir="ed-s-tabs">🗂️ Pestañas</button>
         <button type="button" data-ir="ed-s-extra">✨ Extras</button>
         <button type="button" data-ir="ed-s-pub">🚀 Publicar</button>
       </nav>
@@ -745,6 +736,17 @@
           <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-box"/></svg> Información básica</h4>
           <label class="label" for="ed-title">Título <span class="ed-count" id="ed-title-n"></span></label>
           <input id="ed-title" class="field" maxlength="80" placeholder="Ej: Vs Matt V3">
+          <!-- ID: lo eliges al crear (sale en el enlace para compartir); después ya no cambia -->
+          <div class="ed-id" id="ed-id-new">
+            <label class="label" for="ed-id">ID para el enlace (opcional)</label>
+            <div class="fr-line"><span class="ed-id-pre" id="ed-id-pre">?share=</span><input id="ed-id" class="field" maxlength="40" placeholder="vs-matt-v3" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+            <div class="ed-quick"><button type="button" onclick="edIdDesdeTitulo()">Usar el título</button><span class="ed-hint" id="ed-id-msg">Solo letras, números, - y _. Si lo dejas vacío se crea uno solo.</span></div>
+          </div>
+          <div class="ed-id ed-id-fixed" id="ed-id-old" hidden>
+            <span>ID: <code id="ed-id-actual"></code></span>
+            <button type="button" class="btn btn-soft btn-sm" onclick="edCopiarId()">Copiar ID</button>
+            <button type="button" class="btn btn-soft btn-sm" onclick="edCopiarEnlace()">Copiar enlace</button>
+          </div>
           <label class="label" for="ed-desc">Descripción <span class="ed-count" id="ed-desc-n"></span></label>
           <textarea id="ed-desc" class="field ed-tall" maxlength="1500" placeholder="De qué trata, qué trae y para qué celulares está optimizado"></textarea>
           <div class="editor-grid">
@@ -812,8 +814,12 @@
             <button type="button" data-v="info">ℹ️ Info</button><button type="button" data-v="warn">⚠️ Cuidado</button>
             <button type="button" data-v="danger">⛔ Importante</button><button type="button" data-v="ok">✅ Buena noticia</button>
           </div>
-          <label class="label" for="ed-changelog">Qué cambió en esta versión (opcional)</label>
-          <textarea id="ed-changelog" class="field" maxlength="1200" placeholder="- Se optimizaron las canciones&#10;- Se arregló el crasheo en la semana 2"></textarea>
+        </section>
+
+        <section class="ed-section" id="ed-s-tabs">
+          <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-list"/></svg> Pestañas del popup</h4>
+          <p class="note"><b>NOTA:</b> Info, Descargas, Capturas y Chat siempre están. Las de aquí abajo solo aparecen si las <b>activas</b> y les <b>escribes algo</b>. Puedes ordenarlas, apagarlas o borrarlas.</p>
+          <div id="ed-tabs-list"></div>
         </section>
 
         <section class="ed-section" id="ed-s-pub">

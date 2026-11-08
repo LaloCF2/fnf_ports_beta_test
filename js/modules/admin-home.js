@@ -75,6 +75,78 @@ window.homeDuplicar = async (key) => {
   }
 };
 
+// ==========================================
+// EDITAR LAS PARTES FIJAS (portada, ¿De qué trata?, guía...)
+// Se ve el cambio en vivo detrás del popup mientras escribes.
+// ==========================================
+let fijoKey = null;
+let fijoCambios = false;
+(() => {
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="sys-editor-popup" class="popup">
+      <div class="popup-content ed-sheet">
+        <button class="popup-close" onclick="homeCerrarFijo()" aria-label="Cerrar">${FNF.icon('x', 'icon icon-sm')}</button>
+        <h2 class="popup-title" id="sys-title">Editar textos</h2>
+        <p class="ed-status">Los cambios se ven en vivo detrás de esta ventana. Lo que dejes vacío regresa al original.</p>
+        <div class="editor-body"><section class="ed-section" id="sys-campos"></section></div>
+        <div class="ed-footer">
+          <button type="button" class="btn btn-ghost" onclick="homeRestaurarFijo()">Original</button>
+          <button type="button" class="btn" onclick="homeGuardarFijo()">${FNF.icon('check', 'icon icon-sm')} Guardar</button>
+        </div>
+      </div>
+    </div>`);
+  const pop = document.getElementById('sys-editor-popup');
+  pop.addEventListener('input', () => { fijoCambios = true; H.aplicarFijos({ ...(H.data().sys || {}), [fijoKey]: leerFijo() }); });
+})();
+function leerFijo() {
+  const o = {};
+  (H.SYS_CAMPOS[fijoKey] || []).forEach(c => {
+    const el = document.getElementById('sys-f-' + c.k);
+    if (!el) return;
+    if (c.tipo === 'hide') { if (el.checked) o[c.k] = true; }
+    else if (el.value.trim()) o[c.k] = el.value.trim().slice(0, c.tipo === 'textarea' ? 600 : 120);
+  });
+  return o;
+}
+window.homeEditarFijo = (key) => {
+  if (!isAdmin() || !H.SYS_CAMPOS[key]) return;
+  fijoKey = key;
+  fijoCambios = false;
+  const o = (H.data().sys || {})[key] || {};
+  $('sys-title').textContent = `Editar: ${H.SYS[key][1]}`;
+  $('sys-campos').innerHTML = H.SYS_CAMPOS[key].map(c => c.tipo === 'hide'
+    ? `<label class="setting-row" style="border:0;padding:4px 0"><span>${esc(c.label)}</span><span class="switch"><input type="checkbox" id="sys-f-${c.k}" ${o[c.k] ? 'checked' : ''}><span></span></span></label>`
+    : `<label class="label" for="sys-f-${c.k}">${esc(c.label)}</label>
+       ${c.tipo === 'textarea'
+        ? `<textarea id="sys-f-${c.k}" class="field" maxlength="600" placeholder="${esc(c.ph || '')}">${esc(o[c.k] || '')}</textarea>`
+        : `<input id="sys-f-${c.k}" class="field" maxlength="120" placeholder="${esc(c.ph || '')}" value="${esc(o[c.k] || '')}">`}
+       ${c.tipo === 'link' ? '<p class="note"><b>NOTA:</b> https://..., #mods, #apks, #scripts, #help, #contact o mod:ID.</p>' : ''}`).join('') +
+    '<p class="note"><b>TIP:</b> escribe **así** para negritas.</p>';
+  openPopup('sys-editor-popup');
+};
+window.homeCerrarFijo = () => {
+  if (fijoCambios && !confirm('¿Salir sin guardar? Se regresan los textos de antes.')) return;
+  fijoCambios = false;
+  H.aplicarFijos();
+  closePopup('sys-editor-popup');
+};
+window.homeRestaurarFijo = () => {
+  document.querySelectorAll('#sys-campos input, #sys-campos textarea').forEach(el => { if (el.type === 'checkbox') el.checked = false; else el.value = ''; });
+  fijoCambios = true;
+  H.aplicarFijos({ ...(H.data().sys || {}), [fijoKey]: {} });
+  toast('Se regresaron los textos originales. Dale Guardar para dejarlo así.', 'refresh');
+};
+window.homeGuardarFijo = async () => {
+  const o = leerFijo();
+  if (o.link && !H.parseLink(o.link)) return toast('El enlace del botón no es válido.', 'alert');
+  if (o.href && !/^https?:\/\//i.test(o.href)) return toast('El enlace debe empezar con https://', 'alert');
+  if (await guardar({ [`sys/${fijoKey}`]: Object.keys(o).length ? o : null }, 'Textos guardados.')) {
+    log(`Editó los textos de "${H.SYS[fijoKey][1]}"`, fijoKey);
+    fijoCambios = false;
+    closePopup('sys-editor-popup');
+  }
+};
+
 // Atajo: ir al Inicio con el modo edición encendido
 window.homeIrEditar = () => {
   window.selectSection('home');
@@ -436,7 +508,8 @@ A.TAB.inicio = {
           ${A.btn('up', '', `homeMover('${k}', -1)`)}
           ${A.btn('down', '', `homeMover('${k}', 1)`)}
           ${A.btn(oculto ? 'eye' : 'hide', oculto ? 'Mostrar' : 'Ocultar', `homeOcultar('${k}')`)}
-          ${b ? A.btn('edit', 'Editar', `homeEditar('${k}')`, 'btn-soft') + A.btn('copy', 'Duplicar', `homeDuplicar('${k}')`) + A.btn('trash', 'Borrar', `homeBorrar('${k}')`, 'btn-danger') : ''}
+          ${b ? A.btn('edit', 'Editar', `homeEditar('${k}')`, 'btn-soft') + A.btn('copy', 'Duplicar', `homeDuplicar('${k}')`) + A.btn('trash', 'Borrar', `homeBorrar('${k}')`, 'btn-danger')
+            : H.SYS_CAMPOS[key] ? A.btn('edit', 'Editar textos', `homeEditarFijo('${k}')`, 'btn-soft') : ''}
         </div>
       </article>`;
     }).join('');

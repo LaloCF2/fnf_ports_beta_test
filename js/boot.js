@@ -99,5 +99,17 @@ window.renderAll();
 window.initNav();
 applyLanguage();
 document.getElementById('year').textContent = new Date().getFullYear();
+
+// Barra de arriba fija: al bajar se vuelve de cristal (para que se lea encima de todo)
+const topbar = document.querySelector('.topbar');
+let topbarPendiente = false;
+window.addEventListener('scroll', () => {
+  if (topbarPendiente) return;
+  topbarPendiente = true;
+  requestAnimationFrame(() => {
+    topbar.classList.toggle('is-scrolled', window.scrollY > 8);
+    topbarPendiente = false;
+  });
+}, { passive: true });
 requestAnimationFrame(() => document.body.classList.add('loaded'));
 })();

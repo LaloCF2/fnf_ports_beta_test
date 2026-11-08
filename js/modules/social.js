@@ -496,6 +496,7 @@ window.loadItemRating = (id) => {
   paintStars(mine || 0);
   const base = mine ? t('Tu calificación', 'Your rating') : t('Califica este contenido', 'Rate this content');
   const el = document.getElementById('detail-rating-text');
+  if (!el) return; // la pestaña Info no está abierta en este momento
   el.textContent = n ? `${base} · ${t('Promedio', 'Average')}: ${avg.toFixed(1)} ⭐ (${n})` : base;
 };
 

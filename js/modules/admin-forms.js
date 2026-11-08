@@ -74,6 +74,38 @@ const TIPOS = {
     },
     valido: (r) => !r.url || FNF.home.parseLink(r.url)
   },
+  paso: {
+    nuevo: () => ({ text: '' }),
+    agregar: 'Añadir paso',
+    html: (r) => `<div class="fr-main"><input class="field" data-k="text" maxlength="200" placeholder="Ej: Copia la carpeta del mod en mods/" value="${esc(r.text)}"></div>`,
+    valido: () => true
+  },
+  version: {
+    nuevo: () => ({ version: '', date: '', text: '' }),
+    agregar: 'Añadir versión',
+    html: (r) => `
+      <div class="fr-main">
+        <div class="fr-line">
+          <input class="field" data-k="version" maxlength="30" placeholder="v1.0.4" value="${esc(r.version)}">
+          <input class="field" data-k="date" maxlength="30" placeholder="Fecha (ej: 05/11/2026)" value="${esc(r.date)}">
+        </div>
+        <textarea class="field" data-k="text" maxlength="800" placeholder="- Qué cambió en esta versión">${esc(r.text)}</textarea>
+      </div>`,
+    valido: () => true
+  },
+  credito: {
+    nuevo: () => ({ name: '', role: '', link: '' }),
+    agregar: 'Añadir persona',
+    html: (r) => `
+      <div class="fr-main">
+        <div class="fr-line">
+          <input class="field" data-k="name" maxlength="40" placeholder="Nombre" value="${esc(r.name)}">
+          <input class="field" data-k="role" maxlength="40" placeholder="Qué hizo (ej: Música)" value="${esc(r.role)}">
+        </div>
+        <input class="field" data-k="link" inputmode="url" placeholder="Enlace (opcional): https://..." value="${esc(r.link)}">
+      </div>`,
+    valido: (r) => !r.link || /^https?:\/\/\S+$/i.test(r.link.trim())
+  },
   imagen: {
     nuevo: () => ({ url: '' }),
     agregar: 'Añadir imagen',
@@ -193,6 +225,144 @@ FNF.Filas = (el, tipo, filas, onChange, opciones = {}) => {
       const vacio = [...el.querySelectorAll('.fr-row:last-child input')].find(x => !x.value);
       if (vacio) vacio.focus();
     }
+  };
+};
+
+// ==========================================
+// EDITOR DE PESTAÑAS DEL POPUP (mods, bases y scripts)
+// ==========================================
+const TIPOS_TAB = {
+  cambios: ['📝', 'Cambios', 'Qué cambió en esta versión'],
+  instalar: ['🛠️', 'Instalar', 'Pasos numerados para instalarlo'],
+  versiones: ['🗂️', 'Versiones', 'Historial de versiones'],
+  requisitos: ['📋', 'Requisitos', 'Lo que se necesita antes'],
+  creditos: ['👥', 'Créditos', 'Quién hizo qué'],
+  video: ['▶️', 'Video', 'Un video de YouTube'],
+  custom: ['✨', 'Personalizada', 'Tú eliges el título y el texto']
+};
+// Qué lista usa cada tipo (y con qué tipo de fila)
+const LISTA_TAB = { instalar: ['steps', 'paso', 'Sin pasos todavía.'], versiones: ['items', 'version', 'Sin versiones. La primera que pongas es la actual.'], creditos: ['items', 'credito', 'Sin personas todavía.'], custom: ['links', 'boton', 'Sin botones (son opcionales).'] };
+
+const tieneContenido = (p) => (FNF.pestanaConContenido ? FNF.pestanaConContenido(p) : !!(p.text || p.url || (p.steps || []).length || (p.items || []).length || (p.links || []).length));
+const estadoTab = (p) => p.on === false ? '⏸ Apagada' : tieneContenido(p) ? '✅ Se ve en el popup' : '✏️ Falta escribirle algo';
+
+/**
+ *   const tabs = FNF.EditorPestanas(elemento, [{ type, on, emoji, title, text, steps, items, links, url }], () => {...});
+ *   tabs.get() / tabs.set([...])
+ */
+FNF.EditorPestanas = (el, inicial, onChange) => {
+  let rows = JSON.parse(JSON.stringify(inicial || []));
+  let abierta = null;
+  const listas = {};
+  const avisar = () => { if (onChange) onChange(); };
+
+  const cuerpo = (p, i) => {
+    const lista = LISTA_TAB[p.type] ? `<label class="label">${{ steps: 'Pasos', items: p.type === 'versiones' ? 'Versiones (la de arriba es la actual)' : 'Personas', links: 'Botones (opcional)' }[LISTA_TAB[p.type][0]]}</label><div data-filas="${i}"></div>` : '';
+    const texto = (ph, label = 'Texto') => `<label class="label">${label}</label><textarea class="field ed-tall" data-tk="text" maxlength="2000" placeholder="${ph}">${esc(p.text)}</textarea>
+      <p class="note"><b>TIP:</b> empieza una línea con <b>- </b> para hacer una lista, y escribe <b>**así**</b> para negritas.</p>`;
+    if (p.type === 'instalar') return lista + texto('Nota final (opcional)', 'Nota al final (opcional)');
+    if (p.type === 'versiones' || p.type === 'creditos') return lista;
+    if (p.type === 'video') return `<label class="label">Enlace de YouTube</label><input class="field" data-tk="url" inputmode="url" placeholder="https://youtu.be/..." value="${esc(p.url)}">` + texto('Algo sobre el video (opcional)', 'Texto (opcional)');
+    if (p.type === 'cambios') return texto('- Se optimizaron las canciones\n- Se arregló el crasheo en la semana 2');
+    if (p.type === 'requisitos') return texto('- Android 8 o más nuevo\n- 2 GB de RAM\n- La base Psych Engine 0.7.3');
+    return texto('Escribe lo que quieras mostrar en esta pestaña.') + lista;
+  };
+
+  function pintar() {
+    Object.keys(listas).forEach(k => delete listas[k]);
+    el.innerHTML = `
+      <div class="tp-fijas"><span>Siempre:</span><b>ℹ️ Info</b><b>⬇️ Descargas</b><b>🖼️ Capturas</b><b>💬 Chat</b></div>
+      <div class="tp-list">${rows.map((p, i) => {
+        const T = TIPOS_TAB[p.type] || TIPOS_TAB.custom;
+        const off = p.on === false;
+        return `
+        <div class="tp-card${off ? ' off' : ''}${abierta === i ? ' open' : ''}" data-i="${i}">
+          <div class="tp-head">
+            <input class="field tp-emoji" data-tk="emoji" maxlength="4" value="${esc(p.emoji || T[0])}" aria-label="Emoji">
+            <input class="field tp-title" data-tk="title" maxlength="24" placeholder="${T[1]}" value="${esc(p.title || '')}" aria-label="Título de la pestaña">
+            <label class="switch" title="Activar o apagar"><input type="checkbox" data-tk="on" ${off ? '' : 'checked'}><span></span></label>
+          </div>
+          <div class="tp-meta">
+            <span class="tp-type">${T[0]} ${T[1]}</span>
+            <span class="tp-state" data-estado>${estadoTab(p)}</span>
+            <span class="grow"></span>
+            <button type="button" data-tp="up" ${i === 0 ? 'disabled' : ''} aria-label="Subir">${icon('up', 'icon icon-sm')}</button>
+            <button type="button" data-tp="down" ${i === rows.length - 1 ? 'disabled' : ''} aria-label="Bajar">${icon('down', 'icon icon-sm')}</button>
+            <button type="button" data-tp="abrir" class="tp-edit">${abierta === i ? 'Listo' : '✏️ Editar'}</button>
+            <button type="button" data-tp="del" class="danger" aria-label="Borrar">${icon('trash', 'icon icon-sm')}</button>
+          </div>
+          ${abierta === i ? `<div class="tp-body">${cuerpo(p, i)}</div>` : ''}
+        </div>`;
+      }).join('') || '<p class="fr-empty">Sin pestañas extra todavía. Agrega una aquí abajo 👇</p>'}</div>
+      <div class="tp-add"><span>➕ Añadir pestaña:</span>
+        ${Object.entries(TIPOS_TAB).map(([k, [e, n, desc]]) => `<button type="button" data-tpadd="${k}" title="${desc}">${e} ${n}</button>`).join('')}
+      </div>`;
+    // Listas (pasos, versiones, créditos, botones) dentro de la pestaña abierta
+    if (abierta !== null && rows[abierta] && LISTA_TAB[rows[abierta].type]) {
+      const p = rows[abierta];
+      const [campo, tipo, vacio] = LISTA_TAB[p.type];
+      const box = el.querySelector(`[data-filas="${abierta}"]`);
+      const f = FNF.Filas(box, tipo, p[campo] || [], () => {
+        p[campo] = f.get();
+        const est = el.querySelector(`.tp-card[data-i="${abierta}"] [data-estado]`);
+        if (est) est.textContent = estadoTab(p);
+        avisar();
+      }, { vacio, max: 20 });
+      listas[abierta] = f;
+    }
+  }
+
+  el.addEventListener('input', (e) => {
+    const k = e.target.dataset.tk;
+    const card = e.target.closest('.tp-card');
+    if (!k || !card) return;
+    const p = rows[Number(card.dataset.i)];
+    p[k] = k === 'on' ? e.target.checked : e.target.value;
+    if (k === 'on') card.classList.toggle('off', !e.target.checked);
+    const est = card.querySelector('[data-estado]');
+    if (est) est.textContent = estadoTab(p);
+    avisar();
+  });
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('[data-filas]')) return; // los botones de las listas los maneja su propia lista
+    const add = e.target.closest('[data-tpadd]');
+    if (add) {
+      const tipo = add.dataset.tpadd;
+      rows.push({ id: 't' + Date.now().toString(36), type: tipo, on: true, emoji: TIPOS_TAB[tipo][0], title: '' });
+      abierta = rows.length - 1;
+      pintar(); avisar();
+      const campo = el.querySelector('.tp-card.open textarea, .tp-card.open [data-filas] input, .tp-card.open input[data-tk="url"]');
+      if (campo) { campo.focus(); campo.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      return;
+    }
+    const b = e.target.closest('[data-tp]');
+    if (!b) return;
+    const i = Number(b.closest('.tp-card').dataset.i);
+    const a = b.dataset.tp;
+    if (a === 'up' && i > 0) { [rows[i - 1], rows[i]] = [rows[i], rows[i - 1]]; if (abierta === i) abierta = i - 1; else if (abierta === i - 1) abierta = i; }
+    else if (a === 'down' && i < rows.length - 1) { [rows[i + 1], rows[i]] = [rows[i], rows[i + 1]]; if (abierta === i) abierta = i + 1; else if (abierta === i + 1) abierta = i; }
+    else if (a === 'abrir') abierta = abierta === i ? null : i;
+    else if (a === 'del') {
+      if (tieneContenido(rows[i]) && !confirm(`¿Borrar la pestaña "${rows[i].title || TIPOS_TAB[rows[i].type][1]}" y lo que tiene escrito?`)) return;
+      rows.splice(i, 1);
+      abierta = null;
+    }
+    pintar();
+    if (a !== 'abrir') avisar(); // abrir una pestaña para verla no cuenta como cambio
+  });
+
+  pintar();
+  const limpia = (p) => {
+    const out = { id: p.id || ('t' + Math.random().toString(36).slice(2, 8)), type: p.type, on: p.on !== false };
+    ['emoji', 'title', 'text', 'url'].forEach(k => { const v = String(p[k] || '').trim(); if (v) out[k] = v; });
+    if ((p.steps || []).length) out.steps = p.steps;
+    if ((p.items || []).length) out.items = p.items;
+    if ((p.links || []).length) out.links = p.links;
+    return out;
+  };
+  return {
+    get: () => rows.map(limpia),
+    set: (nuevas) => { rows = JSON.parse(JSON.stringify(nuevas || [])); abierta = null; pintar(); }
   };
 };
 })();

@@ -112,7 +112,9 @@ function paintTopWeek() {
   let weekly = true;
   if (top.length < 3) { top = rank(live.downloads); weekly = false; }
   document.getElementById('top-week-wrap').hidden = !top.length;
-  setText('top-week-title', weekly ? t('🔥 Top de la semana', '🔥 Top this week') : t('🔥 Los más descargados', '🔥 Most downloaded'));
+  // Si el admin le puso su propio título (Editar textos), ese se respeta
+  const propio = FNF.home && FNF.home.textoFijo('sys_top', 'title');
+  if (!propio) setText('top-week-title', weekly ? t('🔥 Top de la semana', '🔥 Top this week') : t('🔥 Los más descargados', '🔥 Most downloaded'));
   box.innerHTML = top.map(([id, n], i) => `
     <button class="top-row" onclick="openModInfo('${id}')">
       <span class="top-rank">${i + 1}</span>

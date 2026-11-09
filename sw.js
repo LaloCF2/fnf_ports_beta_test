@@ -3,7 +3,7 @@
 // · HTML, JS y CSS: primero internet (para no quedarse con versiones viejas), pero si tarda
 //   más de 3 segundos o no hay señal, se usa lo guardado.
 // Cambia CACHE_NAME en cada actualización de la página para que todos reciban lo nuevo.
-const CACHE_NAME = 'fnf-mobile-v7.4.0';
+const CACHE_NAME = 'fnf-mobile-v7.4.1';
 const TIMEOUT_RED = 3000;
 
 const urlsToCache = [

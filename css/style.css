@@ -1846,17 +1846,19 @@ body.low-end-mode .stagger > * { animation: none; }
 .dt-dots span.on { width: 18px; background: var(--accent); }
 
 /* ---- Contenido de la pestaña: gira como un cubo ---- */
-.dt-stage { position: relative; perspective: 1200px; margin-top: 10px; min-height: 110px; }
-.dt-panel { backface-visibility: hidden; }
-.dt-panel.saliendo { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
-.dt-panel.out-next { transform-origin: 0% 50%; animation: dt-out-next .45s ease-in both; }
-.dt-panel.in-next { transform-origin: 100% 50%; animation: dt-in-next .5s var(--ease) both; }
-.dt-panel.out-prev { transform-origin: 100% 50%; animation: dt-out-prev .45s ease-in both; }
-.dt-panel.in-prev { transform-origin: 0% 50%; animation: dt-in-prev .5s var(--ease) both; }
-@keyframes dt-out-next { to { transform: rotateY(90deg); opacity: 0; } }
-@keyframes dt-in-next { from { transform: rotateY(-90deg); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes dt-out-prev { to { transform: rotateY(-90deg); opacity: 0; } }
-@keyframes dt-in-prev { from { transform: rotateY(90deg); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Cubo de verdad: las dos caras giran alrededor del centro del cubo (detrás de la pantalla),
+   así la pestaña de antes se va completa hacia un lado mientras la nueva entra por el otro, sin encimarse */
+.dt-stage { position: relative; perspective: 1100px; margin: 10px -16px 0; padding: 0 16px; min-height: 110px; overflow: hidden; --dz: -180px; }
+.dt-panel { backface-visibility: hidden; -webkit-backface-visibility: hidden; transform-origin: 50% 50% var(--dz); }
+.dt-panel.saliendo { position: absolute; top: 0; left: 16px; right: 16px; pointer-events: none; }
+.dt-panel.out-next { animation: dt-out-next .55s cubic-bezier(.45, .05, .35, 1) both; }
+.dt-panel.in-next { animation: dt-in-next .55s cubic-bezier(.45, .05, .35, 1) both; }
+.dt-panel.out-prev { animation: dt-out-prev .55s cubic-bezier(.45, .05, .35, 1) both; }
+.dt-panel.in-prev { animation: dt-in-prev .55s cubic-bezier(.45, .05, .35, 1) both; }
+@keyframes dt-out-next { from { transform: rotateY(0); opacity: 1; } to { transform: rotateY(-90deg); opacity: .25; } }
+@keyframes dt-in-next { from { transform: rotateY(90deg); opacity: .25; } to { transform: rotateY(0); opacity: 1; } }
+@keyframes dt-out-prev { from { transform: rotateY(0); opacity: 1; } to { transform: rotateY(90deg); opacity: .25; } }
+@keyframes dt-in-prev { from { transform: rotateY(-90deg); opacity: .25; } to { transform: rotateY(0); opacity: 1; } }
 body.low-end-mode .dt-tab { transition: opacity .2s; }
 
 .dt-text { font-size: 14px; color: var(--text-2); line-height: 1.55; overflow-wrap: anywhere; }
@@ -1958,3 +1960,33 @@ body.low-end-mode .dt-tab { transition: opacity .2s; }
 .tp-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--muted); }
 .tp-add button { border: 1px dashed var(--accent); background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 12px; cursor: pointer; }
 .tp-add button:active { transform: scale(.95); }
+
+/* ---- Plataformas dentro de Descargas (Android, Windows, Mac, Linux, iOS...) ---- */
+.dt-plats { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px 10px; margin: 0 -2px; }
+.dt-plats::-webkit-scrollbar { display: none; }
+.dt-plat {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 99px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--glass); color: var(--text-2); font: inherit; font-size: 13px; font-weight: 700;
+  transition: background .25s, color .25s, transform .2s var(--spring), box-shadow .25s;
+}
+.dt-plat:active { transform: scale(.94); }
+.dt-plat.on { background: var(--text); color: var(--bg-3); border-color: transparent; box-shadow: 0 6px 16px rgba(42, 33, 64, .25); }
+:root[data-theme="dark"] .dt-plat.on { background: #fff; color: #24123a; }
+.dt-plat.vacia:not(.on) { opacity: .65; }
+.dt-plat em { font-style: normal; font-size: 10px; padding: 1px 6px; border-radius: 99px; background: var(--line); }
+.dt-plat.on em { background: rgba(255, 255, 255, .22); }
+.dt-plat-in { animation: dt-plat-in .35s var(--ease) both; }
+@keyframes dt-plat-in { from { opacity: 0; transform: translateY(8px); } }
+.dt-plat-empty { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 22px 12px; border-radius: 16px; border: 1px dashed var(--line); background: var(--glass); }
+.dt-plat-empty span { font-size: 34px; }
+.dt-plat-empty b { font-size: 14px; color: var(--text-2); font-weight: 600; }
+.dt-dlscroll { max-height: 52vh; overflow-y: auto; }
+.dt-dlgrupo { font-size: 12px; font-weight: 700; color: var(--text); padding: 10px 6px 2px; }
+.dt-dlgrupo span { font-size: 10px; font-weight: 700; color: #fff; background: var(--accent); padding: 2px 7px; border-radius: 99px; margin-left: 4px; }
+.dt-dlnota { font-size: 12.5px; color: var(--muted); padding: 4px 8px 8px; }
+
+/* Editor: plataformas y su selector en cada descarga */
+.ed-plats { display: grid; gap: 8px; padding: 10px 12px; border-radius: 14px; background: var(--glass); border: 1px dashed var(--line); margin-bottom: 4px; }
+.fr-line .fr-emoji { flex: 0 0 56px; text-align: center; }
+.fr-plat { font-size: 13px; padding-top: 9px; padding-bottom: 9px; }
+.tp-add .tp-base { border-style: solid; background: rgba(177, 79, 224, .08); }

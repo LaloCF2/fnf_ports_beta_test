@@ -32,16 +32,24 @@ const primerItem = () => Object.keys(window.MOD_DATA || {})[0] || '';
 // Cómo se dibuja y se edita cada tipo de fila
 const TIPOS = {
   descarga: {
-    nuevo: () => ({ name: '', link: '' }),
+    nuevo: () => ({ name: '', link: '', plat: '' }),
     agregar: 'Añadir descarga',
-    html: (r) => `
+    html: (r, i, opc) => {
+      // Si el mod tiene plataformas (Android, iOS...), cada descarga elige la suya
+      const plats = opc && opc.plataformas ? opc.plataformas() : [];
+      return `
       <div class="fr-main">
         <input class="field" data-k="name" maxlength="60" placeholder="Nombre del botón (ej: Descarga Android)" value="${esc(r.name)}">
         <div class="fr-line">
           <input class="field" data-k="link" inputmode="url" placeholder="https://... o assets/..." value="${esc(r.link)}">
           <span class="fr-host" data-host>${esc(servidor(r.link))}</span>
         </div>
-      </div>`,
+        ${plats.length ? `<select class="field fr-plat" data-k="plat">
+          <option value="">📦 Sin plataforma (sale en "Otros")</option>
+          ${plats.map(p => `<option value="${esc(p.key)}" ${r.plat === p.key ? 'selected' : ''}>${esc(p.emoji || '')} ${esc(p.name)}</option>`).join('')}
+        </select>` : ''}
+      </div>`;
+    },
     extra: () => `<button type="button" data-a="probar" title="Abrir el enlace para probarlo">${icon('link', 'icon icon-sm')}</button>`,
     valido: (r) => !r.link || /^(https?:\/\/|assets\/)\S+$/i.test(r.link.trim())
   },
@@ -73,6 +81,20 @@ const TIPOS = {
         </div>`;
     },
     valido: (r) => !r.url || FNF.home.parseLink(r.url)
+  },
+  plataforma: {
+    // La clave no cambia aunque le cambies el nombre (así sus descargas no se pierden)
+    nuevo: () => ({ key: 'p' + Date.now().toString(36), emoji: '', name: '', note: '' }),
+    agregar: 'Otra plataforma',
+    html: (r) => `
+      <div class="fr-main">
+        <div class="fr-line">
+          <input class="field fr-emoji" data-k="emoji" maxlength="4" placeholder="📦" value="${esc(r.emoji)}" aria-label="Emoji">
+          <input class="field" data-k="name" maxlength="20" placeholder="Nombre (ej: iOS)" value="${esc(r.name)}">
+        </div>
+        <input class="field" data-k="note" maxlength="120" placeholder="Si no tiene links, mostrar: (ej: Pronto estará para iOS 👀)" value="${esc(r.note)}">
+      </div>`,
+    valido: (r) => !!String(r.name || '').trim() || !(r.note || r.emoji)
   },
   paso: {
     nuevo: () => ({ text: '' }),
@@ -137,7 +159,7 @@ FNF.Filas = (el, tipo, filas, onChange, opciones = {}) => {
       <div class="fr-list">${rows.map((r, i) => `
         <div class="fr-row${T.valido(r) ? '' : ' bad'}" data-i="${i}">
           <span class="fr-num">${i + 1}</span>
-          ${T.html(r, i)}
+          ${T.html(r, i, opciones)}
           <div class="fr-tools">
             ${T.extra ? T.extra(r, i) : ''}
             <button type="button" data-a="up" ${i === 0 ? 'disabled' : ''} aria-label="Subir">${icon('up', 'icon icon-sm')}</button>
@@ -217,6 +239,8 @@ FNF.Filas = (el, tipo, filas, onChange, opciones = {}) => {
       .filter(r => Object.entries(r).some(([k, v]) => k !== 'style' && v)),
     invalidas: () => rows.filter(r => !T.valido(r)),
     set: (nuevas) => { rows = (nuevas || []).map(r => ({ ...T.nuevo(), ...r })); pintar(); },
+    // Vuelve a dibujar (ej. cuando cambian las plataformas que eligen las descargas)
+    repintar: () => pintar(),
     // Agrega una fila ya llenada (ej. "+ MediaFire") y pone el cursor en su primer campo vacío
     agregar: (r) => {
       if (rows.length >= max) return;
@@ -231,7 +255,15 @@ FNF.Filas = (el, tipo, filas, onChange, opciones = {}) => {
 // ==========================================
 // EDITOR DE PESTAÑAS DEL POPUP (mods, bases y scripts)
 // ==========================================
+// Las 4 de siempre: se llenan solas desde otras partes del editor (por eso su tarjeta tiene un botón "Ir a…")
+const BASE_TAB = {
+  info: ['ℹ️', 'Info', 'Descripción, etiquetas, nota, tráiler y estrellas', 'ed-s-info', 'Información básica'],
+  descargas: ['⬇️', 'Descargas', 'Los links, separados por plataforma si quieres', 'ed-s-dl', 'Descargas'],
+  capturas: ['🖼️', 'Capturas', 'Todas las imágenes del mod', 'ed-s-media', 'Imágenes'],
+  chat: ['💬', 'Chat', 'Los últimos comentarios y el botón para abrir el chat']
+};
 const TIPOS_TAB = {
+  ...Object.fromEntries(Object.entries(BASE_TAB).map(([k, v]) => [k, v.slice(0, 3)])),
   cambios: ['📝', 'Cambios', 'Qué cambió en esta versión'],
   instalar: ['🛠️', 'Instalar', 'Pasos numerados para instalarlo'],
   versiones: ['🗂️', 'Versiones', 'Historial de versiones'],
@@ -256,7 +288,16 @@ FNF.EditorPestanas = (el, inicial, onChange) => {
   const listas = {};
   const avisar = () => { if (onChange) onChange(); };
 
+  // Resumen de arriba: qué pestañas se verán y en qué orden
+  const resumen = () => `<span>En el popup, en este orden:</span>${rows.filter(p => p.on !== false && (BASE_TAB[p.type] || tieneContenido(p))).map(p => `<b>${esc(p.emoji || (TIPOS_TAB[p.type] || TIPOS_TAB.custom)[0])} ${esc(p.title || (TIPOS_TAB[p.type] || TIPOS_TAB.custom)[1])}</b>`).join('') || '<b>ℹ️ Info (si quitas todas, queda esta)</b>'}`;
+
   const cuerpo = (p, i) => {
+    const B = BASE_TAB[p.type];
+    if (B) {
+      return `<p class="note"><b>${B[0]} ${B[1]}:</b> ${B[2]}. ${B[3] ? `Se llena desde la sección <b>${B[4]}</b> del editor.` : 'Se llena sola con los comentarios de la gente.'}</p>
+        ${B[3] ? `<button type="button" class="btn btn-soft btn-sm" data-ired="${B[3]}">Ir a ${B[4]}</button>` : ''}
+        <p class="note">Aquí solo cambias su nombre, su emoji, si se ve y en qué lugar va.</p>`;
+    }
     const lista = LISTA_TAB[p.type] ? `<label class="label">${{ steps: 'Pasos', items: p.type === 'versiones' ? 'Versiones (la de arriba es la actual)' : 'Personas', links: 'Botones (opcional)' }[LISTA_TAB[p.type][0]]}</label><div data-filas="${i}"></div>` : '';
     const texto = (ph, label = 'Texto') => `<label class="label">${label}</label><textarea class="field ed-tall" data-tk="text" maxlength="2000" placeholder="${ph}">${esc(p.text)}</textarea>
       <p class="note"><b>TIP:</b> empieza una línea con <b>- </b> para hacer una lista, y escribe <b>**así**</b> para negritas.</p>`;
@@ -271,7 +312,7 @@ FNF.EditorPestanas = (el, inicial, onChange) => {
   function pintar() {
     Object.keys(listas).forEach(k => delete listas[k]);
     el.innerHTML = `
-      <div class="tp-fijas"><span>Siempre:</span><b>ℹ️ Info</b><b>⬇️ Descargas</b><b>🖼️ Capturas</b><b>💬 Chat</b></div>
+      <div class="tp-fijas">${resumen()}</div>
       <div class="tp-list">${rows.map((p, i) => {
         const T = TIPOS_TAB[p.type] || TIPOS_TAB.custom;
         const off = p.on === false;
@@ -295,7 +336,8 @@ FNF.EditorPestanas = (el, inicial, onChange) => {
         </div>`;
       }).join('') || '<p class="fr-empty">Sin pestañas extra todavía. Agrega una aquí abajo 👇</p>'}</div>
       <div class="tp-add"><span>➕ Añadir pestaña:</span>
-        ${Object.entries(TIPOS_TAB).map(([k, [e, n, desc]]) => `<button type="button" data-tpadd="${k}" title="${desc}">${e} ${n}</button>`).join('')}
+        ${Object.entries(TIPOS_TAB).filter(([k]) => !BASE_TAB[k] || !rows.some(p => p.type === k)) // las de siempre, solo si las quitaste
+          .map(([k, [e, n, desc]]) => `<button type="button" data-tpadd="${k}" title="${desc}"${BASE_TAB[k] ? ' class="tp-base"' : ''}>${e} ${n}</button>`).join('')}
       </div>`;
     // Listas (pasos, versiones, créditos, botones) dentro de la pestaña abierta
     if (abierta !== null && rows[abierta] && LISTA_TAB[rows[abierta].type]) {
@@ -321,10 +363,17 @@ FNF.EditorPestanas = (el, inicial, onChange) => {
     if (k === 'on') card.classList.toggle('off', !e.target.checked);
     const est = card.querySelector('[data-estado]');
     if (est) est.textContent = estadoTab(p);
+    const res = el.querySelector('.tp-fijas'); if (res) res.innerHTML = resumen();
     avisar();
   });
   el.addEventListener('click', (e) => {
     if (e.target.closest('[data-filas]')) return; // los botones de las listas los maneja su propia lista
+    const ir = e.target.closest('[data-ired]');
+    if (ir) {
+      const sec = document.getElementById(ir.dataset.ired);
+      if (sec) { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); sec.classList.add('ed-flash'); setTimeout(() => sec.classList.remove('ed-flash'), 1600); }
+      return;
+    }
     const add = e.target.closest('[data-tpadd]');
     if (add) {
       const tipo = add.dataset.tpadd;
@@ -343,7 +392,8 @@ FNF.EditorPestanas = (el, inicial, onChange) => {
     else if (a === 'down' && i < rows.length - 1) { [rows[i + 1], rows[i]] = [rows[i], rows[i + 1]]; if (abierta === i) abierta = i + 1; else if (abierta === i + 1) abierta = i; }
     else if (a === 'abrir') abierta = abierta === i ? null : i;
     else if (a === 'del') {
-      if (tieneContenido(rows[i]) && !confirm(`¿Borrar la pestaña "${rows[i].title || TIPOS_TAB[rows[i].type][1]}" y lo que tiene escrito?`)) return;
+      const nombre = rows[i].title || (TIPOS_TAB[rows[i].type] || TIPOS_TAB.custom)[1];
+      if (BASE_TAB[rows[i].type] ? !confirm(`¿Quitar la pestaña "${nombre}" del popup? (La puedes volver a agregar abajo.)`) : (tieneContenido(rows[i]) && !confirm(`¿Borrar la pestaña "${nombre}" y lo que tiene escrito?`))) return;
       rows.splice(i, 1);
       abierta = null;
     }

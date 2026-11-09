@@ -113,9 +113,18 @@ const TIPOS_PESTANA = {
   custom: ['✨', 'Extra', 'Extra']
 };
 FNF.TIPOS_PESTANA = TIPOS_PESTANA;
-// Una pestaña extra solo aparece si está activada y tiene algo escrito
+// Las 4 de siempre (ahora también se pueden quitar, renombrar y ordenar desde el editor)
+const BASE_TABS = {
+  info: ['ℹ️', 'Info', 'Info'],
+  descargas: ['⬇️', 'Descargas', 'Downloads'],
+  capturas: ['🖼️', 'Capturas', 'Screens'],
+  chat: ['💬', 'Chat', 'Chat']
+};
+FNF.BASE_TABS = BASE_TABS;
+// Una pestaña extra solo aparece si está activada y tiene algo escrito (las de siempre, solo si están activadas)
 const conContenido = (p) => {
   if (!p) return false;
+  if (BASE_TABS[p.type]) return true;
   if (p.type === 'instalar') return (p.steps || []).some(s => s && String(s.text || '').trim());
   if (p.type === 'versiones') return (p.items || []).some(v => v && (v.version || v.text));
   if (p.type === 'creditos') return (p.items || []).some(c => c && c.name);
@@ -124,21 +133,90 @@ const conContenido = (p) => {
 };
 FNF.pestanaConContenido = conContenido;
 
+// La lista completa de pestañas de un mod, en su orden.
+// Los mods que nunca se editaron (o de la versión anterior, que solo guardaba las extra) llevan las 4 de siempre.
+function configPestanas(d) {
+  let tabs = Array.isArray(d.tabs) ? d.tabs.filter(Boolean) : [];
+  if (!tabs.length && d.changelog) tabs = [{ id: 'cambios', type: 'cambios', on: true, text: d.changelog }];
+  if (!tabs.some(p => BASE_TABS[p.type])) {
+    tabs = [{ type: 'info' }, { type: 'descargas' }, { type: 'capturas' }, ...tabs, { type: 'chat' }]
+      .map(p => ({ on: true, ...p, id: p.id || p.type }));
+  }
+  return tabs;
+}
+FNF.configPestanas = configPestanas;
+
 function pestanasDe(d) {
-  const lista = [
-    { k: 'info', e: 'ℹ️', label: 'Info' },
-    { k: 'descargas', e: '⬇️', label: t('Descargas', 'Downloads'), n: (d.downloads || []).length },
-    { k: 'capturas', e: '🖼️', label: t('Capturas', 'Screens'), n: imagenesDe(d).length }
-  ];
-  let extra = Array.isArray(d.tabs) ? d.tabs : [];
-  if (!extra.length && d.changelog) extra = [{ id: 'cambios', type: 'cambios', on: true, text: d.changelog }]; // mods de antes
-  extra.filter(p => p && p.on !== false && TIPOS_PESTANA[p.type] && conContenido(p)).forEach((p, i) => {
+  const lista = [];
+  configPestanas(d).forEach((p, i) => {
+    if (p.on === false) return;
+    const B = BASE_TABS[p.type];
+    if (B) {
+      if (lista.some(x => x.k === p.type)) return; // cada una de las de siempre, solo una vez
+      const n = p.type === 'descargas' ? (d.downloads || []).length : p.type === 'capturas' ? imagenesDe(d).length : 0;
+      lista.push({ k: p.type, e: p.emoji || B[0], label: p.title || t(B[1], B[2]), n });
+      return;
+    }
     const T = TIPOS_PESTANA[p.type];
+    if (!T || !conContenido(p)) return;
     lista.push({ k: 'x' + i, e: p.emoji || T[0], label: p.title || t(T[1], T[2]), p });
   });
-  lista.push({ k: 'chat', e: '💬', label: 'Chat' });
+  if (!lista.length) lista.push({ k: 'info', e: 'ℹ️', label: 'Info' }); // nunca queda vacío
   return lista;
 }
+
+// ==========================================
+// PLATAFORMAS DENTRO DE DESCARGAS (Android, Windows, Mac, Linux, iOS...)
+// ==========================================
+const PLAT_EMOJI = { android: '🤖', windows: '🪟', mac: '🍎', linux: '🐧', ios: '📱' };
+let platActiva = null;
+// La plataforma de quien está viendo (para abrir directo en la suya)
+const miPlataforma = () => {
+  const ua = navigator.userAgent || '';
+  if (/android/i.test(ua)) return 'android';
+  if (/iphone|ipad|ipod/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/windows/i.test(ua)) return 'windows';
+  if (/mac os x|macintosh/i.test(ua)) return 'mac';
+  if (/linux/i.test(ua)) return 'linux';
+  return '';
+};
+// Las descargas agrupadas por plataforma (null si el mod no usa plataformas)
+function gruposDescarga(d) {
+  const plats = (d.platforms || []).filter(p => p && p.key && p.name);
+  if (!plats.length) return null;
+  const dls = d.downloads || [];
+  const grupos = plats.map(p => ({ ...p, emoji: p.emoji || PLAT_EMOJI[p.key] || '📦', links: dls.filter(l => l.plat === p.key) }));
+  const sueltos = dls.filter(l => !l.plat || !plats.some(p => p.key === l.plat));
+  if (sueltos.length) grupos.push({ key: '_otros', emoji: '📦', name: t('Otros', 'Other'), links: sueltos });
+  return grupos;
+}
+const grupoInicial = (grupos) => grupos.find(g => g.key === platActiva) || grupos.find(g => g.key === miPlataforma() && g.links.length)
+  || grupos.find(g => g.links.length) || grupos[0];
+function linksHTML(dls) {
+  const { id, preview } = actual;
+  return `<div class="dl-list">${dls.map(dl => {
+    const srv = servidorDe(dl.link);
+    return `<a class="dl-link" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}')"`}>
+      <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span class="dl-txt">${esc(dl.name)}${srv ? `<small>${esc(srv)}</small>` : ''}</span></a>`;
+  }).join('')}</div>`;
+}
+// Lo que se ve en una plataforma: sus links o el mensaje del admin ("Pronto estará para iOS")
+const cuerpoPlataforma = (g) => g.links.length ? linksHTML(g.links) : `
+  <div class="dt-plat-empty"><span>${esc(g.emoji)}</span><b>${esc(g.note || t(`Por el momento no hay descarga para ${g.name}.`, `No download for ${g.name} yet.`))}</b></div>`;
+window.dtPlataforma = (key) => {
+  if (!actual) return;
+  const grupos = gruposDescarga(actual.d) || [];
+  const g = grupos.find(x => x.key === key);
+  if (!g) return;
+  platActiva = key;
+  document.querySelectorAll('.dt-plat').forEach(b => b.classList.toggle('on', b.dataset.plat === key));
+  const body = $('dt-plat-body');
+  if (body) {
+    body.innerHTML = cuerpoPlataforma(g);
+    body.classList.remove('dt-plat-in'); void body.offsetWidth; body.classList.add('dt-plat-in');
+  }
+  vibrate(8);
+};
 
 // ==========================================
 // ESTADO DEL POPUP
@@ -245,13 +323,22 @@ function panelHTML(tab) {
   }
   if (tab.k === 'descargas') {
     const dls = d.downloads || [];
+    const reporte = preview ? '' : `<button class="btn btn-ghost btn-block dt-report" onclick="abrirReporte('${id}')">${icon('alert', 'icon icon-sm')} ${t('Reportar un problema', 'Report a problem')}</button>`;
+    const grupos = gruposDescarga(d);
+    if (grupos) {
+      // Fila de plataformas (Android, Windows, iOS...) y abajo lo de la elegida
+      const g = grupoInicial(grupos);
+      platActiva = g.key;
+      return `
+        <div class="dt-plats no-swipe" role="tablist">${grupos.map(x => `
+          <button type="button" class="dt-plat${x.key === g.key ? ' on' : ''}${x.links.length ? '' : ' vacia'}" data-plat="${esc(x.key)}" onclick="dtPlataforma(this.dataset.plat)">
+            <span>${esc(x.emoji)}</span>${esc(x.name)}${x.links.length ? `<em>${x.links.length}</em>` : ''}</button>`).join('')}
+        </div>
+        <div class="dt-plat-body" id="dt-plat-body">${cuerpoPlataforma(g)}</div>
+        ${dls.length ? reporte : ''}`;
+    }
     if (!dls.length) return `<p class="dt-empty">${t('Todavía no hay descargas.', 'No downloads yet.')}</p>`;
-    return `<div class="dl-list">${dls.map(dl => {
-      const srv = servidorDe(dl.link);
-      return `<a class="dl-link" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}')"`}>
-        <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span class="dl-txt">${esc(dl.name)}${srv ? `<small>${esc(srv)}</small>` : ''}</span></a>`;
-    }).join('')}</div>
-    ${preview ? '' : `<button class="btn btn-ghost btn-block dt-report" onclick="abrirReporte('${id}')">${icon('alert', 'icon icon-sm')} ${t('Reportar un problema', 'Report a problem')}</button>`}`;
+    return linksHTML(dls) + reporte;
   }
   if (tab.k === 'capturas') {
     const imgs = imagenesDe(d);
@@ -299,18 +386,27 @@ function pieHTML() {
   const fav = !!FNF.store.json('fnf_favorites', {})[id];
   const likes = (live().likes || {})[id] || 0;
   const texto = type === 'script' ? t('Descargar script', 'Get script') : t('Descargar', 'Download');
+  // Con plataformas: si la de este celular tiene un solo link, el botón va directo a ese
+  const grupos = gruposDescarga(d);
+  const mia = grupos && grupos.find(g => g.key === miPlataforma());
+  if (grupos && mia && mia.links.length === 1) {
+    const dl = mia.links[0];
+    const directo = `<a class="btn dt-dl" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}')"`}>${icon('download', 'icon icon-sm')} ${texto} <small>· ${esc(mia.name)}</small></a>`;
+    if (preview) return directo;
+    return pieBotones(id, d, liked, fav, likes) + directo;
+  }
   const principal = !dls.length
     ? `<span class="btn dt-dl btn-disabled">${icon('download', 'icon icon-sm')} ${t('Sin descarga', 'No download')}</span>`
     : dls.length === 1
       ? `<a class="btn dt-dl" href="${esc(safeLink(dls[0].link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}')"`}>${icon('download', 'icon icon-sm')} ${texto}</a>`
       : `<button class="btn dt-dl" onclick="dtMenuDescargas()">${icon('download', 'icon icon-sm')} ${texto} <small>▾</small></button>`;
   if (preview) return principal;
-  return `
+  return pieBotones(id, d, liked, fav, likes) + principal;
+}
+const pieBotones = (id, d, liked, fav, likes) => `
     <button class="dt-ib${liked ? ' active' : ''}" onclick="handleLike('${id}', this)" aria-label="Like">${icon('heart', 'icon')}<span>${FNF.compact(likes)}</span></button>
     <button class="dt-ib${fav ? ' is-fav' : ''}" data-fav="${id}" onclick="toggleFavorite('${id}')" aria-label="${t('Guardar', 'Save')}">${icon('bookmark', 'icon')}</button>
-    <button class="dt-ib" onclick="abrirMenuCompartir('${id}', '${esc(String(d.title || '').replace(/['"\\]/g, ''))}')" aria-label="${t('Compartir', 'Share')}">${icon('share', 'icon')}</button>
-    ${principal}`;
-}
+    <button class="dt-ib" onclick="abrirMenuCompartir('${id}', '${esc(String(d.title || '').replace(/['"\\]/g, ''))}')" aria-label="${t('Compartir', 'Share')}">${icon('share', 'icon')}</button>`;
 
 // ==========================================
 // RUEDA 3D DE PESTAÑAS
@@ -338,6 +434,8 @@ function mostrarPanel(dir = 0) {
   nuevo.className = 'dt-panel activo';
   nuevo.innerHTML = panelHTML(tabs[activa]);
   const viejos = [...stage.querySelectorAll('.dt-panel')];
+  // El centro del cubo queda a medio ancho detrás de la pantalla (así giran las dos caras juntas)
+  stage.style.setProperty('--dz', `-${Math.round(Math.max(200, stage.clientWidth - 32) / 2)}px`);
   stage.appendChild(nuevo);
   viejos.forEach(v => {
     if (dir && !sinAnimacion() && v.classList.contains('activo')) {
@@ -345,7 +443,7 @@ function mostrarPanel(dir = 0) {
       v.classList.remove('activo');
       v.classList.add('saliendo', dir > 0 ? 'out-next' : 'out-prev');
       nuevo.classList.add(dir > 0 ? 'in-next' : 'in-prev');
-      setTimeout(() => v.remove(), 480);
+      setTimeout(() => v.remove(), 580);
     } else v.remove();
   });
   const tab = tabs[activa];
@@ -429,10 +527,19 @@ window.dtGaleria = (i) => { if (actual) window.abrirGaleria(imagenesDe(actual.d)
 window.dtMenuDescargas = () => {
   const { id, d, preview } = actual;
   const menu = $('dt-dlmenu');
+  const opcion = (dl) => `<a class="dt-dlop" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}'); dtCerrarMenu()"`}>
+      <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span class="grow"><b>${esc(dl.name)}</b><small>${esc(servidorDe(dl.link))}</small></span>${icon('right', 'icon icon-sm')}</a>`;
+  // Con plataformas: agrupadas (la de este celular primero) y las que no tienen links muestran su mensaje
+  const grupos = gruposDescarga(d);
+  const mia = miPlataforma();
+  const lista = grupos
+    ? [...grupos].sort((a, b) => (b.key === mia) - (a.key === mia)).map(g => `
+        <h5 class="dt-dlgrupo">${esc(g.emoji)} ${esc(g.name)}${g.key === mia ? ` <span>${t('tu celular', 'your device')}</span>` : ''}</h5>
+        ${g.links.length ? g.links.map(opcion).join('') : `<p class="dt-dlnota">${esc(g.note || t(`Por el momento no hay descarga para ${g.name}.`, `No download for ${g.name} yet.`))}</p>`}`).join('')
+    : (d.downloads || []).map(opcion).join('');
   menu.innerHTML = `
     <h4>${t('Elige tu descarga', 'Choose your download')}</h4>
-    ${(d.downloads || []).map(dl => `<a class="dt-dlop" href="${esc(safeLink(dl.link))}" target="_blank" rel="noopener"${preview ? '' : ` onclick="trackDownload('${id}'); dtCerrarMenu()"`}>
-      <span class="tile-icon">${icon('download', 'icon icon-sm')}</span><span class="grow"><b>${esc(dl.name)}</b><small>${esc(servidorDe(dl.link))}</small></span>${icon('right', 'icon icon-sm')}</a>`).join('')}
+    <div class="dt-dlscroll">${lista}</div>
     <button class="btn btn-ghost btn-block" onclick="dtCerrarMenu()">${t('Cancelar', 'Cancel')}</button>`;
   menu.hidden = false;
   vibrate(10);
@@ -452,6 +559,7 @@ function showDetail(type, id, d, opts = {}) {
   if (!d) return;
   const preview = !!opts.preview;
   actual = { type, id, d, preview };
+  platActiva = null; // cada mod empieza en la plataforma de este celular
   window.currentItemRatingId = preview ? null : id;
   window.currentItemType = type;
   $('detail-preview-flag').hidden = !preview;

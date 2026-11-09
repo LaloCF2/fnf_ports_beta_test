@@ -793,6 +793,17 @@
 
         <section class="ed-section" id="ed-s-dl">
           <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-download"/></svg> Descargas</h4>
+          <!-- Plataformas: pestañas dentro de Descargas (Android, Windows, Mac, Linux, iOS...) -->
+          <div class="ed-plats">
+            <label class="label">Plataformas (opcional)</label>
+            <div id="ed-plats-list"></div>
+            <div class="ed-quick" id="ed-plats-quick"><span>Agregar:</span>
+              <button type="button" data-plat="android">🤖 Android</button><button type="button" data-plat="windows">🪟 Windows</button>
+              <button type="button" data-plat="mac">🍎 Mac</button><button type="button" data-plat="linux">🐧 Linux</button><button type="button" data-plat="ios">📱 iOS</button>
+            </div>
+            <p class="note"><b>NOTA:</b> si agregas plataformas, en Descargas sale una fila con ellas y cada link de abajo elige la suya. Si una no tiene links, se muestra su mensaje (ej: "Pronto estará para iOS"). Cada quien ve primero la de su celular.</p>
+          </div>
+          <label class="label">Links de descarga</label>
           <div id="ed-downloads-list"></div>
           <div class="ed-quick">
             <span>Agregar rápido:</span>
@@ -818,7 +829,7 @@
 
         <section class="ed-section" id="ed-s-tabs">
           <h4 class="ed-head"><svg class="icon ic" style="width:18px;height:18px"><use href="#i-list"/></svg> Pestañas del popup</h4>
-          <p class="note"><b>NOTA:</b> Info, Descargas, Capturas y Chat siempre están. Las de aquí abajo solo aparecen si las <b>activas</b> y les <b>escribes algo</b>. Puedes ordenarlas, apagarlas o borrarlas.</p>
+          <p class="note"><b>NOTA:</b> todas se pueden renombrar, cambiar de emoji, ordenar, apagar o quitar (también Info, Descargas, Capturas y Chat; si las quitas, las vuelves a agregar abajo). Las extra solo aparecen si están <b>activadas</b> y les <b>escribes algo</b>.</p>
           <div id="ed-tabs-list"></div>
         </section>
 

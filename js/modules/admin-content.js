@@ -198,6 +198,11 @@ let cambios = false;           // hay algo sin guardar
 let listaImgs = null;          // filas de imágenes (admin-forms.js)
 let listaDls = null;           // filas de descargas
 let pestanas = null;           // editor de pestañas del popup
+let listaPlats = null;         // plataformas de Descargas (Android, iOS...)
+// Las de siempre, con su emoji (se agregan con un toque)
+const PLATS = { android: ['🤖', 'Android'], windows: ['🪟', 'Windows'], mac: ['🍎', 'Mac'], linux: ['🐧', 'Linux'], ios: ['📱', 'iOS'] };
+// Plataformas ya escritas (con nombre), para que cada descarga elija la suya
+const plataformas = () => (listaPlats ? listaPlats.get() : []).filter(p => p.key && String(p.name || '').trim());
 let tipoNota = 'warn';
 
 // ---- ID personalizado (sale en el enlace para compartir) ----
@@ -250,7 +255,17 @@ function leerFormulario() {
     tabs: pestanas && pestanas.get().length ? pestanas.get() : null,
     // La galería del popup: portada + capturas
     images: imgs.length > 1 || (editingKind === 'script' && imgs.length) ? imgs : null,
-    downloads: listaDls ? listaDls.get().filter(r => r.link).map(r => ({ name: r.name || 'Descarga', link: r.link })) : [],
+    downloads: listaDls ? listaDls.get().filter(r => r.link).map(r => {
+      const dl = { name: r.name || 'Descarga', link: r.link };
+      if (r.plat && plataformas().some(p => p.key === r.plat)) dl.plat = r.plat;
+      return dl;
+    }) : [],
+    platforms: plataformas().length ? plataformas().map(p => {
+      const o = { key: p.key, name: p.name.trim().slice(0, 20) };
+      if (p.emoji) o.emoji = p.emoji.slice(0, 4);
+      if (p.note) o.note = p.note.trim().slice(0, 120);
+      return o;
+    }) : null,
     tags: tags.length ? tags : null,
     trailer: val('ed-trailer') || null,
     note: val('ed-note') || null, noteType: val('ed-note') ? tipoNota : null,
@@ -286,6 +301,14 @@ const avisarCambio = () => {
   pop.addEventListener('input', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list, #ed-tabs-list')) avisarCambio(); });
   pop.addEventListener('change', (e) => { if (!e.target.closest('#ed-images-list, #ed-downloads-list, #ed-tabs-list')) avisarCambio(); });
   $('ed-id').addEventListener('input', revisarId);
+  // Botones rápidos de plataformas (Android, Windows, Mac, Linux, iOS)
+  $('ed-plats-quick').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-plat]');
+    if (!b) return;
+    const k = b.dataset.plat;
+    if (plataformas().some(p => p.key === k)) return toast(`${PLATS[k][1]} ya está en la lista.`, 'info');
+    listaPlats.agregar({ key: k, emoji: PLATS[k][0], name: PLATS[k][1], note: '' });
+  });
   // Atajos: llevan a cada parte del formulario
   $('ed-jump').addEventListener('click', (e) => {
     const b = e.target.closest('[data-ir]');
@@ -327,8 +350,8 @@ window.abrirEditorMod = (id, kind, origen) => {
   if (id) $('ed-id-actual').textContent = id;
   revisarId();
   // Pestañas del popup (los mods de antes con "Qué cambió" lo traen como pestaña Cambios)
-  let tabs = Array.isArray(d.tabs) ? d.tabs : [];
-  if (!tabs.length && d.changelog) tabs = [{ id: 'cambios', type: 'cambios', on: true, text: d.changelog }];
+  // (Info, Descargas, Capturas y Chat también vienen en la lista y se pueden quitar u ordenar)
+  const tabs = FNF.configPestanas ? FNF.configPestanas(d) : [];
   if (!pestanas) pestanas = FNF.EditorPestanas($('ed-tabs-list'), tabs, avisarCambio);
   else pestanas.set(tabs);
   setV('ed-tags', (d.tags || []).join(', ')); setV('ed-trailer', d.trailer); setV('ed-note', d.note);
@@ -345,10 +368,13 @@ window.abrirEditorMod = (id, kind, origen) => {
   // Imágenes y descargas: cada una en su caja
   const portada = d.img || (d.images || [])[0] || '';
   const imgs = [portada, ...(d.images || []).filter(x => x && x !== portada)].filter(Boolean).map(url => ({ url }));
-  const dls = (d.downloads || []).map(x => ({ name: x.name, link: x.link }));
+  const dls = (d.downloads || []).map(x => ({ name: x.name, link: x.link, plat: x.plat || '' }));
+  const plats = (d.platforms || []).map(p => ({ key: p.key, emoji: p.emoji || '', name: p.name || '', note: p.note || '' }));
+  if (!listaPlats) listaPlats = FNF.Filas($('ed-plats-list'), 'plataforma', plats, () => { if (listaDls) listaDls.repintar(); avisarCambio(); }, { vacio: 'Sin plataformas: todas las descargas salen juntas.', max: 8 });
+  else listaPlats.set(plats);
   if (!listaImgs) listaImgs = FNF.Filas($('ed-images-list'), 'imagen', imgs, avisarCambio, { vacio: 'Sin imágenes. Agrega al menos la portada.', max: 12 });
   else listaImgs.set(imgs);
-  if (!listaDls) listaDls = FNF.Filas($('ed-downloads-list'), 'descarga', dls, avisarCambio, { vacio: 'Sin descargas todavía.', max: 10 });
+  if (!listaDls) listaDls = FNF.Filas($('ed-downloads-list'), 'descarga', dls, avisarCambio, { vacio: 'Sin descargas todavía.', max: 12, plataformas });
   else listaDls.set(dls.length ? dls : []);
   if (!dls.length) listaDls.set([{ name: 'Descarga', link: '' }]);
 
